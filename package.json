@@ -1,0 +1,11 @@
+{
+  "author": "Codomaster",
+  "name": "com.codomaster.uniject",
+  "version": "1.0.0",
+  "displayName": "Uniject",
+  "description": "Uniject is a dependency injection framework for Unity. It allows you to easily manage dependencies and improve the modularity of your code.",
+  "category": "Tools",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "unity": "6000.0"
+}
