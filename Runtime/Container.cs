@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Uniject.Bindings;
 using Uniject.Reflection;
 
 namespace Uniject
@@ -8,15 +9,21 @@ namespace Uniject
     {
         private Container _parentContainer;
 
-        private readonly Dictionary<Type, InstanceGetter> _bindings = new();
+        private readonly Dictionary<Type, Binding> _bindings = new();
 
         private readonly Queue<Type> _resolvingTypes = new();
         private readonly HashSet<Type> _resolvingTypesSet = new();
 
-        public void Bind<TContract>()
+        public BindingToBuilder Bind<TContract>()
         {
             var contractType = typeof(TContract);
-            _bindings[contractType] = new InstanceGetter(this, contractType);
+
+            if (_bindings.ContainsKey(contractType))
+                throw new Exception($"Type {contractType} is already bound.");
+
+            var binding = new Binding(this, contractType);
+            _bindings[contractType] = binding;
+            return new BindingToBuilder(this, binding);
         }
 
         public T Resolve<T>() => Resolve<T>(typeof(T));
@@ -31,16 +38,16 @@ namespace Uniject
             _resolvingTypesSet.Add(contractType);
 
             var currentContainer = this;
-            var instanceGetter = default(InstanceGetter);
+            var binding = default(Binding);
 
-            while (!currentContainer?._bindings.TryGetValue(contractType, out instanceGetter) ?? false)
+            while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
                 currentContainer = currentContainer._parentContainer;
 
-            if (instanceGetter == null)
+            if (binding == null)
                 throw new Exception($"No binding found for type {contractType}.");
 
-            var instance = (T)instanceGetter.GetObject();
-            
+            var instance = (T)binding.GetObject();
+
             _resolvingTypes.Dequeue();
             _resolvingTypesSet.Remove(contractType);
 

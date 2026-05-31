@@ -1,4 +1,4 @@
-namespace Uniject
+namespace Uniject.Bindings
 {
     public enum Scope
     {

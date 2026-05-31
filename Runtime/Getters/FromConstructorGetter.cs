@@ -1,10 +1,10 @@
 using System;
 
-namespace Uniject
+namespace Uniject.Getters
 {
-    public class FromConstructorInstanceGetter : FromInstanceGetter
+    public class FromConstructorGetter : InstanceGetter
     {
-        public FromConstructorInstanceGetter(Container container) : base(container) { }
+        public FromConstructorGetter(Container container) : base(container) { }
 
         public override object GetObject(Type concreteType)
         {
