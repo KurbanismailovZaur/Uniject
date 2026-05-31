@@ -6,9 +6,6 @@ namespace Uniject.Getters
     {
         public FromConstructorGetter(Container container) : base(container) { }
 
-        public override object GetObject(Type concreteType)
-        {
-            return _container.Instantiate<object>(concreteType);
-        }
+        public override object GetObject(Type concreteType) => _container.Instantiate(concreteType);
     }
 }

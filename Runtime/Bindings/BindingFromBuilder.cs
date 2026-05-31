@@ -1,8 +1,9 @@
 using Uniject.Getters;
+using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingFromBuilder
+    public class BindingFromBuilder<T>
     {
         private readonly Binding _binding;
         private readonly Container _container;
@@ -13,16 +14,18 @@ namespace Uniject.Bindings
             _binding = binding;
         }
 
-        public BindingAsBuilder FromConstructor()
+        private BindingAsBuilder From(InstanceGetter instanceGetter)
         {
-            _binding.From(new FromConstructorGetter(_container));
+            _binding.From(instanceGetter);
             return new BindingAsBuilder(_container, _binding);
         }
 
-        public BindingAsBuilder FromInstance(object instance)
-        {
-            _binding.From(new FromInstanceGetter(_container, instance));
-            return new BindingAsBuilder(_container, _binding);
-        }
+        public BindingAsBuilder FromConstructor() => From(new FromConstructorGetter(_container));
+
+        public BindingAsBuilder FromInstance(object instance) => From(new FromInstanceGetter(_container, instance));
+
+        public BindingAsBuilder FromComponentInNewPrefab(T prefab) => From(new FromComponentInNewPrefabGetter<T>(_container, prefab));
+
+        
     }
 }

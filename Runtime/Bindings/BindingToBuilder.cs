@@ -11,10 +11,10 @@ namespace Uniject.Bindings
             _binding = binding;
         }
 
-        public BindingFromBuilder To<T>()
+        public BindingFromBuilder<T> To<T>()
         {
             _binding.To(typeof(T));
-            return new BindingFromBuilder(_container, _binding);
+            return new BindingFromBuilder<T>(_container, _binding);
         }
     }
 }

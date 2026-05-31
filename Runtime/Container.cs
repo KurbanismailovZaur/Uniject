@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using Uniject.Attributes;
 using Uniject.Bindings;
 using Uniject.Reflection;
+using UnityEngine;
 
 namespace Uniject
 {
@@ -54,9 +57,9 @@ namespace Uniject
             return instance;
         }
 
-        public T Instantiate<T>() => Instantiate<T>(typeof(T));
+        public T Instantiate<T>() => (T)Instantiate(typeof(T));
 
-        public T Instantiate<T>(Type concreteType)
+        public object Instantiate(Type concreteType)
         {
             var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
             var parametersInstances = new object[constructorInjectionData.parametersInfo.Length];
@@ -67,7 +70,38 @@ namespace Uniject
                 parametersInstances[parameter.Position] = parameterInstance;
             }
 
-            return (T)constructorInjectionData.constructorInfo.Invoke(parametersInstances);
+            return constructorInjectionData.constructorInfo.Invoke(parametersInstances);
+        }
+
+        public void Inject(object instance)
+        {
+            var methodInjectionData = ReflectionCache.GetMethodInjectionData(instance.GetType());
+
+            if (!methodInjectionData.hasInjectMethod)
+                return;
+
+            var parametersInstances = new object[methodInjectionData.parametersInfo.Length];
+
+            foreach (var parameter in methodInjectionData.parametersInfo)
+            {
+                var parameterInstance = Resolve<object>(parameter.ParameterType);
+                parametersInstances[parameter.Position] = parameterInstance;
+            }
+
+            methodInjectionData.methodInfo.Invoke(instance, parametersInstances);
+        }
+
+        public T InstantiatePrefab<T>(T prefab) where T : Component => (T)InstantiatePrefab(typeof(T), prefab);
+
+        public Component InstantiatePrefab(Type concreteType, Component prefab)
+        {
+            var cloned = UnityEngine.Object.Instantiate(prefab);
+            var injectionTargets = cloned.GetComponent<InjectionTargets>().Targets;
+
+            foreach (var target in injectionTargets)
+                Inject(target);
+            
+            return cloned;
         }
     }
 }

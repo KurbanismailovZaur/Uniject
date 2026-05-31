@@ -6,14 +6,8 @@ namespace Uniject.Getters
     {
         private object _instance;
 
-        public FromInstanceGetter(Container container, object instance) : base(container)
-        {
-            _instance = instance;
-        }
+        public FromInstanceGetter(Container container, object instance) : base(container) => _instance = instance;
 
-        public override object GetObject(Type concreteType)
-        {
-            return _instance;
-        }
+        public override object GetObject(Type concreteType) => _instance;
     }
 }

@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Uniject.Attributes;
 
 namespace Uniject.Reflection
 {
     public static class ReflectionCache
     {
         private static readonly Dictionary<Type, ConstructorInjectionData> _constructors = new();
+
+        private static readonly Dictionary<Type, MethodInjectionData> _methods = new();
+
 
         public static ConstructorInjectionData GetConstructorInjectionData(Type concreteType)
         {
@@ -31,6 +35,23 @@ namespace Uniject.Reflection
                 throw new Exception($"No public constructor found for type {concreteType}.");
 
             return _constructors[concreteType] = new ConstructorInjectionData(best, bestParameters);
+        }
+
+        public static MethodInjectionData GetMethodInjectionData(Type concreteType)
+        {
+            if (_methods.TryGetValue(concreteType, out var cached))
+                return cached;
+
+            foreach (var method in concreteType.GetMethods())
+            {
+                if (method.GetCustomAttributes(typeof(InjectAttribute), false).Length == 0)
+                    continue;
+
+                var data = new MethodInjectionData(method, method.GetParameters(), true);
+                return _methods[concreteType] = data;
+            }
+
+            return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
         }
     }
 }
