@@ -11,6 +11,7 @@ namespace Uniject
         private readonly Dictionary<Type, InstanceGetter> _bindings = new();
 
         private readonly Queue<Type> _resolvingTypes = new();
+        private readonly HashSet<Type> _resolvingTypesSet = new();
 
         public void Bind<TContract>()
         {
@@ -22,11 +23,12 @@ namespace Uniject
 
         public T Resolve<T>(Type contractType)
         {
-            if (_resolvingTypes.Contains(contractType))
+            if (_resolvingTypesSet.Contains(contractType))
                 throw new Exception($"Circular dependency detected while resolving type {contractType}. " +
                     $"Dependencies stack: {string.Join(" → ", _resolvingTypes)} → {contractType}.");
 
             _resolvingTypes.Enqueue(contractType);
+            _resolvingTypesSet.Add(contractType);
 
             var currentContainer = this;
             var instanceGetter = default(InstanceGetter);
@@ -38,7 +40,9 @@ namespace Uniject
                 throw new Exception($"No binding found for type {contractType}.");
 
             var instance = (T)instanceGetter.GetObject();
+            
             _resolvingTypes.Dequeue();
+            _resolvingTypesSet.Remove(contractType);
 
             return instance;
         }
