@@ -91,18 +91,22 @@ namespace Uniject
             methodInjectionData.methodInfo.Invoke(instance, parametersInstances);
         }
 
+        public void Inject(InjectionTargets injectionTargets)
+        {
+            foreach (var target in injectionTargets.Targets)
+                Inject(target);
+        }
+
         public GameObject InstantiatePrefab(GameObject prefab) => InstantiatePrefab(prefab.transform).gameObject;
 
         public T InstantiatePrefab<T>(Component prefab) where T : Component => (T)InstantiatePrefab(prefab);
 
-
         public Component InstantiatePrefab(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
-            var injectionTargets = cloned.GetComponent<InjectionTargets>().Targets;
-
-            foreach (var target in injectionTargets)
-                Inject(target);
+            
+            if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
+                Inject(injectionTargets);
             
             return cloned;
         }

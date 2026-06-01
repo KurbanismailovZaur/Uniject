@@ -24,10 +24,12 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromInstance(object instance) => From(new FromInstanceGetter(_container, instance));
 
-        public BindingAsBuilder FromComponentInNewPrefab(T prefab) => From(new FromComponentInNewPrefabGetter<T>(_container, prefab));
+        public BindingAsBuilder FromComponentInNewPrefab(object prefab) => From(new FromComponentInNewPrefabGetter(_container, prefab, _binding.ConcreteType));
 
         public BindingAsBuilder FromComponentInNewPrefabResource(string pathToPrefabResource) => From(new FromComponentInNewPrefabResourceGetter(_container, pathToPrefabResource));
 
         public BindingAsBuilder FromNewComponentOnNewGameObject() => From(new FromNewComponentOnNewGameObjectGetter(_binding.ConcreteType, _container));
+
+        public BindingAsBuilder FromNewComponentOnNewPrefab(T prefab) => From(new FromNewComponentOnNewPrefabGetter<T>(_container, prefab));
     }
 }
