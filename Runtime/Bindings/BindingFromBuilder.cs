@@ -26,6 +26,6 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromComponentInNewPrefab(T prefab) => From(new FromComponentInNewPrefabGetter<T>(_container, prefab));
 
-        
+        public BindingAsBuilder FromComponentInNewPrefabResource(string pathToPrefabResource) => From(new FromComponentInNewPrefabResourceGetter<T>(_container, pathToPrefabResource));
     }
 }

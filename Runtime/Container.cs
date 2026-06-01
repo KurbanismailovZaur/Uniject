@@ -91,9 +91,12 @@ namespace Uniject
             methodInjectionData.methodInfo.Invoke(instance, parametersInstances);
         }
 
-        public T InstantiatePrefab<T>(T prefab) where T : Component => (T)InstantiatePrefab(typeof(T), prefab);
+        public GameObject InstantiatePrefab(GameObject prefab) => InstantiatePrefab(prefab.transform).gameObject;
 
-        public Component InstantiatePrefab(Type concreteType, Component prefab)
+        public T InstantiatePrefab<T>(Component prefab) where T : Component => (T)InstantiatePrefab(prefab);
+
+
+        public Component InstantiatePrefab(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
             var injectionTargets = cloned.GetComponent<InjectionTargets>().Targets;
