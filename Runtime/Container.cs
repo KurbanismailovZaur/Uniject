@@ -105,7 +105,7 @@ namespace Uniject
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
             
-            if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
+            if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
                 Inject(injectionTargets.Targets);
             
             return cloned;

@@ -3,33 +3,28 @@ using UnityEngine;
 
 namespace Uniject.Getters
 {
-    public class FromNewComponentOnNewPrefabGetter<TConcrete> : InstanceGetter
+    public class FromNewComponentOnNewPrefabGetter : InstanceGetter
     {
-        private readonly TConcrete _prefab;
+        private readonly GameObject _prefab;
 
-        public FromNewComponentOnNewPrefabGetter(Container container, TConcrete prefab) : base(container)
+        public FromNewComponentOnNewPrefabGetter(Container container, GameObject prefab, Type concreteType) : base(container)
         {
-            if (prefab == null) 
-                throw new ArgumentNullException(nameof(prefab), 
-                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} getter can not be null.");
+            if (!typeof(Component).IsAssignableFrom(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewPrefabGetter)} " + 
+                    "getter must be a Component, but it is not.");
 
-            if (prefab is GameObject gameObject)
-                _prefab = gameObject;
-            else if (prefab is Component component)
-                _prefab = component.gameObject;
-            else
-                throw new ArgumentException($"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} must be a " + 
-                    "GameObject or a Component, but it is not.");
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab),
+                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter)} getter can not be null.");
+
+            _prefab = prefab;
         }
 
         public override object GetObject(Type concreteType)
         {
-            var cloned = UnityEngine.Object.Instantiate(_prefab as Component);
-            
-            if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
-                _container.Inject(injectionTargets.Targets);
-            
-            var script = cloned.gameObject.AddComponent(concreteType);
+            var cloned = _container.Instantiate(_prefab);
+
+            var script = cloned.AddComponent(concreteType);
             _container.Inject(script);
 
             return script;

@@ -6,10 +6,11 @@ namespace Uniject.Getters
 {
     public class FromNewComponentOnNewGameObjectGetter : InstanceGetter
     {
-        public FromNewComponentOnNewGameObjectGetter(Type concreteType, Container container) : base(container)
+        public FromNewComponentOnNewGameObjectGetter(Container container, Type concreteType) : base(container)
         {
             if (!typeof(Component).IsAssignableFrom(concreteType))
-                throw new ArgumentException($"Type {concreteType} for FromNewComponentOnNewGameObject getter must be a Component, but it is not.");
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewGameObjectGetter)} " + 
+                    "getter must be a Component, but it is not.");
         }
 
         public override object GetObject(Type concreteType)

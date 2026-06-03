@@ -28,10 +28,12 @@ namespace Uniject.Bindings
         
         public BindingAsBuilder FromComponentInNewPrefab(TConcrete prefab) => From(new FromComponentInNewPrefabGetter<TConcrete>(_container, prefab));
 
-        public BindingAsBuilder FromComponentInNewPrefabResource(string pathToPrefabResource) => From(new FromComponentInNewPrefabResourceGetter(_container, pathToPrefabResource));
+        public BindingAsBuilder FromComponentInNewPrefabResource(string pathToPrefabResource) => From(new FromComponentInNewPrefabResourceGetter(_container, pathToPrefabResource, _binding.ConcreteType));
 
-        public BindingAsBuilder FromNewComponentOnNewPrefab(TConcrete prefab) => From(new FromNewComponentOnNewPrefabGetter<TConcrete>(_container, prefab));
+        public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => From(new FromNewComponentOnNewPrefabGetter(_container, prefab, _binding.ConcreteType));
+        
+        public BindingAsBuilder FromNewComponentOnNewPrefabResource(string pathToPrefabResource) => From(new FromNewComponentOnNewPrefabResourceGetter(_container, pathToPrefabResource, _binding.ConcreteType));
 
-        public BindingAsBuilder FromNewComponentOnNewGameObject() => From(new FromNewComponentOnNewGameObjectGetter(_binding.ConcreteType, _container));
+        public BindingAsBuilder FromNewComponentOnNewGameObject() => From(new FromNewComponentOnNewGameObjectGetter(_container, _binding.ConcreteType));
     }
 }

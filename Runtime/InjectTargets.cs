@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public class InjectionTargets : MonoBehaviour
+    public class InjectTargets : MonoBehaviour
     {
         [field: SerializeField] public MonoBehaviour[] Targets { get; private set; }
     }

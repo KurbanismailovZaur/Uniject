@@ -7,8 +7,12 @@ namespace Uniject.Getters
     {
         private readonly string _pathToPrefabResource;
 
-        public FromComponentInNewPrefabResourceGetter(Container container, string pathToPrefabResource) : base(container)
+        public FromComponentInNewPrefabResourceGetter(Container container, string pathToPrefabResource, Type concreteType) : base(container)
         {
+            if (!typeof(Component).IsAssignableFrom(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromComponentInNewPrefabResourceGetter)} " + 
+                    "getter must be a Component, but it is not.");
+
             if (string.IsNullOrWhiteSpace(pathToPrefabResource))
                 throw new ArgumentException($"Path to prefab resource for {nameof(FromComponentInNewPrefabResourceGetter)} " + 
                     "getter can not be null or empty.", nameof(pathToPrefabResource));
@@ -18,11 +22,11 @@ namespace Uniject.Getters
 
         public override object GetObject(Type concreteType)
         {
-            var prefab = Resources.Load<GameObject>(_pathToPrefabResource).GetComponent(concreteType);
+            var prefab = (Component)Resources.Load(_pathToPrefabResource, concreteType);
 
             if (prefab == null)
                 throw new ArgumentException($"Prefab resource at path \"{_pathToPrefabResource}\" for " 
-                + $"{nameof(FromComponentInNewPrefabResourceGetter)} does not have a component of type {concreteType.Name}.");
+                    + $"{nameof(FromComponentInNewPrefabResourceGetter)} does not have a component of type {concreteType}.");
 
             return _container.Instantiate(prefab);
         }

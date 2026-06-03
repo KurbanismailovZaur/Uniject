@@ -23,7 +23,6 @@ namespace Uniject.Getters
         {
             _prefab = prefab as Component;
         }
-
         
         public override object GetObject(Type concreteType) => _container.Instantiate(_prefab);
     }
