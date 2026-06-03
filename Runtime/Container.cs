@@ -75,10 +75,10 @@ namespace Uniject
             methodInjectionData.methodInfo.Invoke(instance, parametersInstances);
         }
 
-        public void Inject(InjectionTargets injectionTargets)
+        public void Inject(IEnumerable<object> instances)
         {
-            foreach (var target in injectionTargets.Targets)
-                Inject(target);
+            foreach (var instance in instances)
+                Inject(instance);
         }
 
         public T Instantiate<T>() => (T)Instantiate(typeof(T));
@@ -97,24 +97,16 @@ namespace Uniject
             return constructorInjectionData.constructorInfo.Invoke(parametersInstances);
         }
 
-        public GameObject Instantiate(GameObject prefab)
-        {
-            var cloned = UnityEngine.Object.Instantiate(prefab);
-            
-            if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
-                Inject(injectionTargets);
-            
-            return cloned;
-        }
+        public GameObject Instantiate(GameObject prefab) => Instantiate(prefab.transform).gameObject;
 
-        public T Instantiate<T>(Component prefab) where T : Component => (T)Instantiate(prefab);
+        public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab);
 
         internal Component Instantiate(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
             
             if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
-                Inject(injectionTargets);
+                Inject(injectionTargets.Targets);
             
             return cloned;
         }
