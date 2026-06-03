@@ -1,6 +1,6 @@
 namespace Uniject.Bindings
 {
-    public class BindingToBuilder
+    public class BindingToBuilder<TContract>
     {
         private readonly Container _container;
         private readonly Binding _binding;
@@ -11,10 +11,10 @@ namespace Uniject.Bindings
             _binding = binding;
         }
 
-        public BindingFromBuilder<T> To<T>()
+        public BindingFromBuilder<TConcrete> To<TConcrete>() where TConcrete : TContract
         {
-            _binding.To(typeof(T));
-            return new BindingFromBuilder<T>(_container, _binding);
+            _binding.To(typeof(TConcrete));
+            return new BindingFromBuilder<TConcrete>(_container, _binding);
         }
     }
 }

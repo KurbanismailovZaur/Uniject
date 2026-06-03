@@ -17,7 +17,7 @@ namespace Uniject
         private readonly Queue<Type> _resolvingTypes = new();
         private readonly HashSet<Type> _resolvingTypesSet = new();
 
-        public BindingToBuilder Bind<TContract>()
+        public BindingToBuilder<TContract> Bind<TContract>()
         {
             var contractType = typeof(TContract);
 
@@ -26,7 +26,7 @@ namespace Uniject
 
             var binding = new Binding(this, contractType);
             _bindings[contractType] = binding;
-            return new BindingToBuilder(this, binding);
+            return new BindingToBuilder<TContract>(this, binding);
         }
 
         public T Resolve<T>() => Resolve<T>(typeof(T));
@@ -57,22 +57,6 @@ namespace Uniject
             return instance;
         }
 
-        public T Instantiate<T>() => (T)Instantiate(typeof(T));
-
-        public object Instantiate(Type concreteType)
-        {
-            var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
-            var parametersInstances = new object[constructorInjectionData.parametersInfo.Length];
-
-            foreach (var parameter in constructorInjectionData.parametersInfo)
-            {
-                var parameterInstance = Resolve<object>(parameter.ParameterType);
-                parametersInstances[parameter.Position] = parameterInstance;
-            }
-
-            return constructorInjectionData.constructorInfo.Invoke(parametersInstances);
-        }
-
         public void Inject(object instance)
         {
             var methodInjectionData = ReflectionCache.GetMethodInjectionData(instance.GetType());
@@ -97,11 +81,35 @@ namespace Uniject
                 Inject(target);
         }
 
-        public GameObject InstantiatePrefab(GameObject prefab) => InstantiatePrefab(prefab.transform).gameObject;
+        public T Instantiate<T>() => (T)Instantiate(typeof(T));
 
-        public T InstantiatePrefab<T>(Component prefab) where T : Component => (T)InstantiatePrefab(prefab);
+        public object Instantiate(Type concreteType)
+        {
+            var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
+            var parametersInstances = new object[constructorInjectionData.parametersInfo.Length];
 
-        public Component InstantiatePrefab(Component prefab)
+            foreach (var parameter in constructorInjectionData.parametersInfo)
+            {
+                var parameterInstance = Resolve<object>(parameter.ParameterType);
+                parametersInstances[parameter.Position] = parameterInstance;
+            }
+
+            return constructorInjectionData.constructorInfo.Invoke(parametersInstances);
+        }
+
+        public GameObject Instantiate(GameObject prefab)
+        {
+            var cloned = UnityEngine.Object.Instantiate(prefab);
+            
+            if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
+                Inject(injectionTargets);
+            
+            return cloned;
+        }
+
+        public T Instantiate<T>(Component prefab) where T : Component => (T)Instantiate(prefab);
+
+        internal Component Instantiate(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
             

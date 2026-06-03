@@ -24,7 +24,7 @@ namespace Uniject.Getters
                 throw new ArgumentException($"Prefab resource at path \"{_pathToPrefabResource}\" for " 
                 + $"{nameof(FromComponentInNewPrefabResourceGetter)} does not have a component of type {concreteType.Name}.");
 
-            return _container.InstantiatePrefab(prefab);
+            return _container.Instantiate(prefab);
         }
     }
 }
