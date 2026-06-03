@@ -99,7 +99,7 @@ namespace Uniject
 
         public GameObject Instantiate(GameObject prefab) => Instantiate(prefab.transform).gameObject;
 
-        public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab);
+        public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab as Component);
 
         internal Component Instantiate(Component prefab)
         {
