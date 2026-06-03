@@ -3,22 +3,23 @@ using UnityEngine;
 
 namespace Uniject.Getters
 {
-    public class FromNewComponentOnNewPrefabGetter : InstanceGetter
+    public class FromNewComponentOnNewPrefabGetter<TConcrete> : InstanceGetter
     {
-        private readonly object _prefab;
+        private readonly TConcrete _prefab;
 
-        public FromNewComponentOnNewPrefabGetter(Container container, object prefab) : base(container)
+        public FromNewComponentOnNewPrefabGetter(Container container, TConcrete prefab) : base(container)
         {
             if (prefab == null) 
                 throw new ArgumentNullException(nameof(prefab), 
-                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter)} getter can not be null.");
+                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} getter can not be null.");
 
             if (prefab is GameObject gameObject)
                 _prefab = gameObject;
             else if (prefab is Component component)
                 _prefab = component.gameObject;
             else
-                throw new ArgumentException($"Prefab for {nameof(FromNewComponentOnNewPrefabGetter)} must be a GameObject or a Component, but it is not.");
+                throw new ArgumentException($"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} must be a " + 
+                    "GameObject or a Component, but it is not.");
         }
 
         public override object GetObject(Type concreteType)
@@ -26,7 +27,7 @@ namespace Uniject.Getters
             var cloned = UnityEngine.Object.Instantiate(_prefab as Component);
             
             if (cloned.TryGetComponent<InjectionTargets>(out var injectionTargets))
-                _container.Inject(injectionTargets);
+                _container.Inject(injectionTargets.Targets);
             
             var script = cloned.gameObject.AddComponent(concreteType);
             _container.Inject(script);
