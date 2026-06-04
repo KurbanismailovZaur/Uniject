@@ -13,9 +13,10 @@ namespace Uniject
         private Container _parentContainer;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
-
-        private readonly Queue<Type> _resolvingTypes = new();
+        private readonly List<Type> _resolvingTypesList = new();
         private readonly HashSet<Type> _resolvingTypesSet = new();
+        private readonly List<Binding> _nonLazyBindingsList = new();
+        private readonly HashSet<Binding> _nonLazyBindingsSet = new();
 
         public BindingToBuilder<TContract> Bind<TContract>()
         {
@@ -33,28 +34,47 @@ namespace Uniject
 
         public T Resolve<T>(Type contractType)
         {
-            if (_resolvingTypesSet.Contains(contractType))
+            EnterResolving(contractType);
+            
+            try
+            {
+                var binding = FindBinding(contractType);
+
+                if (binding == null)
+                    throw new Exception($"No binding found for type {contractType}.");
+
+                return (T)binding.GetInstance();
+            }
+            finally
+            {
+                ExitResolving(contractType);            
+            }
+        }
+
+        private void EnterResolving(Type contractType)
+        {
+            if (!_resolvingTypesSet.Add(contractType))
                 throw new Exception($"Circular dependency detected while resolving type {contractType}. " +
-                    $"Dependencies stack: {string.Join(" → ", _resolvingTypes)} → {contractType}.");
+                    $"Dependencies stack: {string.Join(" → ", _resolvingTypesList)} → {contractType}.");
 
-            _resolvingTypes.Enqueue(contractType);
-            _resolvingTypesSet.Add(contractType);
+            _resolvingTypesList.Add(contractType);
+        }
 
+        private void ExitResolving(Type contractType)
+        {
+            _resolvingTypesList.RemoveAt(_resolvingTypesList.Count - 1);
+            _resolvingTypesSet.Remove(contractType);
+        }
+
+        private Binding FindBinding(Type contractType)
+        {
             var currentContainer = this;
             var binding = default(Binding);
 
             while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
                 currentContainer = currentContainer._parentContainer;
-
-            if (binding == null)
-                throw new Exception($"No binding found for type {contractType}.");
-
-            var instance = (T)binding.GetObject();
-
-            _resolvingTypes.Dequeue();
-            _resolvingTypesSet.Remove(contractType);
-
-            return instance;
+                
+            return binding;
         }
 
         public void Inject(object instance)
@@ -109,6 +129,29 @@ namespace Uniject
                 Inject(injectionTargets.Targets);
             
             return cloned;
+        }
+
+        internal void MarkBindingNonLazy(Binding binding)
+        {
+            if (_nonLazyBindingsSet.Add(binding))
+                _nonLazyBindingsList.Add(binding);
+        }
+
+        // TODO: The access modifier should be internal.
+        public void ResolveNonLazyBindings()
+        {
+            foreach (var binding in _nonLazyBindingsList)
+            {
+                EnterResolving(binding.ContractType);
+                try
+                {
+                    binding.PrepareNonLazyInstance();
+                }
+                finally
+                {
+                    ExitResolving(binding.ContractType);
+                }
+            }
         }
     }
 }

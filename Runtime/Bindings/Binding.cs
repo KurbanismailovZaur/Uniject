@@ -5,21 +5,20 @@ namespace Uniject.Bindings
 {
     public class Binding
     {
+        public Container Container { get; private set; }
+        public Type ContractType { get; private set; }
         public Type ConcreteType { get; private set; }
         public InstanceGetter InstanceGetter { get; private set; }
         public Scope Scope { get; private set; }
-        public object CachedInstance { get; private set; }
-        public bool IsNonLazy { get; private set; }
+        private object CachedInstance { get; set; }
 
-        public Binding(Container container, Type concreteType) 
-            : this(concreteType, new FromConstructorGetter(container), Scope.Transient, false) { }
-
-        public Binding(Type concreteType, InstanceGetter instanceGetter, Scope scope, bool isNonLazy)
+        public Binding(Container container, Type contractType) 
         {
-            ConcreteType = concreteType;
-            InstanceGetter = instanceGetter;
-            Scope = scope;
-            IsNonLazy = isNonLazy;
+            Container = container;
+            ContractType = contractType;
+            ConcreteType = contractType;
+            InstanceGetter = new FromConstructorGetter(container);
+            Scope = Scope.Transient;
         }
 
         public void To(Type concreteType) => ConcreteType = concreteType;
@@ -28,14 +27,25 @@ namespace Uniject.Bindings
         
         public void As(Scope scope) => Scope = scope;
 
-        public void NonLazy() => IsNonLazy = true;
+        public void NonLazy() => Container.MarkBindingNonLazy(this);
 
-        public object GetObject()
+        public object GetInstance()
         {
             if (Scope == Scope.Transient)
+            {
+                if (CachedInstance != null)
+                {
+                    var cachedInstance = CachedInstance;
+                    CachedInstance = null;
+                    return cachedInstance;    
+                }
+
                 return InstanceGetter.GetObject(ConcreteType);
+            }
 
             return CachedInstance ??= InstanceGetter.GetObject(ConcreteType);
         }
+
+        internal void PrepareNonLazyInstance() => CachedInstance ??= InstanceGetter.GetObject(ConcreteType);
     }
 }
