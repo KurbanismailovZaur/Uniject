@@ -1,44 +1,48 @@
 using System;
+using Uniject.Reflection;
 using UnityEngine;
 
 namespace Uniject.Getters
 {
-    public class FromComponentInNewPrefabGetter<TConcrete> : InstanceGetter
+    public class FromComponentInNewPrefabGetter : InstanceGetter
     {
         private readonly Component _prefab;
 
-        private FromComponentInNewPrefabGetter(Container container, object prefab) : base(container)
+        private FromComponentInNewPrefabGetter(Container container, UnityEngine.Object prefab) : base(container)
         {
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab),
-                    $"Prefab for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter can not be null.");
+                    $"Prefab for {nameof(FromComponentInNewPrefabGetter)} can not be null.");
         }
 
-        public FromComponentInNewPrefabGetter(Container container, GameObject prefab, Type concreteType) : this(container, prefab)
+        public FromComponentInNewPrefabGetter(Container container, GameObject prefab, Type concreteType) 
+            : this(container, prefab)
         {
-            if (!typeof(Component).IsAssignableFrom(concreteType))
-                throw new ArgumentException(
-                    $"Type {concreteType} for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must be a Component, but it is not.",
-                    nameof(concreteType));
+            if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromComponentInNewPrefabGetter)} must " + 
+                    "be a Component or an interface.", nameof(concreteType));
 
             _prefab = prefab.GetComponent(concreteType);
 
             if (_prefab == null)
-                throw new ArgumentException(
-                    $"Prefab for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must have a component of type {concreteType}.",
-                    nameof(prefab));
+                throw new ArgumentException($"Prefab for {nameof(FromComponentInNewPrefabGetter)} must have a " +
+                    $"component assignable to type {concreteType}.", nameof(prefab));
         }
 
-        public FromComponentInNewPrefabGetter(Container container, TConcrete prefab) : this(container, (object)prefab)
+        public FromComponentInNewPrefabGetter(Container container, Component prefab, Type concreteType) 
+            : this(container, prefab)
         {
-            if (prefab is not Component component)
-                throw new ArgumentException(
-                    $"Prefab for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must be a Component.",
-                    nameof(prefab));
+            if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromComponentInNewPrefabGetter)} must " + 
+                    "be a Component or an interface.", nameof(concreteType));
 
-            _prefab = component;
+            _prefab = prefab.GetComponent(concreteType);
+
+            if (_prefab == null)
+                throw new ArgumentException($"Prefab for {nameof(FromComponentInNewPrefabGetter)} must have a " + 
+                    $"component assignable to type {concreteType}.", nameof(prefab));
         }
-        
+
         public override object GetInstance(Type concreteType) => _container.Instantiate(_prefab);
     }
 }

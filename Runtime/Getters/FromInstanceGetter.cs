@@ -10,7 +10,7 @@ namespace Uniject.Getters
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance), 
-                    $"Instance for {nameof(FromInstanceGetter<TConcrete>)} getter can not be null.");
+                    $"Instance for {nameof(FromInstanceGetter<TConcrete>)} can not be null.");
 
             _instance = instance;
         }
