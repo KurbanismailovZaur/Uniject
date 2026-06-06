@@ -76,6 +76,28 @@ namespace Uniject
             return binding;
         }
 
+        internal void MarkBindingNonLazy(Binding binding)
+        {
+            if (_nonLazyBindingsSet.Add(binding))
+                _nonLazyBindingsList.Add(binding);
+        }
+
+        internal void ResolveNonLazyBindings()
+        {
+            foreach (var binding in _nonLazyBindingsList)
+            {
+                EnterResolving(binding.ContractType);
+                try
+                {
+                    binding.PrepareNonLazyInstance();
+                }
+                finally
+                {
+                    ExitResolving(binding.ContractType);
+                }
+            }
+        }
+
         public void Inject(object instance)
         {
             var methodInjectionData = ReflectionCache.GetMethodInjectionData(instance.GetType());
@@ -116,7 +138,16 @@ namespace Uniject
             return constructorInjectionData.constructorInfo.Invoke(parametersInstances);
         }
 
-        public GameObject Instantiate(GameObject prefab) => Instantiate(prefab.transform).gameObject;
+        public GameObject Instantiate(GameObject prefab)
+        {
+            var cloned = UnityEngine.Object.Instantiate(prefab);
+            
+            if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
+                Inject(injectionTargets.Targets);
+            
+            return cloned;
+        }
+
 
         public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab as Component);
 
@@ -130,26 +161,28 @@ namespace Uniject
             return cloned;
         }
 
-        internal void MarkBindingNonLazy(Binding binding)
+        public TComponent AddComponent<TComponent>(GameObject gameObject) where TComponent : Component
         {
-            if (_nonLazyBindingsSet.Add(binding))
-                _nonLazyBindingsList.Add(binding);
+            return (TComponent)AddComponent(gameObject, typeof(TComponent));
         }
 
-        internal void ResolveNonLazyBindings()
+        public Component AddComponent(GameObject gameObject, Type componentType)
         {
-            foreach (var binding in _nonLazyBindingsList)
-            {
-                EnterResolving(binding.ContractType);
-                try
-                {
-                    binding.PrepareNonLazyInstance();
-                }
-                finally
-                {
-                    ExitResolving(binding.ContractType);
-                }
-            }
+            var component = gameObject.AddComponent(componentType);
+            Inject(component);
+            return component;
+        }
+
+        public TComponent AddComponent<TComponent>(Component component) where TComponent : Component
+        {
+            return (TComponent)AddComponent(component, typeof(TComponent));
+        }
+
+        public Component AddComponent(Component component, Type componentType)
+        {
+            component = component.gameObject.AddComponent(componentType);
+            Inject(component);
+            return component;
         }
     }
 }

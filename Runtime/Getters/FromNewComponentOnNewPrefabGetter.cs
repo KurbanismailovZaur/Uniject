@@ -38,11 +38,9 @@ namespace Uniject.Getters
         public override object GetInstance(Type concreteType)
         {
             var cloned = _container.Instantiate(_prefab);
+            var component = _container.AddComponent(cloned, concreteType);
 
-            var script = cloned.AddComponent(concreteType);
-            _container.Inject(script);
-
-            return script;
+            return component;
         }
     }
 }
