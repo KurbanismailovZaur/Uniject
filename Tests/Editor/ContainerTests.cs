@@ -36,6 +36,39 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Bind_WhenDifferentTypesAreBound_DoesNotThrow()
+        {
+            var container = new Container();
+
+            Assert.That(() =>
+            {
+                container.Bind<Class>();
+                container.Bind<IInterface>().To<ClassImplementedIInterface>();
+            }, Throws.Nothing);
+        }
+
+        [Test]
+        public void Bind_WhenSameConcreteTypeIsBoundToDifferentContracts_DoesNotThrow()
+        {
+            var container = new Container();
+
+            container.Bind<Class>();
+            container.Bind<IInterface>().To<ClassImplementedIInterface>();
+
+            Assert.Pass();
+        }
+
+        [Test]
+        public void Resolve_WhenTypeWasBound_ReturnsInstance()
+        {
+            var container = new Container();
+            container.Bind<Class>();
+
+            var instance = container.Resolve<Class>();
+            Assert.That(instance, Is.Not.Null);
+        }
+
+        [Test]
         public void Resolve_FromConstructor_ReturnsNewInstance()
         {
             var container = new Container();
