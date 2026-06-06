@@ -32,7 +32,7 @@ namespace Uniject.Bindings
         public BindingAsBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
         
         public BindingAsBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
-
+        
         public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();

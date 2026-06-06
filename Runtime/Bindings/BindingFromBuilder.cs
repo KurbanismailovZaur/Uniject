@@ -33,6 +33,8 @@ namespace Uniject.Bindings
         public BindingAsBuilder FromNewComponentOnNewPrefab(Component prefab) => From(new FromNewComponentOnNewPrefabGetter(_container, prefab, _binding.ConcreteType));
         
         public BindingAsBuilder FromNewComponentOnNewGameObject() => From(new FromNewComponentOnNewGameObjectGetter(_container, _binding.ConcreteType));
+        
+        public BindingAsBuilder FromResolve() => From(new FromResolveGetter(_container, _binding.ContractType, _binding.ConcreteType));
 
         public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 

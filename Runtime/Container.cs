@@ -29,9 +29,9 @@ namespace Uniject
             return new BindingToBuilder<TContract>(this, binding);
         }
 
-        public T Resolve<T>() => Resolve<T>(typeof(T));
-
-        public T Resolve<T>(Type contractType)
+        public T Resolve<T>() => (T)Resolve(typeof(T));
+        
+        public object Resolve(Type contractType)
         {
             EnterResolving(contractType);
             
@@ -42,7 +42,7 @@ namespace Uniject
                 if (binding == null)
                     throw new Exception($"No binding found for type {contractType}.");
 
-                return (T)binding.GetInstance();
+                return binding.GetInstance();
             }
             finally
             {
@@ -109,7 +109,7 @@ namespace Uniject
 
             foreach (var parameter in methodInjectionData.parametersInfo)
             {
-                var parameterInstance = Resolve<object>(parameter.ParameterType);
+                var parameterInstance = Resolve(parameter.ParameterType);
                 parametersInstances[parameter.Position] = parameterInstance;
             }
 
@@ -131,7 +131,7 @@ namespace Uniject
 
             foreach (var parameter in constructorInjectionData.parametersInfo)
             {
-                var parameterInstance = Resolve<object>(parameter.ParameterType);
+                var parameterInstance = Resolve(parameter.ParameterType);
                 parametersInstances[parameter.Position] = parameterInstance;
             }
 
