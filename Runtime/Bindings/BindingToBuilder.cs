@@ -29,7 +29,7 @@ namespace Uniject.Bindings
         
         public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
 
-        public BindingAsBuilder FromNewComponentOnNewPrefab(TContract prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public BindingAsBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
         
         public BindingAsBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
 

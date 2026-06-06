@@ -1,9 +1,10 @@
 using System;
+using Uniject.Reflection;
 using UnityEngine;
 
 namespace Uniject.Getters
 {
-    public class FromNewComponentOnNewPrefabGetter<TConcrete> : InstanceGetter
+    public class FromNewComponentOnNewPrefabGetter : InstanceGetter
     {
         private readonly GameObject _prefab;
 
@@ -11,11 +12,11 @@ namespace Uniject.Getters
         {
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab),
-                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} getter can not be null.");
+                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter)} can not be null.");
 
-            if (!typeof(Component).IsAssignableFrom(concreteType))
-                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} " +
-                    "getter must be a Component, but it is not.");
+            if (!TypeValidator.TypeIsComponent(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewPrefabGetter)} " +
+                    "must be a Component, but it is not.");
         }
 
         public FromNewComponentOnNewPrefabGetter(Container container, GameObject prefab, Type concreteType) 
@@ -24,15 +25,10 @@ namespace Uniject.Getters
             _prefab = prefab;
         }
 
-        public FromNewComponentOnNewPrefabGetter(Container container, TConcrete prefab, Type concreteType) 
+        public FromNewComponentOnNewPrefabGetter(Container container, Component prefab, Type concreteType) 
             : this(container, (object)prefab, concreteType)
         {
-            if (prefab is not Component component)
-                throw new ArgumentException(
-                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter<TConcrete>)} getter must be a Component.",
-                    nameof(prefab));
-
-            _prefab = component.gameObject;
+            _prefab = prefab.gameObject;
         }
 
         public override object GetInstance(Type concreteType)

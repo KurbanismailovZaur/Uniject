@@ -1,7 +1,9 @@
 {
     "name": "Uniject.Runtime.Tests",
     "rootNamespace": "Uniject.Tests",
-    "references": [],
+    "references": [
+        "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

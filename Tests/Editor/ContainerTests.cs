@@ -48,14 +48,18 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Bind_WhenSameConcreteTypeIsBoundToDifferentContracts_DoesNotThrow()
+        public void Resolve_WhenSameConcreteTypeIsBoundToDifferentContracts_ReturnsInstances()
         {
             var container = new Container();
 
             container.Bind<ClassImplementedIInterface>().To<ClassImplementedIInterface>();
             container.Bind<IInterface>().To<ClassImplementedIInterface>();
 
-            Assert.Pass();
+            var concreteInstance = container.Resolve<ClassImplementedIInterface>();
+            var interfaceInstance = container.Resolve<IInterface>();
+
+            Assert.That(concreteInstance, Is.Not.Null);
+            Assert.That(interfaceInstance, Is.Not.Null);
         }
 
         [Test]
@@ -336,6 +340,26 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Bind_FromNewComponentOnNewPrefab_WhenGameObjectPrefabIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab((GameObject)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_FromNewComponentOnNewPrefab_WhenComponentPrefabIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab((Component)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
         public void Bind_FromNewComponentOnNewPrefab_WhenConcreteTypeIsNotComponent_ThrowsArgumentException()
         {
             var prefab = new GameObject("Prefab");
@@ -352,36 +376,6 @@ namespace Uniject.Tests
             {
                 UnityEngine.Object.DestroyImmediate(prefab);
             }
-        }
-
-        [Test]
-        public void Bind_FromNewComponentOnNewPrefab_WhenGameObjectPrefabIsNull_ThrowsArgumentNullException()
-        {
-            var container = new Container();
-
-            Assert.That(
-                () => container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab((GameObject)null),
-                Throws.TypeOf<ArgumentNullException>());
-        }
-
-        [Test]
-        public void Bind_FromNewComponentOnNewPrefab_WhenComponentPrefabIsNull_ThrowsArgumentNullException()
-        {
-            var container = new Container();
-
-            Assert.That(
-                () => container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab((Script)null),
-                Throws.TypeOf<ArgumentNullException>());
-        }
-
-        [Test]
-        public void Bind_FromNewComponentOnNewPrefab_WhenPrefabIsNotComponent_ThrowsArgumentException()
-        {
-            var container = new Container();
-
-            Assert.That(
-                () => container.Bind<Class>().To<Class>().FromNewComponentOnNewPrefab(new Class()),
-                Throws.TypeOf<ArgumentException>());
         }
 
         [Test]
@@ -414,28 +408,129 @@ namespace Uniject.Tests
         [Test]
         public void Resolve_FromNewComponentOnNewPrefab_WhenPrefabIsComponent_AddsComponentToClonedPrefab()
         {
-            var prefabScript = new GameObject("Prefab").AddComponent<Script>();
+            var prefabComponent = new GameObject("Prefab").transform;
             var resolvedScript = default(Script);
 
             try
             {
                 var container = new Container();
-                container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab(prefabScript);
+                container.Bind<Script>().To<Script>().FromNewComponentOnNewPrefab(prefabComponent);
 
                 resolvedScript = container.Resolve<Script>();
 
                 Assert.That(resolvedScript, Is.Not.Null);
-                Assert.That(resolvedScript, Is.Not.SameAs(prefabScript));
-                Assert.That(resolvedScript.gameObject, Is.Not.SameAs(prefabScript.gameObject));
-                Assert.That(prefabScript.gameObject.GetComponents<Script>(), Has.Length.EqualTo(1));
-                Assert.That(resolvedScript.gameObject.GetComponents<Script>(), Has.Length.EqualTo(2));
+                Assert.That(resolvedScript, Is.Not.SameAs(prefabComponent));
+                Assert.That(resolvedScript.gameObject, Is.Not.SameAs(prefabComponent.gameObject));
             }
             finally
             {
                 if (resolvedScript != null)
                     UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
 
-                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+                UnityEngine.Object.DestroyImmediate(prefabComponent.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromNewComponentOnNewPrefab_InjectsAddedComponent()
+        {
+            var prefab = new GameObject("Prefab");
+            var dependency = new Class();
+            var resolvedScript = default(InjectableScript);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Class>().To<Class>().FromInstance(dependency);
+                container.Bind<InjectableScript>().To<InjectableScript>().FromNewComponentOnNewPrefab(prefab);
+
+                resolvedScript = container.Resolve<InjectableScript>();
+
+                Assert.That(resolvedScript.Dependency, Is.SameAs(dependency));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Bind_FromNewComponentOnNewGameObject_WhenConcreteTypeIsNotComponent_ThrowsArgumentException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Class>().To<Class>().FromNewComponentOnNewGameObject(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Bind_FromNewComponentOnNewGameObject_WhenConcreteTypeIsInterface_ThrowsArgumentException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<IInterface>().To<IInterface>().FromNewComponentOnNewGameObject(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Bind_FromNewComponentOnNewGameObject_WhenConcreteTypeIsAbstract_ThrowsArgumentException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<AbstractScript>().To<AbstractScript>().FromNewComponentOnNewGameObject(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Resolve_FromNewComponentOnNewGameObject_ReturnsComponentOnNewGameObject()
+        {
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Script>().To<Script>().FromNewComponentOnNewGameObject();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript, Is.Not.Null);
+                Assert.That(resolvedScript.gameObject, Is.Not.Null);
+                Assert.That(resolvedScript.gameObject.name, Is.EqualTo(nameof(Script)));
+                Assert.That(resolvedScript.gameObject.GetComponent<Script>(), Is.SameAs(resolvedScript));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromNewComponentOnNewGameObject_InjectsAddedComponent()
+        {
+            var dependency = new Class();
+            var resolvedScript = default(InjectableScript);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Class>().To<Class>().FromInstance(dependency);
+                container.Bind<InjectableScript>().To<InjectableScript>().FromNewComponentOnNewGameObject();
+
+                resolvedScript = container.Resolve<InjectableScript>();
+
+                Assert.That(resolvedScript.Dependency, Is.SameAs(dependency));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
             }
         }
     }

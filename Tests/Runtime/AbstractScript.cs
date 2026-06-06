@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Uniject.Tests
 {
-    public class Script : MonoBehaviour
+    public abstract class AbstractScript : MonoBehaviour
     {
     }
 }

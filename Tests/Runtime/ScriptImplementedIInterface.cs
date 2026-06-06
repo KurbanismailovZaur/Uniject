@@ -4,6 +4,5 @@ namespace Uniject.Tests
 {
     public class ScriptImplementedIInterface : MonoBehaviour, IInterface
     {
-        
     }
 }

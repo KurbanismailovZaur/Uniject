@@ -1,5 +1,5 @@
 using System;
-using Uniject.Bindings;
+using Uniject.Reflection;
 using UnityEngine;
 
 namespace Uniject.Getters
@@ -8,15 +8,15 @@ namespace Uniject.Getters
     {
         public FromNewComponentOnNewGameObjectGetter(Container container, Type concreteType) : base(container)
         {
-            if (!typeof(Component).IsAssignableFrom(concreteType))
-                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewGameObjectGetter)} " + 
-                    "getter must be a Component, but it is not.");
+            if (!TypeValidator.TypeCanBeAddedAsComponent(concreteType))
+                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewGameObjectGetter)} must be a non-abstract Component.");
         }
 
         public override object GetInstance(Type concreteType)
         {
-            var component = new GameObject(concreteType.Name).AddComponent(concreteType);
-            _container.Inject(component);
+            var gameObject = new GameObject(concreteType.Name);
+            var component = _container.AddComponent(gameObject, concreteType);
+
             return component;
         }
     }
