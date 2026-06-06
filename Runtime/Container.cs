@@ -120,7 +120,7 @@ namespace Uniject
 
         public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab as Component);
 
-        internal Component Instantiate(Component prefab)
+        public Component Instantiate(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
             

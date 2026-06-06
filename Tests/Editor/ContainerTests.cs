@@ -42,7 +42,7 @@ namespace Uniject.Tests
 
             Assert.That(() =>
             {
-                container.Bind<Class>();
+                container.Bind<Class>().To<Class>();
                 container.Bind<IInterface>().To<ClassImplementedIInterface>();
             }, Throws.Nothing);
         }
@@ -52,7 +52,7 @@ namespace Uniject.Tests
         {
             var container = new Container();
 
-            container.Bind<Class>();
+            container.Bind<ClassImplementedIInterface>().To<ClassImplementedIInterface>();
             container.Bind<IInterface>().To<ClassImplementedIInterface>();
 
             Assert.Pass();
@@ -66,6 +66,60 @@ namespace Uniject.Tests
 
             var instance = container.Resolve<Class>();
             Assert.That(instance, Is.Not.Null);
+        }
+
+        [Test]
+        public void Resolve_FromConstructor_WhenConcreteTypeIsInterface_ThrowsArgumentException()
+        {
+            var container = new Container();
+            container.Bind<IInterface>().To<IInterface>().FromConstructor();
+
+            Assert.That(
+                () => container.Resolve<IInterface>(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Resolve_FromConstructor_WhenConcreteTypeIsAbstract_ThrowsArgumentException()
+        {
+            var container = new Container();
+            container.Bind<AbstractClass>().To<AbstractClass>().FromConstructor();
+
+            Assert.That(
+                () => container.Resolve<AbstractClass>(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Resolve_FromConstructor_WhenConcreteTypeIsComponent_ThrowsArgumentException()
+        {
+            var container = new Container();
+            container.Bind<Script>().To<Script>().FromConstructor();
+
+            Assert.That(
+                () => container.Resolve<Script>(),
+                Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Instantiate_WhenTypeIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Instantiate((Type)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Resolve_FromConstructor_WhenNoPublicConstructor_ThrowsException()
+        {
+            var container = new Container();
+            container.Bind<ClassWithPrivateConstructor>().To<ClassWithPrivateConstructor>().FromConstructor();
+
+            Assert.That(
+                () => container.Resolve<ClassWithPrivateConstructor>(),
+                Throws.Exception);
         }
 
         [Test]
@@ -85,6 +139,32 @@ namespace Uniject.Tests
             Assert.That(
                 () => container.Bind<Class>().To<Class>().FromInstance(null),
                 Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Resolve_FromInstance_WhenContractIsInterface_ReturnsSameInstance()
+        {
+            IInterface instance = new ClassImplementedIInterface();
+
+            var container = new Container();
+            container.Bind<IInterface>().FromInstance(instance);
+
+            var resolvedInstance = container.Resolve<IInterface>();
+
+            Assert.That(resolvedInstance, Is.SameAs(instance));
+        }
+
+        [Test]
+        public void Resolve_FromInstance_WhenContractIsAbstractClass_ReturnsSameInstance()
+        {
+            AbstractClass instance = new ClassImplementedAbstractClass();
+
+            var container = new Container();
+            container.Bind<AbstractClass>().FromInstance(instance);
+
+            var resolvedInstance = container.Resolve<AbstractClass>();
+
+            Assert.That(resolvedInstance, Is.SameAs(instance));
         }
 
         [Test]
