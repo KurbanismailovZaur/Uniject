@@ -2,7 +2,8 @@
     "name": "Uniject.Runtime.Tests",
     "rootNamespace": "Uniject.Tests",
     "references": [
-        "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2"
+        "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
