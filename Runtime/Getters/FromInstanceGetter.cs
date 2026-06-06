@@ -2,16 +2,16 @@ using System;
 
 namespace Uniject.Getters
 {
-    public class FromInstanceGetter : InstanceGetter
+    public class FromInstanceGetter<TConcrete> : InstanceGetter
     {
-        private object _instance;
+        private TConcrete _instance;
 
-        public FromInstanceGetter(Container container, object instance) : base(container)
+        public FromInstanceGetter(Container container, TConcrete instance) : base(container)
         {
             _instance = instance ?? throw new ArgumentNullException(nameof(instance), 
-                $"Instance for {nameof(FromInstanceGetter)} getter can not be null.");
+                $"Instance for {nameof(FromInstanceGetter<TConcrete>)} getter can not be null.");
         }
 
-        public override object GetObject(Type concreteType) => _instance;
+        public override object GetInstance(Type concreteType) => _instance;
     }
 }

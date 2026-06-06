@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Uniject.Bindings
 {
     public class BindingToBuilder<TContract>
@@ -16,5 +18,25 @@ namespace Uniject.Bindings
             _binding.To(typeof(TConcrete));
             return new BindingFromBuilder<TConcrete>(_container, _binding);
         }
+
+        public BindingAsBuilder FromConstructor() => To<TContract>().FromConstructor();
+
+        public BindingAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
+        
+        public BindingAsBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        
+        public BindingAsBuilder FromComponentInNewPrefab(TContract prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        
+        public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+
+        public BindingAsBuilder FromNewComponentOnNewPrefab(TContract prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        
+        public BindingAsBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
+
+        public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
+
+        public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();
+        
+        public void NonLazy() => AsTransient().NonLazy();
     }
 }

@@ -24,5 +24,7 @@ namespace Uniject.Bindings
             _binding.As(Scope.Cached);
             return new BindingNonLazyBuilder(_container, _binding);
         }
+
+        public void NonLazy() => AsTransient().NonLazy();
     }
 }

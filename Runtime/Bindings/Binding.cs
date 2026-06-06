@@ -40,12 +40,12 @@ namespace Uniject.Bindings
                     return cachedInstance;    
                 }
 
-                return InstanceGetter.GetObject(ConcreteType);
+                return InstanceGetter.GetInstance(ConcreteType);
             }
 
-            return CachedInstance ??= InstanceGetter.GetObject(ConcreteType);
+            return CachedInstance ??= InstanceGetter.GetInstance(ConcreteType);
         }
 
-        internal void PrepareNonLazyInstance() => CachedInstance ??= InstanceGetter.GetObject(ConcreteType);
+        internal void PrepareNonLazyInstance() => CachedInstance ??= InstanceGetter.GetInstance(ConcreteType);
     }
 }

@@ -16,14 +16,29 @@ namespace Uniject.Getters
 
         public FromComponentInNewPrefabGetter(Container container, GameObject prefab, Type concreteType) : this(container, prefab)
         {
+            if (!typeof(Component).IsAssignableFrom(concreteType))
+                throw new ArgumentException(
+                    $"Type {concreteType} for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must be a Component, but it is not.",
+                    nameof(concreteType));
+
             _prefab = prefab.GetComponent(concreteType);
+
+            if (_prefab == null)
+                throw new ArgumentException(
+                    $"Prefab for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must have a component of type {concreteType}.",
+                    nameof(prefab));
         }
 
         public FromComponentInNewPrefabGetter(Container container, TConcrete prefab) : this(container, (object)prefab)
         {
-            _prefab = prefab as Component;
+            if (prefab is not Component component)
+                throw new ArgumentException(
+                    $"Prefab for {nameof(FromComponentInNewPrefabGetter<TConcrete>)} getter must be a Component.",
+                    nameof(prefab));
+
+            _prefab = component;
         }
         
-        public override object GetObject(Type concreteType) => _container.Instantiate(_prefab);
+        public override object GetInstance(Type concreteType) => _container.Instantiate(_prefab);
     }
 }

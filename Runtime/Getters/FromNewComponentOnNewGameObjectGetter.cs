@@ -13,7 +13,7 @@ namespace Uniject.Getters
                     "getter must be a Component, but it is not.");
         }
 
-        public override object GetObject(Type concreteType)
+        public override object GetInstance(Type concreteType)
         {
             var component = new GameObject(concreteType.Name).AddComponent(concreteType);
             _container.Inject(component);

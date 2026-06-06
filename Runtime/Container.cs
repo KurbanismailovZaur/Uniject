@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using Uniject.Attributes;
 using Uniject.Bindings;
+using Uniject.Exceptions;
 using Uniject.Reflection;
 using UnityEngine;
 
@@ -23,7 +22,7 @@ namespace Uniject
             var contractType = typeof(TContract);
 
             if (_bindings.ContainsKey(contractType))
-                throw new Exception($"Type {contractType} is already bound.");
+                throw new BindingException($"Type {contractType} is already bound.");
 
             var binding = new Binding(this, contractType);
             _bindings[contractType] = binding;
@@ -137,8 +136,7 @@ namespace Uniject
                 _nonLazyBindingsList.Add(binding);
         }
 
-        // TODO: The access modifier should be internal.
-        public void ResolveNonLazyBindings()
+        internal void ResolveNonLazyBindings()
         {
             foreach (var binding in _nonLazyBindingsList)
             {

@@ -1,13 +1,8 @@
 {
-    "name": "Uniject.Editor.Tests",
+    "name": "Uniject.Runtime.Tests",
     "rootNamespace": "Uniject.Tests",
-    "references": [
-        "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2",
-        "GUID:57da79467f54d4094811a39ecbbbc4a5"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

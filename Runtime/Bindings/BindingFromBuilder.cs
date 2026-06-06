@@ -22,18 +22,22 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromConstructor() => From(new FromConstructorGetter(_container));
 
-        public BindingAsBuilder FromInstance(TConcrete instance) => From(new FromInstanceGetter(_container, instance));
+        public BindingAsBuilder FromInstance(TConcrete instance) => From(new FromInstanceGetter<TConcrete>(_container, instance));
 
         public BindingAsBuilder FromComponentInNewPrefab(GameObject prefab) => From(new FromComponentInNewPrefabGetter<TConcrete>(_container, prefab, _binding.ConcreteType));
         
         public BindingAsBuilder FromComponentInNewPrefab(TConcrete prefab) => From(new FromComponentInNewPrefabGetter<TConcrete>(_container, prefab));
 
-        public BindingAsBuilder FromComponentInNewPrefabResource(string pathToPrefabResource) => From(new FromComponentInNewPrefabResourceGetter(_container, pathToPrefabResource, _binding.ConcreteType));
+        public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => From(new FromNewComponentOnNewPrefabGetter<TConcrete>(_container, prefab, _binding.ConcreteType));
 
-        public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => From(new FromNewComponentOnNewPrefabGetter(_container, prefab, _binding.ConcreteType));
+        public BindingAsBuilder FromNewComponentOnNewPrefab(TConcrete prefab) => From(new FromNewComponentOnNewPrefabGetter<TConcrete>(_container, prefab, _binding.ConcreteType));
         
-        public BindingAsBuilder FromNewComponentOnNewPrefabResource(string pathToPrefabResource) => From(new FromNewComponentOnNewPrefabResourceGetter(_container, pathToPrefabResource, _binding.ConcreteType));
-
         public BindingAsBuilder FromNewComponentOnNewGameObject() => From(new FromNewComponentOnNewGameObjectGetter(_container, _binding.ConcreteType));
+
+        public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
+
+        public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();
+        
+        public void NonLazy() => AsTransient().NonLazy();
     }
 }

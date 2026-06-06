@@ -8,6 +8,6 @@ namespace Uniject.Getters
 
         public InstanceGetter(Container container) => _container = container;
 
-        public abstract object GetObject(Type concreteType);
+        public abstract object GetInstance(Type concreteType);
     }
 }

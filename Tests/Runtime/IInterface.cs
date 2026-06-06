@@ -1,6 +1,6 @@
 namespace Uniject.Tests
 {
-    class Concrete
+    public interface IInterface
     {
         
     }
