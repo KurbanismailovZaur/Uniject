@@ -1,0 +1,134 @@
+using NUnit.Framework;
+using Uniject.Attributes;
+using Uniject.Exceptions;
+using Uniject.Reflection;
+
+namespace Uniject.Tests
+{
+    public class ReflectionCacheTests
+    {
+        private sealed class DependencyA { }
+        private sealed class DependencyB { }
+
+        private sealed class TypeWithInjectConstructor
+        {
+            public TypeWithInjectConstructor(DependencyA a, DependencyB b) { }
+
+            [Inject]
+            public TypeWithInjectConstructor(DependencyA a) { }
+        }
+
+        private sealed class TypeWithLongestConstructor
+        {
+            public TypeWithLongestConstructor() { }
+            public TypeWithLongestConstructor(DependencyA a) { }
+            public TypeWithLongestConstructor(DependencyA a, DependencyB b) { }
+        }
+
+        private sealed class TypeWithMultipleInjectConstructors
+        {
+            [Inject]
+            public TypeWithMultipleInjectConstructors(DependencyA a) { }
+
+            [Inject]
+            public TypeWithMultipleInjectConstructors(DependencyB b) { }
+        }
+
+        private sealed class TypeWithPrivateConstructor
+        {
+            private TypeWithPrivateConstructor() { }
+        }
+
+        private sealed class TypeWithInjectMethod
+        {
+            [Inject]
+            public void Construct(DependencyA a) { }
+        }
+
+        private sealed class TypeWithoutInjectMethod
+        {
+            public void Construct(DependencyA a) { }
+        }
+
+        private sealed class TypeWithMultipleInjectMethods
+        {
+            [Inject]
+            public void Construct(DependencyA a) { }
+
+            [Inject]
+            public void Initialize(DependencyB b) { }
+        }
+
+        private sealed class TypeWithOnlyParameterlessConstructor { }
+
+        [Test]
+        public void GetConstructorInjectionData_WhenInjectConstructorExists_ReturnsInjectConstructor()
+        {
+            var data = ReflectionCache.GetConstructorInjectionData(typeof(TypeWithInjectConstructor));
+
+            Assert.That(data.constructorInfo.IsDefined(typeof(InjectAttribute), false), Is.True);
+            Assert.That(data.parametersInfo.Length, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetConstructorInjectionData_WhenNoInjectConstructor_ReturnsConstructorWithMostParameters()
+        {
+            var data = ReflectionCache.GetConstructorInjectionData(typeof(TypeWithLongestConstructor));
+
+            Assert.That(data.parametersInfo.Length, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void GetConstructorInjectionData_WhenMultipleInjectConstructors_ThrowsInjectException()
+        {
+            Assert.That(
+                () => ReflectionCache.GetConstructorInjectionData(typeof(TypeWithMultipleInjectConstructors)),
+                Throws.TypeOf<InjectException>());
+        }
+
+        [Test]
+        public void GetConstructorInjectionData_WhenNoPublicConstructor_ThrowsInjectException()
+        {
+            Assert.That(
+                () => ReflectionCache.GetConstructorInjectionData(typeof(TypeWithPrivateConstructor)),
+                Throws.TypeOf<InjectException>());
+        }
+
+        [Test]
+        public void GetMethodInjectionData_WhenInjectMethodExists_ReturnsInjectMethodData()
+        {
+            var data = ReflectionCache.GetMethodInjectionData(typeof(TypeWithInjectMethod));
+
+            Assert.That(data.hasInjectMethod, Is.True);
+            Assert.That(data.methodInfo.Name, Is.EqualTo(nameof(TypeWithInjectMethod.Construct)));
+            Assert.That(data.parametersInfo.Length, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetMethodInjectionData_WhenNoInjectMethod_ReturnsDataWithoutInjectMethod()
+        {
+            var data = ReflectionCache.GetMethodInjectionData(typeof(TypeWithoutInjectMethod));
+
+            Assert.That(data.hasInjectMethod, Is.False);
+            Assert.That(data.methodInfo, Is.Null);
+            Assert.That(data.parametersInfo, Is.Empty);
+        }
+
+        [Test]
+        public void GetMethodInjectionData_WhenMultipleInjectMethods_ThrowsInjectException()
+        {
+            Assert.That(
+                () => ReflectionCache.GetMethodInjectionData(typeof(TypeWithMultipleInjectMethods)),
+                Throws.TypeOf<InjectException>());
+        }
+
+        [Test]
+        public void GetConstructorInjectionData_WhenTypeHasOnlyParameterlessConstructor_ReturnsConstructor()
+        {
+            var data = ReflectionCache.GetConstructorInjectionData(typeof(TypeWithOnlyParameterlessConstructor));
+
+            Assert.That(data.constructorInfo, Is.Not.Null);
+            Assert.That(data.parametersInfo, Is.Empty);
+        }
+    }
+}

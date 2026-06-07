@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Uniject.Attributes;
+using Uniject.Exceptions;
 using UnityEngine;
 
 namespace Uniject.Reflection
@@ -33,14 +34,27 @@ namespace Uniject.Reflection
                 throw new ArgumentException($"Type {concreteType} can not be instantiated from constructor because it is a Unity Component.",
                     nameof(concreteType));
 
+            var injected = default(ConstructorInfo);
             var best = default(ConstructorInfo);
             var bestParameters = Array.Empty<ParameterInfo>();
 
             foreach (var constructor in concreteType.GetConstructors())
             {
                 var parameters = constructor.GetParameters();
+                var hasInjectAttribute = constructor.IsDefined(typeof(InjectAttribute), false);
 
-                if (parameters.Length >= bestParameters.Length)
+                if (hasInjectAttribute)
+                {
+                    if (injected != null)
+                        throw new InjectException($"Multiple [Inject] constructors found for type {concreteType}.");
+
+                    injected = constructor;
+                    best = constructor;
+                    bestParameters = parameters;
+                    continue;
+                }
+
+                if (injected == null && (best == null || parameters.Length > bestParameters.Length))
                 {
                     best = constructor;
                     bestParameters = parameters;
@@ -48,7 +62,7 @@ namespace Uniject.Reflection
             }
 
             if (best == null)
-                throw new Exception($"No public constructor found for type {concreteType}.");
+                throw new InjectException($"No public constructor found for type {concreteType}.");
 
             return _constructors[concreteType] = new ConstructorInjectionData(best, bestParameters);
         }
@@ -61,15 +75,25 @@ namespace Uniject.Reflection
             if (_methods.TryGetValue(concreteType, out var cached))
                 return cached;
 
+            var injectMethod = default(MethodInfo);
+
             foreach (var method in concreteType.GetMethods())
             {
-                if (method.GetCustomAttributes(typeof(InjectAttribute), false).Length == 0)
+                if (!method.IsDefined(typeof(InjectAttribute), false))
                     continue;
 
-                var data = new MethodInjectionData(method, method.GetParameters(), true);
-                return _methods[concreteType] = data;
+                if (injectMethod != null)
+                    throw new InjectException($"Multiple inject methods found for type {concreteType}.");
+
+                injectMethod = method;
             }
 
+            if (injectMethod != null)
+            {
+                var data = new MethodInjectionData(injectMethod, injectMethod.GetParameters(), true);
+                return _methods[concreteType] = data;    
+            }
+            
             return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
         }
     }
