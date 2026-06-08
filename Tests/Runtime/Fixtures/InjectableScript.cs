@@ -1,7 +1,7 @@
 using Uniject.Attributes;
 using UnityEngine;
 
-namespace Uniject.Tests
+namespace Uniject.Tests.Fixtures
 {
     public class InjectableScript : MonoBehaviour
     {
