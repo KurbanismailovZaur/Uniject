@@ -10,18 +10,6 @@ namespace Uniject.Tests
 {
     public class ContainerTests
     {
-        // container.Bind<Class>().To<Class>().FromConstructor().AsTransient().NonLazy();        
-
-        // Duplicate bindings
-        // From
-        //   Check exceptions
-        // As
-        // NonLazy
-        // From/As/NonLazy shortcuts
-        // Circular dependencies
-        // Inject
-        // Instantiate
-
         private class NonLazyTransientClass
         {
             public static int InstancesCount { get; set; }
@@ -40,10 +28,114 @@ namespace Uniject.Tests
             public NonLazyShortcutClass() => InstancesCount++;
         }
 
+        private class ConstructorCircularA
+        {
+            public ConstructorCircularA(ConstructorCircularB dependency) { }
+        }
+
+        private class ConstructorCircularB
+        {
+            public ConstructorCircularB(ConstructorCircularA dependency) { }
+        }
+
+        private interface IFromResolveCircularDependency
+        {
+        }
+
+        private class FromResolveCircularDependency : IFromResolveCircularDependency
+        {
+            public FromResolveCircularDependency(IFromResolveCircularDependency dependency) { }
+        }
+
+        private class InjectableClass
+        {
+            public Class Dependency { get; private set; }
+            public int CallsCount { get; private set; }
+
+            [Inject]
+            public void Construct(Class dependency)
+            {
+                Dependency = dependency;
+                CallsCount++;
+            }
+        }
+
+        private class ParameterlessInjectableClass
+        {
+            public bool WasInjected { get; private set; }
+
+            [Inject]
+            public void Construct() => WasInjected = true;
+        }
+
+        private class MultiDependencyInjectableClass
+        {
+            public Class ClassDependency { get; private set; }
+            public IInterface InterfaceDependency { get; private set; }
+
+            [Inject]
+            public void Construct(Class classDependency, IInterface interfaceDependency)
+            {
+                ClassDependency = classDependency;
+                InterfaceDependency = interfaceDependency;
+            }
+        }
+
+        private class ClassWithoutInjectMethod
+        {
+            public bool WasConstructCalled { get; private set; }
+
+            public void Construct(Class dependency) => WasConstructCalled = true;
+        }
+
+        private class ClassWithMultipleInjectMethods
+        {
+            [Inject]
+            public void Construct(Class dependency) { }
+
+            [Inject]
+            public void Initialize(Class dependency) { }
+        }
+
+        private class ClassWithConstructorDependency
+        {
+            public Class Dependency { get; }
+
+            public ClassWithConstructorDependency(Class dependency)
+            {
+                Dependency = dependency;
+            }
+        }
+
+        private class ClassWithMultipleConstructorDependencies
+        {
+            public Class ClassDependency { get; }
+            public IInterface InterfaceDependency { get; }
+
+            public ClassWithMultipleConstructorDependencies(Class classDependency, IInterface interfaceDependency)
+            {
+                ClassDependency = classDependency;
+                InterfaceDependency = interfaceDependency;
+            }
+        }
+
+        private static void AssertCircularDependency(TestDelegate action)
+        {
+            Assert.That(action, Throws.Exception.With.Message.Contains("Circular dependency detected"));
+        }
+
         private static void ResolveNonLazyBindings(Container container)
         {
             var method = typeof(Container).GetMethod("ResolveNonLazyBindings", BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(container, null);
+
+            try
+            {
+                method.Invoke(container, null);
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException != null)
+            {
+                throw exception.InnerException;
+            }
         }
 
         [Test]
@@ -672,6 +764,227 @@ namespace Uniject.Tests
             ResolveNonLazyBindings(container);
 
             Assert.That(NonLazyShortcutClass.InstancesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_FromConstructor_WhenDependenciesAreCircular_ThrowsException()
+        {
+            var container = new Container();
+            container.Bind<ConstructorCircularA>();
+            container.Bind<ConstructorCircularB>();
+
+            AssertCircularDependency(() => container.Resolve<ConstructorCircularA>());
+        }
+
+        [Test]
+        public void Resolve_FromResolve_WhenConcreteDependencyResolvesContractAgain_ThrowsException()
+        {
+            var container = new Container();
+            container.Bind<IFromResolveCircularDependency>().To<FromResolveCircularDependency>().FromResolve();
+            container.Bind<FromResolveCircularDependency>();
+
+            AssertCircularDependency(() => container.Resolve<IFromResolveCircularDependency>());
+        }
+
+        [Test]
+        public void ResolveNonLazyBindings_WhenNonLazyBindingHasCircularDependencies_ThrowsException()
+        {
+            var container = new Container();
+            container.Bind<ConstructorCircularA>().AsTransient().NonLazy();
+            container.Bind<ConstructorCircularB>();
+
+            AssertCircularDependency(() => ResolveNonLazyBindings(container));
+        }
+
+        [Test]
+        public void Inject_WhenInstanceHasInjectMethod_ResolvesDependencyAndInvokesMethod()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var target = new InjectableClass();
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.Inject(target);
+
+            Assert.That(target.Dependency, Is.SameAs(dependency));
+            Assert.That(target.CallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Inject_WhenInjectMethodHasNoParameters_InvokesMethod()
+        {
+            var container = new Container();
+            var target = new ParameterlessInjectableClass();
+
+            container.Inject(target);
+
+            Assert.That(target.WasInjected, Is.True);
+        }
+
+        [Test]
+        public void Inject_WhenInjectMethodHasMultipleParameters_ResolvesAllDependencies()
+        {
+            var container = new Container();
+            var classDependency = new Class();
+            var interfaceDependency = new ClassImplementedIInterface();
+            var target = new MultiDependencyInjectableClass();
+
+            container.Bind<Class>().FromInstance(classDependency);
+            container.Bind<IInterface>().FromInstance(interfaceDependency);
+
+            container.Inject(target);
+
+            Assert.That(target.ClassDependency, Is.SameAs(classDependency));
+            Assert.That(target.InterfaceDependency, Is.SameAs(interfaceDependency));
+        }
+
+        [Test]
+        public void Inject_WhenInstanceHasNoInjectMethod_DoesNothing()
+        {
+            var container = new Container();
+            var target = new ClassWithoutInjectMethod();
+
+            Assert.That(() => container.Inject(target), Throws.Nothing);
+            Assert.That(target.WasConstructCalled, Is.False);
+        }
+
+        [Test]
+        public void Inject_WhenDependencyIsNotBound_ThrowsException()
+        {
+            var container = new Container();
+            var target = new InjectableClass();
+
+            Assert.That(
+                () => container.Inject(target),
+                Throws.Exception.With.Message.Contains("No binding found"));
+        }
+
+        [Test]
+        public void Inject_WhenInstanceHasMultipleInjectMethods_ThrowsInjectException()
+        {
+            var container = new Container();
+            var target = new ClassWithMultipleInjectMethods();
+
+            Assert.That(
+                () => container.Inject(target),
+                Throws.TypeOf<InjectException>());
+        }
+
+        [Test]
+        public void Inject_WhenEnumerableIsPassed_InjectsEveryInstance()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var first = new InjectableClass();
+            var second = new InjectableClass();
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.Inject((System.Collections.Generic.IEnumerable<object>)new object[] { first, second });
+
+            Assert.That(first.Dependency, Is.SameAs(dependency));
+            Assert.That(second.Dependency, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void Instantiate_WhenTypeHasParameterlessConstructor_ReturnsInstance()
+        {
+            var container = new Container();
+
+            var instance = container.Instantiate<Class>();
+
+            Assert.That(instance, Is.Not.Null);
+        }
+
+        [Test]
+        public void Instantiate_WhenTypeHasConstructorDependency_ResolvesDependency()
+        {
+            var container = new Container();
+            var dependency = new Class();
+
+            container.Bind<Class>().FromInstance(dependency);
+
+            var instance = container.Instantiate<ClassWithConstructorDependency>();
+
+            Assert.That(instance.Dependency, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void Instantiate_WhenTypeHasMultipleConstructorDependencies_ResolvesAllDependencies()
+        {
+            var container = new Container();
+            var classDependency = new Class();
+            var interfaceDependency = new ClassImplementedIInterface();
+
+            container.Bind<Class>().FromInstance(classDependency);
+            container.Bind<IInterface>().FromInstance(interfaceDependency);
+
+            var instance = (ClassWithMultipleConstructorDependencies)container.Instantiate(typeof(ClassWithMultipleConstructorDependencies));
+
+            Assert.That(instance.ClassDependency, Is.SameAs(classDependency));
+            Assert.That(instance.InterfaceDependency, Is.SameAs(interfaceDependency));
+        }
+
+        [Test]
+        public void Instantiate_WhenConstructorDependencyIsNotBound_ThrowsException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Instantiate<ClassWithConstructorDependency>(),
+                Throws.Exception.With.Message.Contains("No binding found"));
+        }
+
+        [Test]
+        public void Instantiate_WhenPrefabIsGameObject_ReturnsClonedGameObject()
+        {
+            var prefab = new GameObject("Prefab");
+            var cloned = default(GameObject);
+
+            try
+            {
+                prefab.AddComponent<Script>();
+
+                var container = new Container();
+                cloned = container.Instantiate(prefab);
+
+                Assert.That(cloned, Is.Not.Null);
+                Assert.That(cloned, Is.Not.SameAs(prefab));
+                Assert.That(cloned.GetComponent<Script>(), Is.Not.Null);
+                Assert.That(cloned.GetComponent<Script>(), Is.Not.SameAs(prefab.GetComponent<Script>()));
+            }
+            finally
+            {
+                if (cloned != null)
+                    UnityEngine.Object.DestroyImmediate(cloned);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Instantiate_WhenPrefabIsComponent_ReturnsClonedComponent()
+        {
+            var prefabGameObject = new GameObject("Prefab");
+            var clonedScript = default(Script);
+
+            try
+            {
+                var prefabScript = prefabGameObject.AddComponent<Script>();
+
+                var container = new Container();
+                clonedScript = container.Instantiate(prefabScript);
+
+                Assert.That(clonedScript, Is.Not.Null);
+                Assert.That(clonedScript, Is.Not.SameAs(prefabScript));
+                Assert.That(clonedScript.gameObject, Is.Not.SameAs(prefabGameObject));
+            }
+            finally
+            {
+                if (clonedScript != null)
+                    UnityEngine.Object.DestroyImmediate(clonedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+            }
         }
     }
 }
