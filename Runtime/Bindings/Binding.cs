@@ -1,16 +1,19 @@
 using System;
 using Uniject.Getters;
+using UnityEngine;
 
 namespace Uniject.Bindings
 {
     public class Binding
     {
-        public Container Container { get; private set; }
-        public Type ContractType { get; private set; }
-        public Type ConcreteType { get; private set; }
-        public InstanceGetter InstanceGetter { get; private set; }
-        public Scope Scope { get; private set; }
-        private object CachedInstance { get; set; }
+        public Container Container { get; set; }
+        public Type ContractType { get; set; }
+        public Type ConcreteType { get; set; }
+        public InstanceGetter InstanceGetter { get; set; }
+        public Scope Scope { get; set; }
+        public object CachedInstance { get; private set; }
+        public string ObjectName { get; set; }
+        public Transform ParentTransform { get; set; }
 
         public Binding(Container container, Type contractType) 
         {
@@ -21,13 +24,31 @@ namespace Uniject.Bindings
             Scope = Scope.Transient;
         }
 
-        public void To(Type concreteType) => ConcreteType = concreteType;
-
-        public void From(InstanceGetter instanceGetter) => InstanceGetter = instanceGetter;
-        
-        public void As(Scope scope) => Scope = scope;
-
         public void NonLazy() => Container.MarkBindingNonLazy(this);
+
+        private object CreateAndConfigureInstance()
+        {
+            var instance = InstanceGetter.GetInstance(ConcreteType);
+
+            if(instance is GameObject gameObject)
+            {
+                if (ObjectName != null)
+                    gameObject.name = ObjectName;
+
+                if (ParentTransform != null)
+                    gameObject.transform.SetParent(ParentTransform);
+            }
+            else if (instance is Component component)
+            {
+                if (ObjectName != null)
+                    component.gameObject.name = ObjectName;
+
+                if (ParentTransform != null)
+                    component.transform.SetParent(ParentTransform);
+            }
+
+            return instance;
+        }
 
         public object GetInstance()
         {
@@ -40,12 +61,12 @@ namespace Uniject.Bindings
                     return cachedInstance;    
                 }
 
-                return InstanceGetter.GetInstance(ConcreteType);
+                return CreateAndConfigureInstance();
             }
 
-            return CachedInstance ??= InstanceGetter.GetInstance(ConcreteType);
+            return CachedInstance ??= CreateAndConfigureInstance();
         }
 
-        internal void PrepareNonLazyInstance() => CachedInstance ??= InstanceGetter.GetInstance(ConcreteType);
+        internal void PrepareNonLazyInstance() => CachedInstance ??= CreateAndConfigureInstance();
     }
 }

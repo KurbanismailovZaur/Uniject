@@ -15,13 +15,13 @@ namespace Uniject.Bindings
 
         public BindingNonLazyBuilder AsTransient()
         {
-            _binding.As(Scope.Transient);
+            _binding.Scope = Scope.Transient;
             return new BindingNonLazyBuilder(_container, _binding);
         }
 
         public BindingNonLazyBuilder AsCached()
         {
-            _binding.As(Scope.Cached);
+            _binding.Scope = Scope.Cached;
             return new BindingNonLazyBuilder(_container, _binding);
         }
 

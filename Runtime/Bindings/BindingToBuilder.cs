@@ -15,7 +15,7 @@ namespace Uniject.Bindings
 
         public BindingFromBuilder<TConcrete> To<TConcrete>() where TConcrete : TContract
         {
-            _binding.To(typeof(TConcrete));
+            _binding.ConcreteType = typeof(TConcrete);
             return new BindingFromBuilder<TConcrete>(_container, _binding);
         }
 
@@ -23,15 +23,15 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
         
-        public BindingAsBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        public BindingWithObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         
-        public BindingAsBuilder FromComponentInNewPrefab(Component prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        public BindingWithObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         
-        public BindingAsBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
 
-        public BindingAsBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
         
-        public BindingAsBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
+        public BindingWithObjectNameBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
         
         public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
