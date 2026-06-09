@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingFromBuilder<TConcrete>
+    public class BindingFromBuilder
     {
         private readonly Binding _binding;
         private readonly Container _container;
@@ -22,7 +22,7 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromConstructor() => From(new FromConstructorGetter(_container)).WithObjectName(null).UnderTransform(null);
 
-        public BindingAsBuilder FromInstance(TConcrete instance) => From(new FromInstanceGetter<TConcrete>(_container, instance)).WithObjectName(null).UnderTransform(null);
+        public BindingAsBuilder FromInstance(object instance) => From(new FromInstanceGetter(_container, instance, _binding.ConcreteType)).WithObjectName(null).UnderTransform(null);
 
         public BindingWithObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => From(new FromComponentInNewPrefabGetter(_container, prefab, _binding.ConcreteType));
         

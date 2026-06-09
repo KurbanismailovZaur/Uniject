@@ -2,15 +2,17 @@ using System;
 
 namespace Uniject.Getters
 {
-    public class FromInstanceGetter<TConcrete> : InstanceGetter
+    public class FromInstanceGetter : InstanceGetter
     {
-        private readonly TConcrete _instance;
+        private readonly object _instance;
 
-        public FromInstanceGetter(Container container, TConcrete instance) : base(container)
+        public FromInstanceGetter(Container container, object instance, Type concreteType) : base(container)
         {
             if (instance == null)
-                throw new ArgumentNullException(nameof(instance), 
-                    $"Instance for {nameof(FromInstanceGetter<TConcrete>)} can not be null.");
+                throw new ArgumentNullException(nameof(instance), $"Instance for {nameof(FromInstanceGetter)} can not be null.");
+
+            if (!concreteType.IsAssignableFrom(instance.GetType()))
+                throw new ArgumentNullException(nameof(instance), $"Instance must be assignable with type {concreteType}.");
 
             _instance = instance;
         }

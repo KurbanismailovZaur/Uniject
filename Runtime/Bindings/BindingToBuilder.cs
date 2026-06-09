@@ -13,10 +13,10 @@ namespace Uniject.Bindings
             _binding = binding;
         }
 
-        public BindingFromBuilder<TConcrete> To<TConcrete>() where TConcrete : TContract
+        public BindingFromBuilder To<TConcrete>() where TConcrete : TContract
         {
             _binding.ConcreteType = typeof(TConcrete);
-            return new BindingFromBuilder<TConcrete>(_container, _binding);
+            return new BindingFromBuilder(_container, _binding);
         }
 
         public BindingAsBuilder FromConstructor() => To<TContract>().FromConstructor();
