@@ -74,14 +74,13 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Inject_WhenInjectMethodHasNoParameters_InvokesMethod()
+        public void Inject_WhenInjectMethodHasNoParameters_ThrowsInjectException()
         {
             var container = new Container();
             var target = new ParameterlessInjectableClass();
 
-            container.Inject(target);
-
-            Assert.That(target.WasInjected, Is.True);
+            Assert.That(() => container.Inject(target), Throws.TypeOf<InjectException>());
+            Assert.That(target.WasInjected, Is.False);
         }
 
         [Test]

@@ -88,13 +88,16 @@ namespace Uniject.Reflection
                 injectMethod = method;
             }
 
-            if (injectMethod != null)
-            {
-                var data = new MethodInjectionData(injectMethod, injectMethod.GetParameters(), true);
-                return _methods[concreteType] = data;    
-            }
-            
-            return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
+            if (injectMethod == null)
+                return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
+
+            var parameters = injectMethod.GetParameters();
+
+            if (parameters.Length == 0)
+                throw new InjectException($"Inject method with 0 parameters found for type {concreteType}.");
+
+            var data = new MethodInjectionData(injectMethod, injectMethod.GetParameters(), true);
+            return _methods[concreteType] = data;    
         }
     }
 }
