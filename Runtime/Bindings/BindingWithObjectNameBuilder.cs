@@ -16,7 +16,7 @@ namespace Uniject.Bindings
 
         public BindingUnderTransformBuilder WithObjectName(string name)
         {
-            _binding.ObjectName = name ?? string.Empty;
+            _binding.ObjectName = name;
             return new BindingUnderTransformBuilder(_container, _binding);
         }
 

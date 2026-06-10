@@ -17,16 +17,21 @@ namespace Uniject
         private readonly List<Binding> _nonLazyBindingsList = new();
         private readonly HashSet<Binding> _nonLazyBindingsSet = new();
 
-        public BindingToBuilder<TContract> Bind<TContract>()
+        public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
+
+        public BindingToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
+
+        private Binding CreateBinding(Type contractType)
         {
-            var contractType = typeof(TContract);
+            if (contractType == null)
+                throw new ArgumentNullException(nameof(contractType));
 
             if (_bindings.ContainsKey(contractType))
                 throw new BindingException($"Type {contractType} is already bound.");
 
             var binding = new Binding(this, contractType);
             _bindings[contractType] = binding;
-            return new BindingToBuilder<TContract>(this, binding);
+            return binding;
         }
 
         public T Resolve<T>() => (T)Resolve(typeof(T));

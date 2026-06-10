@@ -58,6 +58,112 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Bind_WhenContractTypeIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_WhenTypeAlreadyBoundUsingNonGenericBind_ThrowsBindingException()
+        {
+            var container = new Container();
+            container.Bind(typeof(Class));
+
+            Assert.That(
+                () => container.Bind<Class>(),
+                Throws.TypeOf<BindingException>());
+        }
+
+        [Test]
+        public void Bind_WhenTypeAlreadyBoundUsingGenericBind_ThrowsBindingException()
+        {
+            var container = new Container();
+            container.Bind<Class>();
+
+            Assert.That(
+                () => container.Bind(typeof(Class)),
+                Throws.TypeOf<BindingException>());
+        }
+
+        [Test]
+        public void Resolve_WhenTypeWasBoundUsingNonGenericBind_ReturnsInstance()
+        {
+            var container = new Container();
+            container.Bind(typeof(Class));
+
+            var instance = container.Resolve<Class>();
+
+            Assert.That(instance, Is.TypeOf<Class>());
+        }
+
+        [Test]
+        public void Resolve_WhenNonGenericBindUsesNonGenericTo_ReturnsConcreteInstance()
+        {
+            var container = new Container();
+            container.Bind(typeof(IInterface)).To(typeof(ClassImplementedIInterface));
+
+            var instance = container.Resolve<IInterface>();
+
+            Assert.That(instance, Is.TypeOf<ClassImplementedIInterface>());
+        }
+
+        [Test]
+        public void Resolve_WhenNonGenericBindUsesGenericTo_ReturnsConcreteInstance()
+        {
+            var container = new Container();
+            container.Bind(typeof(IInterface)).To<ClassImplementedIInterface>();
+
+            var instance = container.Resolve<IInterface>();
+
+            Assert.That(instance, Is.TypeOf<ClassImplementedIInterface>());
+        }
+
+        [Test]
+        public void Resolve_WhenGenericBindUsesNonGenericTo_ReturnsConcreteInstance()
+        {
+            var container = new Container();
+            container.Bind<IInterface>().To(typeof(ClassImplementedIInterface));
+
+            var instance = container.Resolve<IInterface>();
+
+            Assert.That(instance, Is.TypeOf<ClassImplementedIInterface>());
+        }
+
+        [Test]
+        public void Bind_To_WhenConcreteTypeIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind(typeof(IInterface)).To(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_To_WhenConcreteTypeIsNotAssignableToContract_ThrowsBindingException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind(typeof(IInterface)).To(typeof(Class)),
+                Throws.TypeOf<BindingException>());
+        }
+
+        [Test]
+        public void Bind_To_WhenGenericBindUsesNotAssignableConcreteType_ThrowsBindingException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<IInterface>().To(typeof(Class)),
+                Throws.TypeOf<BindingException>());
+        }
+
+        [Test]
         public void Resolve_FromConstructor_WhenConcreteTypeIsInterface_ThrowsArgumentException()
         {
             var container = new Container();
@@ -155,6 +261,19 @@ namespace Uniject.Tests
             container.Bind<Class>().To<Class>().FromInstance(instance);
 
             var resolvedInstance = container.Resolve<Class>();
+            Assert.That(resolvedInstance, Is.SameAs(instance));
+        }
+
+        [Test]
+        public void Resolve_FromInstance_WhenBoundUsingNonGenericBind_ReturnsSameInstance()
+        {
+            IInterface instance = new ClassImplementedIInterface();
+
+            var container = new Container();
+            container.Bind(typeof(IInterface)).FromInstance(instance);
+
+            var resolvedInstance = container.Resolve<IInterface>();
+
             Assert.That(resolvedInstance, Is.SameAs(instance));
         }
 
