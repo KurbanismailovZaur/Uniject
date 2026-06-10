@@ -278,6 +278,82 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Resolve_BindInstance_ReturnsSameInstance()
+        {
+            var instance = new Class();
+
+            var container = new Container();
+            container.BindInstance(instance);
+
+            Assert.That(container.Resolve<Class>(), Is.SameAs(instance));
+        }
+
+        [Test]
+        public void Resolve_BindInstance_WhenContractIsInterface_ReturnsSameInstance()
+        {
+            IInterface instance = new ClassImplementedIInterface();
+
+            var container = new Container();
+            container.BindInstance(instance);
+
+            Assert.That(container.Resolve<IInterface>(), Is.SameAs(instance));
+        }
+
+        [Test]
+        public void BindInstance_WhenInstanceIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.BindInstance<Class>(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Resolve_BindInstances_ReturnsInstancesByRuntimeTypes()
+        {
+            var classInstance = new Class();
+            var interfaceImplementation = new ClassImplementedIInterface();
+
+            var container = new Container();
+            container.BindInstances(classInstance, interfaceImplementation);
+
+            Assert.That(container.Resolve<Class>(), Is.SameAs(classInstance));
+            Assert.That(container.Resolve<ClassImplementedIInterface>(), Is.SameAs(interfaceImplementation));
+        }
+
+        [Test]
+        public void BindInstances_WhenInstancesArrayIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.BindInstances(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void BindInstances_WhenInstanceIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.BindInstances((object)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void BindInstances_WhenRuntimeTypeAlreadyBound_ThrowsBindingException()
+        {
+            var container = new Container();
+            container.Bind<Class>();
+
+            Assert.That(
+                () => container.BindInstances(new Class()),
+                Throws.TypeOf<BindingException>());
+        }
+
+        [Test]
         public void Bind_FromComponentInNewPrefab_WhenGameObjectPrefabIsNull_ThrowsArgumentNullException()
         {
             var container = new Container();

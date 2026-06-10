@@ -34,6 +34,28 @@ namespace Uniject
             return binding;
         }
 
+        public void BindInstance<T>(T instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            Bind<T>().FromInstance(instance);
+        }
+
+        public void BindInstances(params object[] instances)
+        {
+            if (instances == null)
+                throw new ArgumentNullException(nameof(instances));
+
+            foreach (var instance in instances)
+            {
+                if (instance == null)
+                    throw new ArgumentNullException(nameof(instances));
+
+                Bind(instance.GetType()).FromInstance(instance);
+            }
+        }
+
         public T Resolve<T>() => (T)Resolve(typeof(T));
         
         public object Resolve(Type contractType)
