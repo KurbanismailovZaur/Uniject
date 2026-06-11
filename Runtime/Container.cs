@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Uniject.Bindings;
+using Uniject.Collections;
 using Uniject.Exceptions;
 using Uniject.Reflection;
 using UnityEngine;
@@ -12,10 +13,8 @@ namespace Uniject
         private Container _parentContainer;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
-        private readonly List<Type> _resolvingTypesList = new();
-        private readonly HashSet<Type> _resolvingTypesSet = new();
-        private readonly List<Binding> _nonLazyBindingsList = new();
-        private readonly HashSet<Binding> _nonLazyBindingsSet = new();
+        private readonly OrderedSet<Type> _resolvingTypes = new();
+        private readonly OrderedSet<Binding> _nonLazyBindings = new();
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
@@ -79,18 +78,12 @@ namespace Uniject
 
         private void EnterResolving(Type contractType)
         {
-            if (!_resolvingTypesSet.Add(contractType))
+            if (!_resolvingTypes.Add(contractType))
                 throw new Exception($"Circular dependency detected while resolving type {contractType}. " +
-                    $"Dependencies stack: {string.Join(" → ", _resolvingTypesList)} → {contractType}.");
-
-            _resolvingTypesList.Add(contractType);
+                    $"Dependencies stack: {string.Join(" → ", _resolvingTypes)} → {contractType}.");
         }
 
-        private void ExitResolving(Type contractType)
-        {
-            _resolvingTypesList.RemoveAt(_resolvingTypesList.Count - 1);
-            _resolvingTypesSet.Remove(contractType);
-        }
+        private void ExitResolving(Type contractType) => _resolvingTypes.RemoveLast(contractType);
 
         private Binding FindBinding(Type contractType)
         {
@@ -103,15 +96,11 @@ namespace Uniject
             return binding;
         }
 
-        internal void MarkBindingNonLazy(Binding binding)
-        {
-            if (_nonLazyBindingsSet.Add(binding))
-                _nonLazyBindingsList.Add(binding);
-        }
+        internal void MarkBindingNonLazy(Binding binding) => _nonLazyBindings.Add(binding);
 
         internal void ResolveNonLazyBindings()
         {
-            foreach (var binding in _nonLazyBindingsList)
+            foreach (var binding in _nonLazyBindings)
             {
                 EnterResolving(binding.ContractType);
                 try
@@ -174,7 +163,6 @@ namespace Uniject
             
             return cloned;
         }
-
 
         public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab as Component);
 
