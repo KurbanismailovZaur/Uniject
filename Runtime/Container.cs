@@ -15,6 +15,7 @@ namespace Uniject
         private readonly Dictionary<Type, Binding> _bindings = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<Binding> _nonLazyBindings = new();
+        private readonly Queue<object> _injectQueue = new();
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
@@ -136,6 +137,29 @@ namespace Uniject
         {
             foreach (var instance in instances)
                 Inject(instance);
+        }
+
+        public void AddToInjectionQueue(object instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance), "Instance can not be null.");
+
+            _injectQueue.Enqueue(instance);
+        }
+
+        public void AddToInjectionQueue(params object[] instances)
+        {
+            if (instances == null)
+                throw new ArgumentNullException(nameof(instances), "Instances array can not be null.");
+
+            foreach (object instance in instances)
+                AddToInjectionQueue(instance);
+        }
+
+        public void InjectQueuedInstances()
+        {
+            while (_injectQueue.Count > 0)
+                Inject(_injectQueue.Dequeue());
         }
 
         public T Instantiate<T>() => (T)Instantiate(typeof(T));

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Uniject;
@@ -57,6 +58,24 @@ namespace Uniject.Tests
 
             [Inject]
             public void Initialize(Class dependency) { }
+        }
+
+        private class OrderedInjectableClass
+        {
+            private readonly int _id;
+            private readonly List<int> _calls;
+
+            public OrderedInjectableClass(int id, List<int> calls)
+            {
+                _id = id;
+                _calls = calls;
+            }
+
+            [Inject]
+            public void Construct(Class dependency)
+            {
+                _calls.Add(_id);
+            }
         }
 
         [Test]
@@ -145,6 +164,100 @@ namespace Uniject.Tests
 
             Assert.That(first.Dependency, Is.SameAs(dependency));
             Assert.That(second.Dependency, Is.SameAs(dependency));
+        }
+        
+        [Test]
+        public void InjectQueuedInstances_WhenSingleInstanceWasQueued_InjectsInstance()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var target = new InjectableClass();
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.AddToInjectionQueue(target);
+
+            container.InjectQueuedInstances();
+
+            Assert.That(target.Dependency, Is.SameAs(dependency));
+            Assert.That(target.CallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InjectQueuedInstances_WhenMultipleInstancesWereQueued_InjectsEveryInstance()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var first = new InjectableClass();
+            var second = new InjectableClass();
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.AddToInjectionQueue(first, second);
+
+            container.InjectQueuedInstances();
+
+            Assert.That(first.Dependency, Is.SameAs(dependency));
+            Assert.That(second.Dependency, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void InjectQueuedInstances_WhenCalledTwice_DoesNotInjectAlreadyProcessedInstances()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var target = new InjectableClass();
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.AddToInjectionQueue(target);
+
+            container.InjectQueuedInstances();
+            container.InjectQueuedInstances();
+
+            Assert.That(target.CallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InjectQueuedInstances_WhenQueueIsEmpty_DoesNothing()
+        {
+            var container = new Container();
+            Assert.That(() => container.InjectQueuedInstances(), Throws.Nothing);
+        }
+
+        [Test]
+        public void AddToInjectionQueue_WhenInstanceIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+            Assert.That(() => container.AddToInjectionQueue((object)null), Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void AddToInjectionQueue_WhenInstancesArrayIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+            Assert.That(() => container.AddToInjectionQueue((object[])null), Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void AddToInjectionQueue_WhenAnyInstanceInArrayIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+            Assert.That(() => container.AddToInjectionQueue(new InjectableClass(), null), Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void InjectQueuedInstances_InjectsInstancesInQueueOrder()
+        {
+            var container = new Container();
+            var dependency = new Class();
+            var calls = new List<int>();
+            var first = new OrderedInjectableClass(1, calls);
+            var second = new OrderedInjectableClass(2, calls);
+
+            container.Bind<Class>().FromInstance(dependency);
+            container.AddToInjectionQueue(first, second);
+
+            container.InjectQueuedInstances();
+
+            Assert.That(calls, Is.EqualTo(new[] { 1, 2 }));
         }
     }
 }
