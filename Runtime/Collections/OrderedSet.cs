@@ -37,6 +37,20 @@ namespace Uniject.Collections
             _set.Remove(item);
         }
 
+        public T PopFirst()
+        {
+            if (_items.Count == 0)
+                throw new InvalidOperationException("Collection is empty.");
+
+            var index = 0;
+            var item = _items[index];
+
+            _items.RemoveAt(index);
+            _set.Remove(item);
+
+            return item;
+        }
+
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

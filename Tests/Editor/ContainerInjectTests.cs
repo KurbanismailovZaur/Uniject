@@ -167,6 +167,26 @@ namespace Uniject.Tests
         }
         
         [Test]
+        public void AddToInjectionQueue_WhenSameInstanceIsAddedTwice_ThrowsArgumentException()
+        {
+            var container = new Container();
+            var target = new InjectableClass();
+
+            container.AddToInjectionQueue(target);
+
+            Assert.That(() => container.AddToInjectionQueue(target), Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void AddToInjectionQueue_WhenInstancesArrayContainsSameInstanceTwice_ThrowsArgumentException()
+        {
+            var container = new Container();
+            var target = new InjectableClass();
+
+            Assert.That(() => container.AddToInjectionQueue(target, target), Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
         public void InjectQueuedInstances_WhenSingleInstanceWasQueued_InjectsInstance()
         {
             var container = new Container();

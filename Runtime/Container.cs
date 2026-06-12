@@ -8,14 +8,14 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public class Container
+    public class Container : IDisposable
     {
         private Container _parentContainer;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<Binding> _nonLazyBindings = new();
-        private readonly Queue<object> _injectQueue = new();
+        private readonly OrderedSet<object> _injectQueue = new();
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
@@ -144,7 +144,8 @@ namespace Uniject
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance), "Instance can not be null.");
 
-            _injectQueue.Enqueue(instance);
+            if (!_injectQueue.Add(instance))
+                throw new ArgumentException("Instance already added to inject queue.", nameof(instance));
         }
 
         public void AddToInjectionQueue(params object[] instances)
@@ -159,7 +160,7 @@ namespace Uniject
         public void InjectQueuedInstances()
         {
             while (_injectQueue.Count > 0)
-                Inject(_injectQueue.Dequeue());
+                Inject(_injectQueue.PopFirst());
         }
 
         public T Instantiate<T>() => (T)Instantiate(typeof(T));
@@ -222,6 +223,10 @@ namespace Uniject
             component = component.gameObject.AddComponent(componentType);
             Inject(component);
             return component;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
