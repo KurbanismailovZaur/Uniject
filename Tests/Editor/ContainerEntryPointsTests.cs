@@ -16,7 +16,7 @@ namespace Uniject.Tests
 
             public EntryPointClass() => InstancesCount++;
 
-            public void Start() => StartsCount++;
+            public void Run() => StartsCount++;
         }
 
         private class NotEntryPoint { }
@@ -29,12 +29,12 @@ namespace Uniject.Tests
 
         private class FirstEntryPoint : IEntryPoint
         {
-            public void Start() => EntryPointOrder.Items.Add("First");
+            public void Run() => EntryPointOrder.Items.Add("First");
         }
 
         private class SecondEntryPoint : IEntryPoint
         {
-            public void Start() => EntryPointOrder.Items.Add("Second");
+            public void Run() => EntryPointOrder.Items.Add("Second");
         }
 
         private static void ResolveNonLazyBindings(Container container)

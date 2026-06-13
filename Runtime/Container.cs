@@ -129,7 +129,7 @@ namespace Uniject
                 if (!binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
 
-                ((IEntryPoint)binding.CachedInstance).Start();
+                ((IEntryPoint)binding.CachedInstance).Run();
             }
         }
 
@@ -175,7 +175,7 @@ namespace Uniject
                 AddToInjectionQueue(instance);
         }
 
-        public void InjectQueuedInstances()
+        internal void InjectQueuedInstances()
         {
             while (_injectQueue.Count > 0)
                 Inject(_injectQueue.PopFirst());

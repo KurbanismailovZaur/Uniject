@@ -5,7 +5,7 @@ namespace Uniject.Tests.Fixtures
 {
     public class ClassWithEntryPoint : IEntryPoint
     {
-        public void Start()
+        public void Run()
         {
             Debug.Log("Class Started!");
         }

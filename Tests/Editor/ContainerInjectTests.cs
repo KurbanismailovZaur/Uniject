@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using NUnit.Framework;
 using Uniject;
 using Uniject.Attributes;
@@ -76,6 +77,12 @@ namespace Uniject.Tests
             {
                 _calls.Add(_id);
             }
+        }
+
+        private static void InjectQueuedInstances(Container container)
+        {
+            var method = typeof(Container).GetMethod("InjectQueuedInstances", BindingFlags.Instance | BindingFlags.NonPublic);
+            method.Invoke(container, null);
         }
 
         [Test]
@@ -196,7 +203,7 @@ namespace Uniject.Tests
             container.Bind<Class>().FromInstance(dependency);
             container.AddToInjectionQueue(target);
 
-            container.InjectQueuedInstances();
+            InjectQueuedInstances(container);
 
             Assert.That(target.Dependency, Is.SameAs(dependency));
             Assert.That(target.CallsCount, Is.EqualTo(1));
@@ -213,7 +220,7 @@ namespace Uniject.Tests
             container.Bind<Class>().FromInstance(dependency);
             container.AddToInjectionQueue(first, second);
 
-            container.InjectQueuedInstances();
+            InjectQueuedInstances(container);
 
             Assert.That(first.Dependency, Is.SameAs(dependency));
             Assert.That(second.Dependency, Is.SameAs(dependency));
@@ -229,8 +236,8 @@ namespace Uniject.Tests
             container.Bind<Class>().FromInstance(dependency);
             container.AddToInjectionQueue(target);
 
-            container.InjectQueuedInstances();
-            container.InjectQueuedInstances();
+            InjectQueuedInstances(container);
+            InjectQueuedInstances(container);
 
             Assert.That(target.CallsCount, Is.EqualTo(1));
         }
@@ -239,7 +246,7 @@ namespace Uniject.Tests
         public void InjectQueuedInstances_WhenQueueIsEmpty_DoesNothing()
         {
             var container = new Container();
-            Assert.That(() => container.InjectQueuedInstances(), Throws.Nothing);
+            Assert.That(() => InjectQueuedInstances(container), Throws.Nothing);
         }
 
         [Test]
@@ -275,7 +282,7 @@ namespace Uniject.Tests
             container.Bind<Class>().FromInstance(dependency);
             container.AddToInjectionQueue(first, second);
 
-            container.InjectQueuedInstances();
+            InjectQueuedInstances(container);
 
             Assert.That(calls, Is.EqualTo(new[] { 1, 2 }));
         }

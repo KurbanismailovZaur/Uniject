@@ -5,9 +5,9 @@ namespace Uniject.Tests.Fixtures
 {
     public class ScriptWithEntryPoint : MonoBehaviour, IEntryPoint
     {
-        void IEntryPoint.Start()
+        public void Run()
         {
-            Debug.Log("Started!");
+            Debug.Log("Script Started!");
         }
     }
 }
