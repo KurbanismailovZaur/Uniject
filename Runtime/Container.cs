@@ -69,7 +69,8 @@ namespace Uniject
                 var binding = FindBinding(contractType);
 
                 if (binding == null)
-                    throw new Exception($"No binding found for type {contractType}.");
+                    throw new Exception($"No binding found for type {contractType}. " + 
+                        $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
 
                 return binding.GetInstance();
             }
@@ -83,7 +84,7 @@ namespace Uniject
         {
             if (!_resolvingTypes.Add(contractType))
                 throw new Exception($"Circular dependency detected while resolving type {contractType}. " +
-                    $"Dependencies stack: {string.Join(" → ", _resolvingTypes)} → {contractType}.");
+                    $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)} ← {contractType}.");
         }
 
         private void ExitResolving(Type contractType) => _resolvingTypes.RemoveLast(contractType);
