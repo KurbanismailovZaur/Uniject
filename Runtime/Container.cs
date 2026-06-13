@@ -13,8 +13,8 @@ namespace Uniject
         private Container _parentContainer;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
+        private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
-        private readonly OrderedSet<Binding> _nonLazyBindings = new();
         private readonly OrderedSet<object> _injectQueue = new();
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
@@ -31,6 +31,7 @@ namespace Uniject
 
             var binding = new Binding(this, contractType);
             _bindings[contractType] = binding;
+            _bindingsTypes.Add(contractType);
             return binding;
         }
 
@@ -97,12 +98,15 @@ namespace Uniject
             return binding;
         }
 
-        internal void MarkBindingNonLazy(Binding binding) => _nonLazyBindings.Add(binding);
-
         internal void ResolveNonLazyBindings()
         {
-            foreach (var binding in _nonLazyBindings)
+            foreach (var bindingType in _bindingsTypes)
             {
+                var binding = _bindings[bindingType];
+
+                if (!binding.IsNonLazy)
+                    continue;
+
                 EnterResolving(binding.ContractType);
                 try
                 {

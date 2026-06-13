@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using Uniject;
@@ -36,6 +37,29 @@ namespace Uniject.Tests
             {
                 throw exception.InnerException;
             }
+        }
+
+        private class LazyClass
+        {
+            public static int InstancesCount { get; set; }
+            public LazyClass() => InstancesCount++;
+        }
+
+        private static class NonLazyOrder
+        {
+            public static readonly List<string> Items = new();
+
+            public static void Clear() => Items.Clear();
+        }
+
+        private class FirstNonLazyClass
+        {
+            public FirstNonLazyClass() => NonLazyOrder.Items.Add("First");
+        }
+
+        private class SecondNonLazyClass
+        {
+            public SecondNonLazyClass() => NonLazyOrder.Items.Add("Second");
         }
 
         [Test]
@@ -90,6 +114,36 @@ namespace Uniject.Tests
             ResolveNonLazyBindings(container);
 
             Assert.That(NonLazyShortcutClass.InstancesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ResolveNonLazyBindings_WhenLazyAndNonLazyBindingsExist_ResolvesOnlyNonLazyBindings()
+        {
+            LazyClass.InstancesCount = 0;
+            NonLazyTransientClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<LazyClass>().AsTransient();
+            container.Bind<NonLazyTransientClass>().AsTransient().NonLazy();
+
+            ResolveNonLazyBindings(container);
+
+            Assert.That(LazyClass.InstancesCount, Is.EqualTo(0));
+            Assert.That(NonLazyTransientClass.InstancesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ResolveNonLazyBindings_WhenSeveralBindingsAreNonLazy_ResolvesThemInRegistrationOrder()
+        {
+            NonLazyOrder.Clear();
+
+            var container = new Container();
+            container.Bind<FirstNonLazyClass>().AsTransient().NonLazy();
+            container.Bind<SecondNonLazyClass>().AsTransient().NonLazy();
+
+            ResolveNonLazyBindings(container);
+
+            Assert.That(NonLazyOrder.Items, Is.EqualTo(new[] { "First", "Second" }));
         }
     }
 }
