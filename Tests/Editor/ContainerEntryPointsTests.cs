@@ -12,11 +12,11 @@ namespace Uniject.Tests
         private class EntryPointClass : IEntryPoint
         {
             public static int InstancesCount { get; set; }
-            public static int StartsCount { get; set; }
+            public static int RunsCount { get; set; }
 
             public EntryPointClass() => InstancesCount++;
 
-            public void Run() => StartsCount++;
+            public void Run() => RunsCount++;
         }
 
         private class NotEntryPoint { }
@@ -40,20 +40,36 @@ namespace Uniject.Tests
         private static void ResolveNonLazyBindings(Container container)
         {
             var method = typeof(Container).GetMethod("ResolveNonLazyBindings", BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(container, null);
+
+            try
+            {
+                method.Invoke(container, null);
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException != null)
+            {
+                throw exception.InnerException;
+            }
         }
 
         private static void CallEntryPoints(Container container)
         {
             var method = typeof(Container).GetMethod("CallEntryPoints", BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(container, null);
+
+            try
+            {
+                method.Invoke(container, null);
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException != null)
+            {
+                throw exception.InnerException;
+            }
         }
 
         [Test]
-        public void CallEntryPoints_WhenBindingIsEntryPoint_CallsStart()
+        public void CallEntryPoints_WhenBindingIsEntryPoint_CallsRun()
         {
             EntryPointClass.InstancesCount = 0;
-            EntryPointClass.StartsCount = 0;
+            EntryPointClass.RunsCount = 0;
 
             var container = new Container();
             container.Bind<EntryPointClass>().AsEntryPoint();
@@ -62,13 +78,13 @@ namespace Uniject.Tests
             CallEntryPoints(container);
 
             Assert.That(EntryPointClass.InstancesCount, Is.EqualTo(1));
-            Assert.That(EntryPointClass.StartsCount, Is.EqualTo(1));
+            Assert.That(EntryPointClass.RunsCount, Is.EqualTo(1));
         }
 
         [Test]
-        public void CallEntryPoints_WhenBindingIsOnlyNonLazy_DoesNotCallStart()
+        public void CallEntryPoints_WhenBindingIsOnlyNonLazy_DoesNotCallRun()
         {
-            EntryPointClass.StartsCount = 0;
+            EntryPointClass.RunsCount = 0;
 
             var container = new Container();
             container.Bind<EntryPointClass>().NonLazy();
@@ -76,11 +92,11 @@ namespace Uniject.Tests
             ResolveNonLazyBindings(container);
             CallEntryPoints(container);
 
-            Assert.That(EntryPointClass.StartsCount, Is.EqualTo(0));
+            Assert.That(EntryPointClass.RunsCount, Is.EqualTo(0));
         }
 
         [Test]
-        public void CallEntryPoints_WhenSeveralEntryPointsExist_CallsStartInRegistrationOrder()
+        public void CallEntryPoints_WhenSeveralEntryPointsExist_CallsRunInRegistrationOrder()
         {
             EntryPointOrder.Clear();
 
@@ -92,6 +108,23 @@ namespace Uniject.Tests
             CallEntryPoints(container);
 
             Assert.That(EntryPointOrder.Items, Is.EqualTo(new[] { "First", "Second" }));
+        }
+
+        [Test]
+        public void Resolve_WhenBindingIsEntryPoint_ReturnsSameInstanceAfterNonLazyResolve()
+        {
+            EntryPointClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<EntryPointClass>().AsTransient().NonLazy().AsEntryPoint();
+
+            ResolveNonLazyBindings(container);
+
+            var first = container.Resolve<EntryPointClass>();
+            var second = container.Resolve<EntryPointClass>();
+
+            Assert.That(EntryPointClass.InstancesCount, Is.EqualTo(1));
+            Assert.That(second, Is.SameAs(first));
         }
 
         [Test]
