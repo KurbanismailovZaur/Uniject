@@ -4,7 +4,6 @@ using System.Reflection;
 using NUnit.Framework;
 using Uniject;
 using Uniject.Attributes;
-using Uniject.Exceptions;
 using Uniject.Tests.Fixtures;
 
 namespace Uniject.Tests
@@ -100,12 +99,12 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Inject_WhenInjectMethodHasNoParameters_ThrowsInjectException()
+        public void Inject_WhenInjectMethodHasNoParameters_ThrowsInvalidOperationException()
         {
             var container = new Container();
             var target = new ParameterlessInjectableClass();
 
-            Assert.That(() => container.Inject(target), Throws.TypeOf<InjectException>());
+            Assert.That(() => container.Inject(target), Throws.TypeOf<InvalidOperationException>());
             Assert.That(target.WasInjected, Is.False);
         }
 
@@ -148,14 +147,14 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Inject_WhenInstanceHasMultipleInjectMethods_ThrowsInjectException()
+        public void Inject_WhenInstanceHasMultipleInjectMethods_ThrowsInvalidOperationException()
         {
             var container = new Container();
             var target = new ClassWithMultipleInjectMethods();
 
             Assert.That(
                 () => container.Inject(target),
-                Throws.TypeOf<InjectException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]

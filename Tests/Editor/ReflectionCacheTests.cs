@@ -1,6 +1,6 @@
+using System;
 using NUnit.Framework;
 using Uniject.Attributes;
-using Uniject.Exceptions;
 using Uniject.Reflection;
 
 namespace Uniject.Tests
@@ -79,19 +79,19 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void GetConstructorInjectionData_WhenMultipleInjectConstructors_ThrowsInjectException()
+        public void GetConstructorInjectionData_WhenMultipleInjectConstructors_ThrowsInvalidOperationException()
         {
             Assert.That(
                 () => ReflectionCache.GetConstructorInjectionData(typeof(TypeWithMultipleInjectConstructors)),
-                Throws.TypeOf<InjectException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
-        public void GetConstructorInjectionData_WhenNoPublicConstructor_ThrowsInjectException()
+        public void GetConstructorInjectionData_WhenNoPublicConstructor_ThrowsInvalidOperationException()
         {
             Assert.That(
                 () => ReflectionCache.GetConstructorInjectionData(typeof(TypeWithPrivateConstructor)),
-                Throws.TypeOf<InjectException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
@@ -115,11 +115,11 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void GetMethodInjectionData_WhenMultipleInjectMethods_ThrowsInjectException()
+        public void GetMethodInjectionData_WhenMultipleInjectMethods_ThrowsInvalidOperationException()
         {
             Assert.That(
                 () => ReflectionCache.GetMethodInjectionData(typeof(TypeWithMultipleInjectMethods)),
-                Throws.TypeOf<InjectException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]

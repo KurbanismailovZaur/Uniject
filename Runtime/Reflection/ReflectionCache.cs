@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Uniject.Attributes;
-using Uniject.Exceptions;
 using UnityEngine;
 
 namespace Uniject.Reflection
@@ -46,7 +45,7 @@ namespace Uniject.Reflection
                 if (hasInjectAttribute)
                 {
                     if (injected != null)
-                        throw new InjectException($"Multiple [Inject] constructors found for type {concreteType}.");
+                        throw new InvalidOperationException($"Multiple [Inject] constructors found for type {concreteType}.");
 
                     injected = constructor;
                     best = constructor;
@@ -62,7 +61,7 @@ namespace Uniject.Reflection
             }
 
             if (best == null)
-                throw new InjectException($"No public constructor found for type {concreteType}.");
+                throw new InvalidOperationException($"No public constructor found for type {concreteType}.");
 
             return _constructors[concreteType] = new ConstructorInjectionData(best, bestParameters);
         }
@@ -83,7 +82,7 @@ namespace Uniject.Reflection
                     continue;
 
                 if (injectMethod != null)
-                    throw new InjectException($"Multiple inject methods found for type {concreteType}.");
+                    throw new InvalidOperationException($"Multiple inject methods found for type {concreteType}.");
 
                 injectMethod = method;
             }
@@ -94,7 +93,7 @@ namespace Uniject.Reflection
             var parameters = injectMethod.GetParameters();
 
             if (parameters.Length == 0)
-                throw new InjectException($"Inject method with 0 parameters found for type {concreteType}.");
+                throw new InvalidOperationException($"Inject method with 0 parameters found for type {concreteType}.");
 
             var data = new MethodInjectionData(injectMethod, injectMethod.GetParameters(), true);
             return _methods[concreteType] = data;    
