@@ -13,6 +13,7 @@ namespace Uniject.Bindings
         public Scope Scope { get; set; }
         public object CachedInstance { get; private set; }
         public bool IsNonLazy { get; set; }
+        public bool IsEntryPoint { get; set; }
         public string ObjectName { get; set; }
         public Transform ParentTransform { get; set; }
 
@@ -24,8 +25,6 @@ namespace Uniject.Bindings
             InstanceGetter = new FromConstructorGetter(container);
             Scope = Scope.Transient;
         }
-
-        public void NonLazy() => IsNonLazy = true;
 
         private object CreateAndConfigureInstance()
         {

@@ -1,0 +1,25 @@
+using Uniject.Exceptions;
+using Uniject.Lifecycle;
+
+namespace Uniject.Bindings
+{
+    public class BindingAsEntryPointBuilder
+    {
+        private readonly Binding _binding;
+        private readonly Container _container;
+
+        public BindingAsEntryPointBuilder(Container container, Binding binding)
+        {
+            _container = container;
+            _binding = binding;
+        }
+
+        public void AsEntryPoint()
+        {
+            if (!typeof(IEntryPoint).IsAssignableFrom(_binding.ConcreteType))
+                throw new BindingException($"Type {_binding.ConcreteType} is not assignable from {typeof(IEntryPoint)}");
+
+            _binding.IsEntryPoint = true;
+        }
+    }
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Collections;
 using Uniject.Exceptions;
+using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
 
@@ -116,6 +117,19 @@ namespace Uniject
                 {
                     ExitResolving(binding.ContractType);
                 }
+            }
+        }
+
+        internal void CallEntryPoints()
+        {
+            foreach (var bindingType in _bindingsTypes)
+            {
+                var binding = _bindings[bindingType];
+
+                if (!binding.IsNonLazy || !binding.IsEntryPoint)
+                    continue;
+
+                ((IEntryPoint)binding.CachedInstance).Start();
             }
         }
 

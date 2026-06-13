@@ -13,6 +13,10 @@ namespace Uniject.Bindings
             _binding = binding;
         }
 
-        public void NonLazy() => _binding.NonLazy();
+        public BindingAsEntryPointBuilder NonLazy()
+        {
+            _binding.IsNonLazy = true;
+            return new BindingAsEntryPointBuilder(_container, _binding);
+        }
     }
 }

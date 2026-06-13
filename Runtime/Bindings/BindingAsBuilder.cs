@@ -25,6 +25,8 @@ namespace Uniject.Bindings
             return new BindingNonLazyBuilder(_container, _binding);
         }
 
-        public void NonLazy() => AsTransient().NonLazy();
+        public BindingAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
+        
+        public void AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

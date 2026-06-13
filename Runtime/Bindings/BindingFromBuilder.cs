@@ -40,6 +40,8 @@ namespace Uniject.Bindings
 
         public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();
         
-        public void NonLazy() => AsTransient().NonLazy();
+        public BindingAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
+
+        public void AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }
