@@ -1,4 +1,4 @@
-using Uniject.Exceptions;
+using System;
 using Uniject.Lifecycle;
 
 namespace Uniject.Bindings
@@ -17,7 +17,7 @@ namespace Uniject.Bindings
         public void AsEntryPoint()
         {
             if (!typeof(IEntryPoint).IsAssignableFrom(_binding.ConcreteType))
-                throw new BindingException($"Type {_binding.ConcreteType} is not assignable from {typeof(IEntryPoint)}");
+                throw new InvalidOperationException($"Type {_binding.ConcreteType} is not assignable from {typeof(IEntryPoint)}");
 
             _binding.Scope = Scope.Cached;
             _binding.IsEntryPoint = true;

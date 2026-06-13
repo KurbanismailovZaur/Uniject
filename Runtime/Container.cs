@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Collections;
-using Uniject.Exceptions;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
@@ -28,7 +27,7 @@ namespace Uniject
                 throw new ArgumentNullException(nameof(contractType));
 
             if (_bindings.ContainsKey(contractType))
-                throw new BindingException($"Type {contractType} is already bound.");
+                throw new InvalidOperationException($"Type {contractType} is already bound.");
 
             var binding = new Binding(this, contractType);
             _bindings[contractType] = binding;

@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
 using Uniject;
-using Uniject.Exceptions;
 using Uniject.Tests.Fixtures;
 using UnityEngine;
 
@@ -10,14 +9,14 @@ namespace Uniject.Tests
     public class ContainerResolveTests
     {
         [Test]
-        public void Bind_WhenTypeAlreadyBound_ThrowsBindingException()
+        public void Bind_WhenTypeAlreadyBound_ThrowsInvalidOperationException()
         {
             var container = new Container();
             container.Bind<Class>();
 
             Assert.That(
                 () => container.Bind<Class>(),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
@@ -68,25 +67,25 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Bind_WhenTypeAlreadyBoundUsingNonGenericBind_ThrowsBindingException()
+        public void Bind_WhenTypeAlreadyBoundUsingNonGenericBind_ThrowsInvalidOperationException()
         {
             var container = new Container();
             container.Bind(typeof(Class));
 
             Assert.That(
                 () => container.Bind<Class>(),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
-        public void Bind_WhenTypeAlreadyBoundUsingGenericBind_ThrowsBindingException()
+        public void Bind_WhenTypeAlreadyBoundUsingGenericBind_ThrowsInvalidOperationException()
         {
             var container = new Container();
             container.Bind<Class>();
 
             Assert.That(
                 () => container.Bind(typeof(Class)),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
@@ -144,23 +143,23 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Bind_To_WhenConcreteTypeIsNotAssignableToContract_ThrowsBindingException()
+        public void Bind_To_WhenConcreteTypeIsNotAssignableToContract_ThrowsArgumentException()
         {
             var container = new Container();
 
             Assert.That(
                 () => container.Bind(typeof(IInterface)).To(typeof(Class)),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<ArgumentException>());
         }
 
         [Test]
-        public void Bind_To_WhenGenericBindUsesNotAssignableConcreteType_ThrowsBindingException()
+        public void Bind_To_WhenGenericBindUsesNotAssignableConcreteType_ThrowsArgumentException()
         {
             var container = new Container();
 
             Assert.That(
                 () => container.Bind<IInterface>().To(typeof(Class)),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<ArgumentException>());
         }
 
         [Test]
@@ -343,14 +342,14 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void BindInstances_WhenRuntimeTypeAlreadyBound_ThrowsBindingException()
+        public void BindInstances_WhenRuntimeTypeAlreadyBound_ThrowsInvalidOperationException()
         {
             var container = new Container();
             container.Bind<Class>();
 
             Assert.That(
                 () => container.BindInstances(new Class()),
-                Throws.TypeOf<BindingException>());
+                Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]

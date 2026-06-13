@@ -1,5 +1,4 @@
 using System;
-using Uniject.Exceptions;
 using UnityEngine;
 
 namespace Uniject.Bindings
@@ -21,7 +20,7 @@ namespace Uniject.Bindings
                 throw new ArgumentNullException(nameof(concreteType));
 
             if (!_binding.ContractType.IsAssignableFrom(concreteType))
-                throw new BindingException($"Type {concreteType} is not assignable to {_binding.ContractType}.");
+                throw new ArgumentException($"Type {concreteType} is not assignable to {_binding.ContractType}.", nameof(concreteType));
 
             _binding.ConcreteType = concreteType;
             return new BindingFromBuilder(_container, _binding);
@@ -69,7 +68,7 @@ namespace Uniject.Bindings
                 throw new ArgumentNullException(nameof(concreteType));
 
             if (!_binding.ContractType.IsAssignableFrom(concreteType))
-                throw new BindingException($"Type {concreteType} is not assignable to {_binding.ContractType}.");
+                throw new ArgumentException($"Type {concreteType} is not assignable to {_binding.ContractType}.", nameof(concreteType));
 
             _binding.ConcreteType = concreteType;
             return new BindingFromBuilder(_container, _binding);

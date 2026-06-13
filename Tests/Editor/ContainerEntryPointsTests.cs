@@ -1,8 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
-using Uniject;
-using Uniject.Exceptions;
 using Uniject.Lifecycle;
 
 namespace Uniject.Tests
@@ -128,10 +127,10 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void AsEntryPoint_WhenConcreteTypeDoesNotImplementIEntryPoint_ThrowsBindingException()
+        public void AsEntryPoint_WhenConcreteTypeDoesNotImplementIEntryPoint_ThrowsInvalidOperationException()
         {
             var container = new Container();
-            Assert.That(() => container.Bind<NotEntryPoint>().AsEntryPoint(), Throws.TypeOf<BindingException>());
+            Assert.That(() => container.Bind<NotEntryPoint>().AsEntryPoint(), Throws.TypeOf<InvalidOperationException>());
         }
     }
 }
