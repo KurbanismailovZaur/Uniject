@@ -19,6 +19,11 @@ namespace Uniject
         private readonly OrderedSet<object> _injectQueue = new();
         private Stack<IDisposable> _disposables = new();
 
+        public Container()
+        {
+            Bind<Container>().FromInstance(this).AsCached();
+        }
+
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
         public BindingToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
