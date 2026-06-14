@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Uniject
+namespace Uniject.Components
 {
     public class InjectTargets : MonoBehaviour
     {

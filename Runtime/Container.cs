@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Collections;
+using Uniject.Components;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;

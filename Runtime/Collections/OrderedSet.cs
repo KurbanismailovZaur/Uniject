@@ -22,6 +22,21 @@ namespace Uniject.Collections
 
         public bool Contains(T item) => _set.Contains(item);
 
+        public void Clear()
+        {
+            _items.Clear();
+            _set.Clear();
+        }
+
+        public bool Remove(T item)
+        {
+            if (!_set.Remove(item))
+                return false;
+
+            _items.Remove(item);
+            return true;
+        }
+
         public void RemoveLast(T expectedItem)
         {
             if (_items.Count == 0)
