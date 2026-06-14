@@ -6,86 +6,51 @@ namespace Uniject.Lifecycle
 {
     public class TickableManager : MonoBehaviour
     {
-        private readonly OrderedSet<ITickable> _tickables = new();
-        private readonly OrderedSet<ITickable> _tickablesPendingAdd = new();
-        private readonly OrderedSet<ITickable> _tickablesPendingRemove = new();
-        private bool _isTicking;
+        private Tickable _tickables = new();
+        private LateTickable _lateTickables = new();
+        private FixedTickable _fixedTickables = new();
+        
+        public void RegisterTickable(ITickable tickable) => _tickables.Register(tickable);
+        
+        public void RegisterLateTickable(ILateTickable lateTickable) => _lateTickables.Register(lateTickable);
+        
+        public void RegisterFixedTickable(IFixedTickable fixedTickable) => _fixedTickables.Register(fixedTickable);
 
-        public void Register(ITickable tickable)
+        public void Register(object obj)
         {
-            if (tickable == null)
-                throw new ArgumentNullException(nameof(tickable));
+            if (obj is ITickable tickable)
+                RegisterTickable(tickable);
 
-            if (_tickablesPendingRemove.Remove(tickable))
-                return;
+            if (obj is ILateTickable lateTickable)
+                RegisterLateTickable(lateTickable);
 
-            if (_tickables.Contains(tickable) || _tickablesPendingAdd.Contains(tickable))
-                throw new ArgumentException($"Tickable is already registered.", nameof(tickable));
-
-            if (_isTicking)
-                _tickablesPendingAdd.Add(tickable);
-            else
-                _tickables.Add(tickable);
+            if (obj is IFixedTickable fixedTickable)
+                RegisterFixedTickable(fixedTickable);
         }
 
-        public void Unregister(ITickable tickable)
+        public void UnregisterTickable(ITickable tickable) => _tickables.Unregister(tickable);
+        
+        public void UnregisterLateTickable(ILateTickable lateTickable) => _lateTickables.Unregister(lateTickable);
+        
+        public void UnregisterFixedTickable(IFixedTickable fixedTickable) => _fixedTickables.Unregister(fixedTickable);
+
+        public void Unregister(object obj)
         {
-            if (tickable == null)
-                throw new ArgumentNullException(nameof(tickable));
+            if (obj is ITickable tickable)
+                UnregisterTickable(tickable);
 
-            if (_tickablesPendingAdd.Remove(tickable))
-                return;
+            if (obj is ILateTickable lateTickable)
+                UnregisterLateTickable(lateTickable);
 
-            if (!_tickables.Contains(tickable) || _tickablesPendingRemove.Contains(tickable))
-                throw new ArgumentException($"Tickable is not registered.", nameof(tickable));
-
-            if (_isTicking)
-                _tickablesPendingRemove.Add(tickable);
-            else
-                _tickables.Remove(tickable);
+            if (obj is IFixedTickable fixedTickable)
+                UnregisterFixedTickable(fixedTickable);
         }
 
-        private void Update()
-        {
-            _isTicking = true;
 
-            try
-            {
-                foreach (var tickable in _tickables)
-                {
-                    if (!_tickablesPendingRemove.Contains(tickable))
-                        tickable.Tick();
-                }
-            }
-            finally
-            {
-                _isTicking = false;
+        private void Update() => _tickables.Tick();
 
-                RemoveQueuedTickables();
-                AddQueuedTickables();
-            }
-        }
-
-        private void AddQueuedTickables()
-        {
-            if (_tickablesPendingAdd.Count <= 0)
-                return;
-
-            foreach (var tickable in _tickablesPendingAdd)
-                _tickables.Add(tickable);
-            
-            _tickablesPendingAdd.Clear();
-        }
-
-        private void RemoveQueuedTickables()
-        {
-            if (_tickablesPendingRemove.Count == 0)
-                return;
-
-            foreach (var tickable in _tickablesPendingRemove)
-                _tickables.Remove(tickable);
-
-            _tickablesPendingRemove.Clear();
-        }
+        private void LateUpdate() => _lateTickables.Tick();
+        
+        private void FixedUpdate() => _fixedTickables.Tick();
     }
 }

@@ -45,7 +45,7 @@ namespace Uniject.Tests
             var manager = CreateManager();
             var tickable = new TestTickable();
 
-            manager.Register(tickable);
+            manager.RegisterTickable(tickable);
             Update(manager);
 
             Assert.That(tickable.TicksCount, Is.EqualTo(1));
@@ -57,8 +57,8 @@ namespace Uniject.Tests
             var manager = CreateManager();
             var tickable = new TestTickable();
 
-            manager.Register(tickable);
-            manager.Unregister(tickable);
+            manager.RegisterTickable(tickable);
+            manager.UnregisterTickable(tickable);
 
             Update(manager);
 
@@ -71,9 +71,9 @@ namespace Uniject.Tests
             var manager = CreateManager();
             var tickable = new TestTickable();
 
-            manager.Register(tickable);
+            manager.RegisterTickable(tickable);
 
-            Assert.That(() => manager.Register(tickable), Throws.TypeOf<ArgumentException>());
+            Assert.That(() => manager.RegisterTickable(tickable), Throws.TypeOf<ArgumentException>());
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace Uniject.Tests
             var manager = CreateManager();
             var tickable = new TestTickable();
 
-            Assert.That(() => manager.Unregister(tickable), Throws.TypeOf<ArgumentException>());
+            Assert.That(() => manager.UnregisterTickable(tickable), Throws.TypeOf<ArgumentException>());
         }
 
         [Test]
@@ -98,10 +98,10 @@ namespace Uniject.Tests
                     return;
 
                 wasRegistered = true;
-                manager.Register(registeredDuringTick);
+                manager.RegisterTickable(registeredDuringTick);
             });
 
-            manager.Register(registrar);
+            manager.RegisterTickable(registrar);
 
             Update(manager);
 
@@ -117,10 +117,10 @@ namespace Uniject.Tests
         {
             var manager = CreateManager();
             var second = new TestTickable();
-            var first = new TestTickable(() => manager.Unregister(second));
+            var first = new TestTickable(() => manager.UnregisterTickable(second));
 
-            manager.Register(first);
-            manager.Register(second);
+            manager.RegisterTickable(first);
+            manager.RegisterTickable(second);
 
             Update(manager);
 
@@ -133,9 +133,9 @@ namespace Uniject.Tests
         {
             var manager = CreateManager();
             var tickable = default(TestTickable);
-            tickable = new TestTickable(() => manager.Unregister(tickable));
+            tickable = new TestTickable(() => manager.UnregisterTickable(tickable));
 
-            manager.Register(tickable);
+            manager.RegisterTickable(tickable);
 
             Update(manager);
             Update(manager);
@@ -150,11 +150,11 @@ namespace Uniject.Tests
             var other = new TestTickable();
             var tickable = new TestTickable(() =>
             {
-                manager.Register(other);
-                manager.Unregister(other);
+                manager.RegisterTickable(other);
+                manager.UnregisterTickable(other);
             });
 
-            manager.Register(tickable);
+            manager.RegisterTickable(tickable);
 
             Update(manager);
             Update(manager);
@@ -169,12 +169,12 @@ namespace Uniject.Tests
             var other = new TestTickable();
             var tickable = new TestTickable(() =>
             {
-                manager.Unregister(other);
-                manager.Register(other);
+                manager.UnregisterTickable(other);
+                manager.RegisterTickable(other);
             });
 
-            manager.Register(tickable);
-            manager.Register(other);
+            manager.RegisterTickable(tickable);
+            manager.RegisterTickable(other);
 
             Update(manager);
             Update(manager);
