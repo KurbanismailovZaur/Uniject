@@ -16,6 +16,7 @@ namespace Uniject
         private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
+        private Stack<IDisposable> _disposables = new();
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
@@ -35,12 +36,12 @@ namespace Uniject
             return binding;
         }
 
-        public void BindInstance<T>(T instance)
+        public BindingAsEntryPointBuilder BindInstance<T>(T instance)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
 
-            Bind<T>().FromInstance(instance);
+            return Bind<T>().FromInstance(instance).AsCached().NonLazy();
         }
 
         public void BindInstances(params object[] instances)
@@ -128,6 +129,9 @@ namespace Uniject
 
                 if (!binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
+
+                if (binding.CachedInstance is not Component && binding.CachedInstance is IDisposable disposable)
+                    _disposables.Push(disposable);
 
                 ((IEntryPoint)binding.CachedInstance).Run();
             }
@@ -245,6 +249,8 @@ namespace Uniject
 
         public void Dispose()
         {
+            while (_disposables.TryPop(out var disposable))
+                disposable.Dispose();
         }
     }
 }
