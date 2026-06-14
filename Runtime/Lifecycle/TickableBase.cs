@@ -44,6 +44,24 @@ namespace Uniject.Lifecycle
                 _tickables.Remove(tickable);
         }
 
+        internal bool CanRegister(T tickable)
+        {
+            if (tickable == null)
+                throw new ArgumentNullException(nameof(tickable));
+
+            return _tickablesPendingRemove.Contains(tickable) ||
+                   (!_tickables.Contains(tickable) && !_tickablesPendingAdd.Contains(tickable));
+        }
+
+        internal bool CanUnregister(T tickable)
+        {
+            if (tickable == null)
+                throw new ArgumentNullException(nameof(tickable));
+
+            return _tickablesPendingAdd.Contains(tickable) ||
+                   (_tickables.Contains(tickable) && !_tickablesPendingRemove.Contains(tickable));
+        }
+
         protected void AddQueuedTickables()
         {
             if (_tickablesPendingAdd.Count <= 0)

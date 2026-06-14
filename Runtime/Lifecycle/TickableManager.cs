@@ -1,14 +1,13 @@
 using System;
-using Uniject.Collections;
 using UnityEngine;
 
 namespace Uniject.Lifecycle
 {
     public class TickableManager : MonoBehaviour
     {
-        private Tickable _tickables = new();
-        private LateTickable _lateTickables = new();
-        private FixedTickable _fixedTickables = new();
+        private readonly Tickable _tickables = new();
+        private readonly LateTickable _lateTickables = new();
+        private readonly FixedTickable _fixedTickables = new();
         
         public void RegisterTickable(ITickable tickable) => _tickables.Register(tickable);
         
@@ -18,13 +17,25 @@ namespace Uniject.Lifecycle
 
         public void Register(object obj)
         {
-            if (obj is ITickable tickable)
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            var tickable = obj as ITickable;
+            var lateTickable = obj as ILateTickable;
+            var fixedTickable = obj as IFixedTickable;
+
+            if (tickable != null && !_tickables.CanRegister(tickable) ||
+                lateTickable != null && !_lateTickables.CanRegister(lateTickable) ||
+                fixedTickable != null && !_fixedTickables.CanRegister(fixedTickable))
+                throw new ArgumentException("Object has already registered tickable interfaces.", nameof(obj));
+
+            if (tickable != null)
                 RegisterTickable(tickable);
 
-            if (obj is ILateTickable lateTickable)
+            if (lateTickable != null)
                 RegisterLateTickable(lateTickable);
 
-            if (obj is IFixedTickable fixedTickable)
+            if (fixedTickable != null)
                 RegisterFixedTickable(fixedTickable);
         }
 
@@ -36,16 +47,27 @@ namespace Uniject.Lifecycle
 
         public void Unregister(object obj)
         {
-            if (obj is ITickable tickable)
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            var tickable = obj as ITickable;
+            var lateTickable = obj as ILateTickable;
+            var fixedTickable = obj as IFixedTickable;
+
+            if (tickable != null && !_tickables.CanUnregister(tickable) ||
+                lateTickable != null && !_lateTickables.CanUnregister(lateTickable) ||
+                fixedTickable != null && !_fixedTickables.CanUnregister(fixedTickable))
+                throw new ArgumentException("Object has unregistered tickable interfaces.", nameof(obj));
+
+            if (tickable != null)
                 UnregisterTickable(tickable);
 
-            if (obj is ILateTickable lateTickable)
+            if (lateTickable != null)
                 UnregisterLateTickable(lateTickable);
 
-            if (obj is IFixedTickable fixedTickable)
+            if (fixedTickable != null)
                 UnregisterFixedTickable(fixedTickable);
         }
-
 
         private void Update() => _tickables.Tick();
 
