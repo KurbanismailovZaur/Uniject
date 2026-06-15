@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using Uniject;
+using Uniject.Attributes;
 using Uniject.Tests.Fixtures;
 using UnityEngine;
 
@@ -8,6 +9,17 @@ namespace Uniject.Tests
 {
     public class ContainerResolveTests
     {
+        private class ParentDependencyInjectableClass
+        {
+            public Class Dependency { get; private set; }
+
+            [Inject]
+            public void Construct(Class dependency)
+            {
+                Dependency = dependency;
+            }
+        }
+
         [Test]
         public void Bind_WhenTypeAlreadyBound_ThrowsInvalidOperationException()
         {
@@ -812,6 +824,39 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Resolve_FromComponentInNewPrefab_WhenContainerParentTransformIsSet_ParentsClonedPrefab()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<Script>();
+            var parent = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parent
+                };
+
+                container.Bind<Script>()
+                    .FromComponentInNewPrefab(prefabScript)
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parent));
+                Assert.That(prefabScript.transform.parent, Is.Null);
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parent.gameObject);
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+
+        [Test]
         public void Resolve_FromNewComponentOnNewPrefab_UnderTransform_ParentsClonedPrefab()
         {
             var prefab = new GameObject("Prefab");
@@ -869,6 +914,102 @@ namespace Uniject.Tests
                     UnityEngine.Object.DestroyImmediate(first.gameObject);
 
                 UnityEngine.Object.DestroyImmediate(parent.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromNewComponentOnNewGameObject_WhenContainerParentTransformIsSet_SetsParent()
+        {
+            var parent = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parent
+                };
+
+                container.Bind<Script>()
+                    .FromNewComponentOnNewGameObject()
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parent));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parent.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromNewComponentOnNewPrefab_WhenContainerParentTransformIsSet_ParentsClonedPrefab()
+        {
+            var prefab = new GameObject("Prefab");
+            var parent = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parent
+                };
+
+                container.Bind<Script>()
+                    .FromNewComponentOnNewPrefab(prefab)
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parent));
+                Assert.That(prefab.transform.parent, Is.Null);
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parent.gameObject);
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Resolve_WhenBindingUnderTransformIsSet_UsesBindingParentInsteadOfContainerParent()
+        {
+            var containerParent = new GameObject("ContainerParent").transform;
+            var bindingParent = new GameObject("BindingParent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = containerParent
+                };
+
+                container.Bind<Script>()
+                    .FromNewComponentOnNewGameObject()
+                    .UnderTransform(bindingParent)
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(bindingParent));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(bindingParent.gameObject);
+                UnityEngine.Object.DestroyImmediate(containerParent.gameObject);
             }
         }
 
@@ -933,6 +1074,89 @@ namespace Uniject.Tests
 
             Assert.That(first, Is.Not.Null);
             Assert.That(second, Is.SameAs(first));
+        }
+
+        [Test]
+        public void Resolve_WhenBindingExistsInParentContainer_ReturnsParentBindingInstance()
+        {
+            var dependency = new Class();
+
+            var parent = new Container();
+            parent.Bind<Class>().FromInstance(dependency);
+
+            var child = new Container(parent);
+
+            var resolved = child.Resolve<Class>();
+
+            Assert.That(resolved, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void Resolve_WhenBindingExistsInChildAndParent_ReturnsChildBindingInstance()
+        {
+            var parentDependency = new Class();
+            var childDependency = new Class();
+
+            var parent = new Container();
+            parent.Bind<Class>().FromInstance(parentDependency);
+
+            var child = new Container(parent);
+            child.Bind<Class>().FromInstance(childDependency);
+
+            var resolved = child.Resolve<Class>();
+
+            Assert.That(resolved, Is.SameAs(childDependency));
+        }
+        
+        [Test]
+        public void Resolve_WhenBindingExistsInGrandParentContainer_ReturnsGrandParentBindingInstance()
+        {
+            var dependency = new Class();
+
+            var grandParent = new Container();
+            grandParent.Bind<Class>().FromInstance(dependency);
+
+            var parent = new Container(grandParent);
+            var child = new Container(parent);
+
+            var resolved = child.Resolve<Class>();
+
+            Assert.That(resolved, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void Inject_WhenDependencyExistsInParentContainer_InjectsParentDependency()
+        {
+            var dependency = new Class();
+            var target = new ParentDependencyInjectableClass();
+
+            var parent = new Container();
+            parent.Bind<Class>().FromInstance(dependency);
+
+            var child = new Container(parent);
+            child.Inject(target);
+
+            Assert.That(target.Dependency, Is.SameAs(dependency));
+        }
+
+        [Test]
+        public void Resolve_WhenResolvingContainerFromChild_ReturnsChildContainer()
+        {
+            var parent = new Container();
+            var child = new Container(parent);
+
+            var resolved = child.Resolve<Container>();
+
+            Assert.That(resolved, Is.SameAs(child));
+        }
+
+        [Test]
+        public void Resolve_WhenBindingDoesNotExistInChildOrParent_ThrowsException()
+        {
+            var parent = new Container();
+            var child = new Container(parent);
+
+            Assert.That(() => child.Resolve<Class>(), Throws.Exception.With.Message.Contains("No binding found"));
         }
     }
 }

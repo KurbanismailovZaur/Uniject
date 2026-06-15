@@ -37,6 +37,8 @@ namespace Uniject.Bindings
 
                 if (ParentTransform != null)
                     gameObject.transform.SetParent(ParentTransform);
+                else if (Container.ParentTransformForGameObjects != null)
+                    gameObject.transform.SetParent(Container.ParentTransformForGameObjects);
             }
             else if (instance is Component component)
             {
@@ -45,6 +47,8 @@ namespace Uniject.Bindings
 
                 if (ParentTransform != null)
                     component.transform.SetParent(ParentTransform);
+                else if (Container.ParentTransformForGameObjects != null)
+                    component.transform.SetParent(Container.ParentTransformForGameObjects);
             }
 
             return instance;

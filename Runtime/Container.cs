@@ -19,8 +19,11 @@ namespace Uniject
         private readonly OrderedSet<object> _injectQueue = new();
         private Stack<IDisposable> _disposables = new();
 
-        public Container()
+        public Transform ParentTransformForGameObjects { get; set; }
+
+        public Container(Container parentContainer = null)
         {
+            _parentContainer = parentContainer;
             Bind<Container>().FromInstance(this).AsCached();
         }
 
