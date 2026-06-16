@@ -3,28 +3,28 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingWithObjectNameBuilder
+    public class BindingWithGameObjectNameBuilder
     {
         private readonly Binding _binding;
         private readonly Container _container;
 
-        public BindingWithObjectNameBuilder(Container container, Binding binding)
+        public BindingWithGameObjectNameBuilder(Container container, Binding binding)
         {
             _container = container;
             _binding = binding;
         }
 
-        public BindingUnderTransformBuilder WithObjectName(string name)
+        public BindingUnderTransformBuilder WithGameObjectName(string name)
         {
             _binding.ObjectName = name;
             return new BindingUnderTransformBuilder(_container, _binding);
         }
 
-        public BindingAsBuilder UnderTransform(Transform parent) => WithObjectName(null).UnderTransform(parent);
+        public BindingAsBuilder UnderTransform(Transform parent) => WithGameObjectName(null).UnderTransform(parent);
 
-        public BindingNonLazyBuilder AsTransient() => WithObjectName(null).UnderTransform(null).AsTransient();
+        public BindingNonLazyBuilder AsTransient() => WithGameObjectName(null).UnderTransform(null).AsTransient();
 
-        public BindingNonLazyBuilder AsCached() => WithObjectName(null).UnderTransform(null).AsCached();
+        public BindingNonLazyBuilder AsCached() => WithGameObjectName(null).UnderTransform(null).AsCached();
         
         public BindingAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
 

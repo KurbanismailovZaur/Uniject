@@ -32,15 +32,15 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromInstance(object instance) => To(_binding.ContractType).FromInstance(instance);
         
-        public BindingWithObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
 
-        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromNewComponentOnNewGameObject() => To(_binding.ContractType).FromNewComponentOnNewGameObject();
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewGameObject() => To(_binding.ContractType).FromNewComponentOnNewGameObject();
         
         public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
@@ -80,15 +80,15 @@ namespace Uniject.Bindings
 
         public BindingAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
         
-        public BindingWithObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
 
-        public BindingWithObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
         
-        public BindingWithObjectNameBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
+        public BindingWithGameObjectNameBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
         
         public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 

@@ -716,7 +716,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromNewComponentOnNewGameObject_WithObjectName_RenamesGameObject()
+        public void Resolve_FromNewComponentOnNewGameObject_WithGameObjectName_RenamesGameObject()
         {
             var resolvedScript = default(Script);
 
@@ -725,7 +725,7 @@ namespace Uniject.Tests
                 var container = new Container();
                 container.Bind<Script>()
                     .FromNewComponentOnNewGameObject()
-                    .WithObjectName("Player")
+                    .WithGameObjectName("Player")
                     .AsTransient();
 
                 resolvedScript = container.Resolve<Script>();
@@ -767,7 +767,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromNewComponentOnNewGameObject_WithObjectNameAndUnderTransform_AppliesBoth()
+        public void Resolve_FromNewComponentOnNewGameObject_WithGameObjectNameAndUnderTransform_AppliesBoth()
         {
             var parent = new GameObject("Parent").transform;
             var resolvedScript = default(Script);
@@ -777,7 +777,7 @@ namespace Uniject.Tests
                 var container = new Container();
                 container.Bind<Script>()
                     .FromNewComponentOnNewGameObject()
-                    .WithObjectName("Enemy")
+                    .WithGameObjectName("Enemy")
                     .UnderTransform(parent)
                     .AsTransient();
 
@@ -796,7 +796,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromComponentInNewPrefab_WithObjectName_RenamesClonedGameObject()
+        public void Resolve_FromComponentInNewPrefab_WithGameObjectName_RenamesClonedGameObject()
         {
             var prefabScript = new GameObject("Prefab").AddComponent<Script>();
             var resolvedScript = default(Script);
@@ -806,7 +806,7 @@ namespace Uniject.Tests
                 var container = new Container();
                 container.Bind<Script>()
                     .FromComponentInNewPrefab(prefabScript)
-                    .WithObjectName("Clone")
+                    .WithGameObjectName("Clone")
                     .AsTransient();
 
                 resolvedScript = container.Resolve<Script>();
@@ -887,7 +887,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_AsCached_WithObjectNameAndUnderTransform_ConfiguresInstanceOnlyOnce()
+        public void Resolve_AsCached_WithGameObjectNameAndUnderTransform_ConfiguresInstanceOnlyOnce()
         {
             var parent = new GameObject("Parent").transform;
             var first = default(Script);
@@ -897,7 +897,7 @@ namespace Uniject.Tests
                 var container = new Container();
                 container.Bind<Script>()
                     .FromNewComponentOnNewGameObject()
-                    .WithObjectName("Cached")
+                    .WithGameObjectName("Cached")
                     .UnderTransform(parent)
                     .AsCached();
 
