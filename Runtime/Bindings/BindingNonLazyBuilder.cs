@@ -1,5 +1,3 @@
-using Uniject.Getters;
-
 namespace Uniject.Bindings
 {
     public class BindingNonLazyBuilder

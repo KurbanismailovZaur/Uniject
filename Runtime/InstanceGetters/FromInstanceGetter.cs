@@ -1,6 +1,6 @@
 using System;
 
-namespace Uniject.Getters
+namespace Uniject.InstanceGetters
 {
     public class FromInstanceGetter : InstanceGetter
     {

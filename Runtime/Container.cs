@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public class Container : IDisposable
+    public class Container : IObjectBuilder, IDisposable
     {
         private Container _parentContainer;
 
@@ -24,7 +24,9 @@ namespace Uniject
         public Container(Container parentContainer = null)
         {
             _parentContainer = parentContainer;
+            
             Bind<Container>().FromInstance(this).AsCached();
+            Bind<IObjectBuilder>().FromInstance(this).AsCached();
         }
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
@@ -220,7 +222,7 @@ namespace Uniject
             return cloned;
         }
 
-        public T Instantiate<T>(T prefab) where T : Component => (T)Instantiate(prefab as Component);
+        public TComponent Instantiate<TComponent>(TComponent prefab) where TComponent : Component => (TComponent)Instantiate(prefab as Component);
 
         public Component Instantiate(Component prefab)
         {

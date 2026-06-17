@@ -2,7 +2,7 @@ using System;
 using Uniject.Reflection;
 using UnityEngine;
 
-namespace Uniject.Getters
+namespace Uniject.InstanceGetters
 {
     public class FromComponentInNewPrefabGetter : InstanceGetter
     {

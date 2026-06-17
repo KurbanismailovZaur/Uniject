@@ -1,4 +1,3 @@
-using Uniject.Getters;
 using UnityEngine;
 
 namespace Uniject.Bindings

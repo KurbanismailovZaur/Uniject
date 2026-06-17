@@ -1,5 +1,5 @@
 using System;
-using Uniject.Getters;
+using Uniject.InstanceGetters;
 using UnityEngine;
 
 namespace Uniject.Bindings
