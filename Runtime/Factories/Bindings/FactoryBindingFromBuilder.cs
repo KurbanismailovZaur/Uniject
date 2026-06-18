@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Uniject.Factories.Bindings
 {
-    public class FactoryBindingFromBuilder<TFactory> : FactoryBindingBuilder<TFactory> where TFactory : Factory, new()
+    public class FactoryBindingFromBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {
-        public FactoryBindingFromBuilder(Container container, FactoryBinding<TFactory> binding) : base(container, binding) { }
+        public FactoryBindingFromBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
 
-        private FactoryBindingAsBuilder<TFactory> From(InstanceGetter instanceGetter)
+        private FactoryBindingAsBuilder<TResult, TFactory> From(InstanceGetter instanceGetter)
         {
             _binding.InstanceGetter = instanceGetter;
-            return new FactoryBindingAsBuilder<TFactory>(_container, _binding);
+            return new FactoryBindingAsBuilder<TResult, TFactory>(_container, _binding);
         }
 
-        public FactoryBindingAsBuilder<TFactory> FromConstructor() => From(new FromConstructorGetter(_container));
+        public FactoryBindingAsBuilder<TResult, TFactory> FromConstructor() => From(new FromConstructorGetter(_container));
 
         // public BindingAsBuilder FromInstance(object instance) => From(new FromInstanceGetter(_container, instance, _binding.ConcreteType)).WithGameObjectName(null).UnderTransform(null);
 

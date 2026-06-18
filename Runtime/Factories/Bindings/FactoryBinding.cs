@@ -3,7 +3,7 @@ using Uniject.Bindings;
 
 namespace Uniject.Factories.Bindings
 {
-    public class FactoryBinding<TFactory> : BindingBase where TFactory : Factory, new()
+    public class FactoryBinding<TResult, TFactory> : BindingBase where TFactory : Factory, new()
     {
         public Type ResultContractType { get; set; }
         public Type ResultConcreteType { get; set; }

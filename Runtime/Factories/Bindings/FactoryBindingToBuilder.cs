@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Uniject.Factories.Bindings
 {
-   public class FactoryBindingToBuilder<TFactory> : FactoryBindingBuilder<TFactory> where TFactory : Factory, new()
+   public class FactoryBindingToBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {
-        public FactoryBindingToBuilder(Container container, FactoryBinding<TFactory> binding) : base(container, binding) { }
+        public FactoryBindingToBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
 
-        public FactoryBindingFromBuilder<TFactory> To(Type resultConcreteType)
+        public FactoryBindingFromBuilder<TResult, TFactory> To(Type resultConcreteType)
         {
             if (resultConcreteType == null)
                 throw new ArgumentNullException(nameof(resultConcreteType));
@@ -16,10 +16,10 @@ namespace Uniject.Factories.Bindings
                 throw new ArgumentException($"Type {_binding.ResultContractType} is not assignable from {resultConcreteType} in factory of type {_binding.ContractType}.", nameof(resultConcreteType));
 
             _binding.ResultConcreteType = resultConcreteType;
-            return new FactoryBindingFromBuilder<TFactory>(_container, _binding);
+            return new FactoryBindingFromBuilder<TResult, TFactory>(_container, _binding);
         }
 
-        public FactoryBindingFromBuilder<TFactory> To<TResultConcrete>() => To(typeof(TResultConcrete));
+        public FactoryBindingFromBuilder<TResult, TFactory> To<TResultConcrete>() where TResultConcrete : TResult => To(typeof(TResultConcrete));
 
         // public BindingAsBuilder FromConstructor() => To<TContract>().FromConstructor();
 
