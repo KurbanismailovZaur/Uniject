@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Uniject.Factories.Bindings
 {
-    public class FactoryBindingFromBuilder<TResult> : FactoryBindingBuilder<TResult>
+    public class FactoryBindingFromBuilder<TFactory> : FactoryBindingBuilder<TFactory> where TFactory : Factory, new()
     {
-        public FactoryBindingFromBuilder(Container container, FactoryBinding<TResult> binding) : base(container, binding) { }
+        public FactoryBindingFromBuilder(Container container, FactoryBinding<TFactory> binding) : base(container, binding) { }
 
-        private FactoryBindingAsBuilder<TResult> From(InstanceGetter instanceGetter)
+        private FactoryBindingAsBuilder<TFactory> From(InstanceGetter instanceGetter)
         {
             _binding.InstanceGetter = instanceGetter;
-            return new FactoryBindingAsBuilder<TResult>(_container, _binding);
+            return new FactoryBindingAsBuilder<TFactory>(_container, _binding);
         }
 
-        public FactoryBindingAsBuilder<TResult> FromConstructor() => From(new FromConstructorGetter(_container));
+        public FactoryBindingAsBuilder<TFactory> FromConstructor() => From(new FromConstructorGetter(_container));
 
         // public BindingAsBuilder FromInstance(object instance) => From(new FromInstanceGetter(_container, instance, _binding.ConcreteType)).WithGameObjectName(null).UnderTransform(null);
 
@@ -32,9 +32,5 @@ namespace Uniject.Factories.Bindings
         // public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         // public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();
-        
-        // public BindingAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
-
-        // public void AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

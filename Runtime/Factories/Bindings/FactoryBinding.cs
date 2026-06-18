@@ -3,7 +3,7 @@ using Uniject.Bindings;
 
 namespace Uniject.Factories.Bindings
 {
-    public class FactoryBinding<TResultContract> : BindingBase
+    public class FactoryBinding<TFactory> : BindingBase where TFactory : Factory, new()
     {
         public Type ResultContractType { get; set; }
         public Type ResultConcreteType { get; set; }
@@ -14,7 +14,12 @@ namespace Uniject.Factories.Bindings
             ResultConcreteType = resultType;
         }
 
-        private object CreateFactory() => new Factory<TResultContract>(InstanceGetter, ResultConcreteType);
+        private object CreateFactory()
+        {
+            var factory = new TFactory();
+            factory.Construct(InstanceGetter, ResultConcreteType);
+            return factory;
+        }
 
         public override object GetInstance()
         {

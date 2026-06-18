@@ -4,17 +4,20 @@ using Uniject.InstanceGetters;
 
 namespace Uniject.Factories
 {
-    public class Factory<TResult> 
+    public abstract class Factory
     {
-        private InstanceGetter _instanceGetter;
-        private readonly Type _resultConcreteType;
+        protected InstanceGetter _instanceGetter;
+        protected Type _resultConcreteType;
 
-        public Factory(InstanceGetter instanceGetter, Type resultConcreteType)
+        internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType)
         {
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
         }
+    }
 
+    public class Factory<TResult> : Factory
+    {
         public TResult Create()
         {
             return (TResult)_instanceGetter.GetInstance(_resultConcreteType);

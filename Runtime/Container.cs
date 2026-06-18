@@ -71,17 +71,17 @@ namespace Uniject
             }
         }
 
-        public FactoryBindingToBuilder<TResult> BindFactory<TResult, TFactory>() where TFactory : Factory<TResult>
+        public FactoryBindingToBuilder<TFactory> Bind<TResult, TFactory>() where TFactory : Factory<TResult>, new()
         {
-            return new(this, CreateFactoryBinding<TResult>(typeof(TResult), typeof(TFactory)));
+            return new(this, CreateFactoryBinding<TFactory>(typeof(TResult), typeof(TFactory)));
         }
 
-        private FactoryBinding<TResult> CreateFactoryBinding<TResult>(Type resultType, Type factoryType)
+        private FactoryBinding<TFactory> CreateFactoryBinding<TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
         {
             if (_bindings.ContainsKey(factoryType))
                 throw new InvalidOperationException($"Type {factoryType} is already bound.");
 
-            var binding = new FactoryBinding<TResult>(this, resultType, factoryType);
+            var binding = new FactoryBinding<TFactory>(this, resultType, factoryType);
             _bindings[factoryType] = binding;
             _bindingsTypes.Add(factoryType);
             return binding;
