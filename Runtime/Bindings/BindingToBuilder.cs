@@ -3,16 +3,9 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingToBuilder
+    public class BindingToBuilder : BindingBuilder
     {
-        protected readonly Container _container;
-        protected readonly Binding _binding;
-
-        public BindingToBuilder(Container container, Binding binding)
-        {
-            _container = container;
-            _binding = binding;
-        }
+        public BindingToBuilder(Container container, Binding binding) : base(container, binding) { }
 
         public BindingFromBuilder To(Type concreteType)
         {
@@ -51,16 +44,9 @@ namespace Uniject.Bindings
         public void AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 
-    public class BindingToBuilder<TContract>
+    public class BindingToBuilder<TContract> : BindingBuilder
     {
-        protected readonly Container _container;
-        protected readonly Binding _binding;
-
-        public BindingToBuilder(Container container, Binding binding)
-        {
-            _container = container;
-            _binding = binding;
-        }
+        public BindingToBuilder(Container container, Binding binding) : base(container, binding) { }
 
         public BindingFromBuilder To(Type concreteType)
         {

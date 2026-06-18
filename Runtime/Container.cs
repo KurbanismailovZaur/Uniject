@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Collections;
 using Uniject.Components;
+using Uniject.Factories;
+using Uniject.Factories.Bindings;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
@@ -13,7 +15,7 @@ namespace Uniject
     {
         private Container _parentContainer;
 
-        private readonly Dictionary<Type, Binding> _bindings = new();
+        private readonly Dictionary<Type, BindingBase> _bindings = new();
         private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
@@ -69,6 +71,22 @@ namespace Uniject
             }
         }
 
+        public FactoryBindingToBuilder<TResult> BindFactory<TResult, TFactory>() where TFactory : Factory<TResult>
+        {
+            return new(this, CreateFactoryBinding<TResult>(typeof(TResult), typeof(TFactory)));
+        }
+
+        private FactoryBinding<TResult> CreateFactoryBinding<TResult>(Type resultType, Type factoryType)
+        {
+            if (_bindings.ContainsKey(factoryType))
+                throw new InvalidOperationException($"Type {factoryType} is already bound.");
+
+            var binding = new FactoryBinding<TResult>(this, resultType, factoryType);
+            _bindings[factoryType] = binding;
+            _bindingsTypes.Add(factoryType);
+            return binding;
+        }
+
         public T Resolve<T>() => (T)Resolve(typeof(T));
         
         public object Resolve(Type contractType)
@@ -100,10 +118,10 @@ namespace Uniject
 
         private void ExitResolving(Type contractType) => _resolvingTypes.RemoveLast(contractType);
 
-        private Binding FindBinding(Type contractType)
+        private BindingBase FindBinding(Type contractType)
         {
             var currentContainer = this;
-            var binding = default(Binding);
+            var binding = default(BindingBase);
 
             while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
                 currentContainer = currentContainer._parentContainer;
@@ -115,12 +133,13 @@ namespace Uniject
         {
             foreach (var bindingType in _bindingsTypes)
             {
-                var binding = _bindings[bindingType];
+                var bindingBase = _bindings[bindingType];
 
-                if (!binding.IsNonLazy)
+                if (bindingBase is not Binding binding || !binding.IsNonLazy)
                     continue;
 
                 EnterResolving(binding.ContractType);
+
                 try
                 {
                     binding.PrepareNonLazyInstance();
@@ -136,9 +155,9 @@ namespace Uniject
         {
             foreach (var bindingType in _bindingsTypes)
             {
-                var binding = _bindings[bindingType];
+                var bindingBase = _bindings[bindingType];
 
-                if (!binding.IsNonLazy || !binding.IsEntryPoint)
+                if (bindingBase is not Binding binding || !binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
 
                 if (binding.CachedInstance is not Component && binding.CachedInstance is IDisposable disposable)

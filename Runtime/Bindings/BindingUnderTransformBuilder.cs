@@ -3,16 +3,9 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingUnderTransformBuilder
+    public class BindingUnderTransformBuilder : BindingBuilder
     {
-        private readonly Binding _binding;
-        private readonly Container _container;
-
-        public BindingUnderTransformBuilder(Container container, Binding binding)
-        {
-            _container = container;
-            _binding = binding;
-        }
+        public BindingUnderTransformBuilder(Container container, Binding binding) : base(container, binding) { }
 
         public BindingAsBuilder UnderTransform(Transform parent)
         {

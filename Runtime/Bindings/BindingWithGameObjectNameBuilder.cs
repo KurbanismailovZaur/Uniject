@@ -2,16 +2,9 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class BindingWithGameObjectNameBuilder
+    public class BindingWithGameObjectNameBuilder : BindingBuilder
     {
-        private readonly Binding _binding;
-        private readonly Container _container;
-
-        public BindingWithGameObjectNameBuilder(Container container, Binding binding)
-        {
-            _container = container;
-            _binding = binding;
-        }
+        public BindingWithGameObjectNameBuilder(Container container, Binding binding) : base(container, binding) { }
 
         public BindingUnderTransformBuilder WithGameObjectName(string name)
         {

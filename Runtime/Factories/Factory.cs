@@ -1,11 +1,23 @@
+using System;
+using Uniject.Attributes;
+using Uniject.InstanceGetters;
+
 namespace Uniject.Factories
 {
-    public abstract class Factory<TResult>
+    public class Factory<TResult> 
     {
-        protected IObjectBuilder _objectBuilder;
+        private InstanceGetter _instanceGetter;
+        private readonly Type _resultConcreteType;
 
-        public Factory(IObjectBuilder objectBuilder) => _objectBuilder = objectBuilder;
+        public Factory(InstanceGetter instanceGetter, Type resultConcreteType)
+        {
+            _instanceGetter = instanceGetter;
+            _resultConcreteType = resultConcreteType;
+        }
 
-        public abstract TResult Create();
+        public TResult Create()
+        {
+            return (TResult)_instanceGetter.GetInstance(_resultConcreteType);
+        }
     }
 }

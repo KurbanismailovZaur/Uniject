@@ -1,15 +1,8 @@
 namespace Uniject.Bindings
 {
-    public class BindingAsBuilder
+    public class BindingAsBuilder : BindingBuilder
     {
-        private readonly Binding _binding;
-        private readonly Container _container;
-
-        public BindingAsBuilder(Container container, Binding binding)
-        {
-            _container = container;
-            _binding = binding;
-        }
+        public BindingAsBuilder(Container container, Binding binding) : base(container, binding) { }
 
         public BindingNonLazyBuilder AsTransient()
         {

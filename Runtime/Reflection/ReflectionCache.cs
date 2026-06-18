@@ -74,29 +74,41 @@ namespace Uniject.Reflection
             if (_methods.TryGetValue(concreteType, out var cached))
                 return cached;
 
-            var injectMethod = default(MethodInfo);
+            var currentType = concreteType;
 
-            foreach (var method in concreteType.GetMethods())
+            while (currentType != null && currentType != typeof(object))
             {
-                if (!method.IsDefined(typeof(InjectAttribute), false))
-                    continue;
+                var injectMethod = default(MethodInfo);
+
+                var methods = currentType.GetMethods(
+                    BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+
+                foreach (var method in methods)
+                {
+                    if (!method.IsDefined(typeof(InjectAttribute), false))
+                        continue;
+
+                    if (injectMethod != null)
+                        throw new InvalidOperationException($"Multiple inject methods found for type {currentType}.");
+
+                    injectMethod = method;
+                }
 
                 if (injectMethod != null)
-                    throw new InvalidOperationException($"Multiple inject methods found for type {concreteType}.");
+                {
+                    var parameters = injectMethod.GetParameters();
 
-                injectMethod = method;
+                    if (parameters.Length == 0)
+                        throw new InvalidOperationException($"Inject method with 0 parameters found for type {currentType}.");
+
+                    return _methods[concreteType] = new MethodInjectionData(injectMethod, parameters, true);
+                }
+
+                currentType = currentType.BaseType;
             }
 
-            if (injectMethod == null)
-                return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
-
-            var parameters = injectMethod.GetParameters();
-
-            if (parameters.Length == 0)
-                throw new InvalidOperationException($"Inject method with 0 parameters found for type {concreteType}.");
-
-            var data = new MethodInjectionData(injectMethod, injectMethod.GetParameters(), true);
-            return _methods[concreteType] = data;    
+            return _methods[concreteType] = new MethodInjectionData(null, Array.Empty<ParameterInfo>(), false);
         }
     }
 }

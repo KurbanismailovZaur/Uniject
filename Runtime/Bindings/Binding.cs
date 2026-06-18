@@ -4,33 +4,20 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class Binding
+    public class Binding : BindingBase
     {
-        public Container Container { get; set; }
-        public Type ContractType { get; set; }
-        public Type ConcreteType { get; set; }
-        public InstanceGetter InstanceGetter { get; set; }
-        public Scope Scope { get; set; }
-        public object CachedInstance { get; private set; }
         public bool IsNonLazy { get; set; }
         public bool IsEntryPoint { get; set; }
         public string ObjectName { get; set; }
         public Transform ParentTransform { get; set; }
 
-        public Binding(Container container, Type contractType) 
-        {
-            Container = container;
-            ContractType = contractType;
-            ConcreteType = contractType;
-            InstanceGetter = new FromConstructorGetter(container);
-            Scope = Scope.Transient;
-        }
+        public Binding(Container container, Type contractType) : base(container, contractType) { }
 
-        private object CreateAndConfigureInstance()
+        protected virtual object CreateAndConfigureInstance()
         {
             var instance = InstanceGetter.GetInstance(ConcreteType);
 
-            if(instance is GameObject gameObject)
+            if (instance is GameObject gameObject)
             {
                 if (ObjectName != null)
                     gameObject.name = ObjectName;
@@ -54,7 +41,7 @@ namespace Uniject.Bindings
             return instance;
         }
 
-        public object GetInstance()
+        public override object GetInstance()
         {
             if (Scope == Scope.Transient)
             {
@@ -62,7 +49,7 @@ namespace Uniject.Bindings
                 {
                     var cachedInstance = CachedInstance;
                     CachedInstance = null;
-                    return cachedInstance;    
+                    return cachedInstance;
                 }
 
                 return CreateAndConfigureInstance();
