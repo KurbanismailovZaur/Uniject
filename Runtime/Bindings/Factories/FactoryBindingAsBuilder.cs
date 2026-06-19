@@ -2,7 +2,9 @@ using Uniject.Bindings;
 
 namespace Uniject.Bindings.Factories
 {
-    public class FactoryBindingAsBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
+    public class FactoryBindingAsBuilder<TResult, TResultConcrete, TFactory> : FactoryBindingBuilder<TResult, TFactory> 
+        where TResultConcrete : TResult
+        where TFactory : Factory, new()
     {
         public FactoryBindingAsBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
 

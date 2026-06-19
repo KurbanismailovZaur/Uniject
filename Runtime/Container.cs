@@ -150,7 +150,7 @@ namespace Uniject
             }
         }
 
-        internal void CallEntryPoints()
+        internal void RunEntryPoints()
         {
             foreach (var bindingType in _bindingsTypes)
             {

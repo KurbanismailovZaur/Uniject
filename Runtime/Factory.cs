@@ -15,7 +15,7 @@ namespace Uniject
         }
     }
 
-    public class Factory<TResult> : Factory
+    public class Factory<TResult> : Factory, IFactory<TResult>
     {
         public TResult Create()
         {

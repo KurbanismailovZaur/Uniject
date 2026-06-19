@@ -81,9 +81,9 @@ namespace Uniject.Tests
             }
         }
 
-        private static void CallEntryPoints(Container container)
+        private static void RunEntryPoints(Container container)
         {
-            var method = typeof(Container).GetMethod("CallEntryPoints", BindingFlags.Instance | BindingFlags.NonPublic);
+            var method = typeof(Container).GetMethod("RunEntryPoints", BindingFlags.Instance | BindingFlags.NonPublic);
 
             try
             {
@@ -105,7 +105,7 @@ namespace Uniject.Tests
             container.Bind<EntryPointClass>().AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
 
             Assert.That(EntryPointClass.InstancesCount, Is.EqualTo(1));
             Assert.That(EntryPointClass.RunsCount, Is.EqualTo(1));
@@ -120,7 +120,7 @@ namespace Uniject.Tests
             container.Bind<EntryPointClass>().NonLazy();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
 
             Assert.That(EntryPointClass.RunsCount, Is.EqualTo(0));
         }
@@ -135,7 +135,7 @@ namespace Uniject.Tests
             container.Bind<SecondEntryPoint>().AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
 
             Assert.That(EntryPointOrder.Items, Is.EqualTo(new[] { "First", "Second" }));
         }
@@ -173,7 +173,7 @@ namespace Uniject.Tests
             ResolveNonLazyBindings(container);
             var entryPoint = container.Resolve<DisposableEntryPoint>();
 
-            CallEntryPoints(container);
+            RunEntryPoints(container);
             container.Dispose();
 
             Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
@@ -209,7 +209,7 @@ namespace Uniject.Tests
             container.Bind<DisposableEntryPoint>().FromInstance(entryPoint).AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
             container.Dispose();
 
             Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
@@ -225,7 +225,7 @@ namespace Uniject.Tests
             container.Bind<SecondDisposableEntryPoint>().AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
             container.Dispose();
 
             Assert.That(DisposableEntryPointOrder.Items, Is.EqualTo(new[] { "Second", "First" }));
@@ -240,7 +240,7 @@ namespace Uniject.Tests
             container.BindInstance(entryPoint).AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
 
             Assert.That(entryPoint.RunsCount, Is.EqualTo(1));
         }
@@ -254,7 +254,7 @@ namespace Uniject.Tests
             container.BindInstance(entryPoint).AsEntryPoint();
 
             ResolveNonLazyBindings(container);
-            CallEntryPoints(container);
+            RunEntryPoints(container);
             container.Dispose();
 
             Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
