@@ -1,7 +1,7 @@
 using System;
 using Uniject.Bindings;
 
-namespace Uniject.Factories.Bindings
+namespace Uniject.Bindings.Factories
 {
     public class FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {

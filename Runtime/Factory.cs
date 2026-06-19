@@ -1,8 +1,7 @@
 using System;
-using Uniject.Attributes;
 using Uniject.InstanceGetters;
 
-namespace Uniject.Factories
+namespace Uniject
 {
     public abstract class Factory
     {

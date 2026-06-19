@@ -1,6 +1,6 @@
 using Uniject.Bindings;
 
-namespace Uniject.Factories.Bindings
+namespace Uniject.Bindings.Factories
 {
     public class FactoryBindingAsBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {

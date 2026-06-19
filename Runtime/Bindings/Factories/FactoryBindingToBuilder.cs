@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Uniject.Factories.Bindings
+namespace Uniject.Bindings.Factories
 {
    public class FactoryBindingToBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {
@@ -21,22 +21,22 @@ namespace Uniject.Factories.Bindings
 
         public FactoryBindingFromBuilder<TResult, TFactory> To<TResultConcrete>() where TResultConcrete : TResult => To(typeof(TResultConcrete));
 
-        // public BindingAsBuilder FromConstructor() => To<TContract>().FromConstructor();
+        public FactoryBindingAsBuilder<TResult, TFactory> FromConstructor() => To<TResult>().FromConstructor();
+        
+        public FactoryBindingAsBuilder<TResult, TFactory> FromComponentInNewPrefab(GameObject prefab) => To<TResult>().FromComponentInNewPrefab(prefab);
+        
+        public FactoryBindingAsBuilder<TResult, TFactory> FromComponentInNewPrefab(Component prefab) => To<TResult>().FromComponentInNewPrefab(prefab);
+        
+        public FactoryBindingAsBuilder<TResult, TFactory> FromNewComponentOnNewPrefab(GameObject prefab) => To<TResult>().FromNewComponentOnNewPrefab(prefab);
 
-        // public BindingAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
+        public FactoryBindingAsBuilder<TResult, TFactory> FromNewComponentOnNewPrefab(Component prefab) => To<TResult>().FromNewComponentOnNewPrefab(prefab);
         
-        // public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
+        public FactoryBindingAsBuilder<TResult, TFactory> FromNewComponentOnNewGameObject() => To<TResult>().FromNewComponentOnNewGameObject();
         
-        // public BindingWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
-        
-        // public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
+        public FactoryBindingAsBuilder<TResult, TFactory> FromResolve() => To<TResult>().FromResolve();
 
-        // public BindingWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To<TContract>().FromNewComponentOnNewPrefab(prefab);
-        
-        // public BindingWithGameObjectNameBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
-        
-        // public BindingNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
+        public void AsTransient() => FromConstructor().AsTransient();
 
-        // public BindingNonLazyBuilder AsCached() => FromConstructor().AsCached();
+        public void AsCached() => FromConstructor().AsCached();
     }
 }

@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Uniject.Bindings;
+using Uniject.Bindings.Factories;
 using Uniject.Collections;
 using Uniject.Components;
-using Uniject.Factories;
-using Uniject.Factories.Bindings;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
