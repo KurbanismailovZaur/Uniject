@@ -1,6 +1,6 @@
 namespace Uniject
 {
-    public interface IFactory<TResult>
+    public interface IFactory<out TResult>
     {
         public TResult Create();
     }

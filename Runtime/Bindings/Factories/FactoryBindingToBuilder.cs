@@ -27,6 +27,8 @@ namespace Uniject.Bindings.Factories
         
         public FactoryBindingAsBuilder<TResult, TResult, TFactory> FromResolve() => To<TResult>().FromResolve();
 
+        public FactoryBindingAsBuilder<TResult, TResult, TFactory> FromFactory<TCustomFactory>() where TCustomFactory : IFactory<TResult>, new() => To<TResult>().FromFactory<TCustomFactory>();
+
         public void AsTransient() => FromConstructor().AsTransient();
 
         public void AsCached() => FromConstructor().AsCached();

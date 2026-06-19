@@ -17,9 +17,6 @@ namespace Uniject
 
     public class Factory<TResult> : Factory, IFactory<TResult>
     {
-        public TResult Create()
-        {
-            return (TResult)_instanceGetter.GetInstance(_resultConcreteType);
-        }
+        public TResult Create() => (TResult)_instanceGetter.GetInstance(_resultConcreteType);
     }
 }
