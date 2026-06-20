@@ -75,6 +75,8 @@ namespace Uniject
             return new(this, CreateFactoryBinding<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         }
 
+        public FactoryBindingToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
+
         private FactoryBinding<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
         {
             if (_bindings.ContainsKey(factoryType))

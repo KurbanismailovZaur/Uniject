@@ -6,12 +6,16 @@ namespace Uniject.Bindings
 {
     public class Binding : BindingBase
     {
+        public InstanceGetter InstanceGetter { get; set; }
         public bool IsNonLazy { get; set; }
         public bool IsEntryPoint { get; set; }
         public string ObjectName { get; set; }
         public Transform ParentTransform { get; set; }
 
-        public Binding(Container container, Type contractType) : base(container, contractType) { }
+        public Binding(Container container, Type contractType) : base(container, contractType)
+        {
+            InstanceGetter = new FromConstructorGetter(container);
+        }
 
         protected virtual object CreateAndConfigureInstance()
         {
