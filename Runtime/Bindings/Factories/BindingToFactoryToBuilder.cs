@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Uniject.Bindings.Factories
 {
-   public class BindingToFactoryToBuilder<TResult, TFactory> : BindingToFactoryBuilder<TResult, TFactory> where TFactory : Factory, new()
+   public class BindingToFactoryToBuilder<TResult, TFactory> : BindingToFactoryBuilder<TResult, TFactory> where TFactory : Factory<TResult>, new()
     {
         public BindingToFactoryToBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
 

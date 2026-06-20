@@ -1,12 +1,10 @@
 using System;
 
-namespace Uniject.InstanceGetters
+namespace Uniject.InstanceGetters.Factories
 {
-    public abstract class InstanceGetterWithParameter<TParam>
+    public abstract class InstanceGetterWithParameter<TParam> : InstanceGetterBase
     {
-        protected readonly Container _container;
-
-        public InstanceGetterWithParameter(Container container) => _container = container;
+        public InstanceGetterWithParameter(Container container): base(container) { }
 
         public abstract object GetInstance(Type concreteType, TParam origin);
     }

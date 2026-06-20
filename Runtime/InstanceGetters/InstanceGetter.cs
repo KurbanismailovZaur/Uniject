@@ -2,11 +2,9 @@ using System;
 
 namespace Uniject.InstanceGetters
 {
-    public abstract class InstanceGetter
+    public abstract class InstanceGetter : InstanceGetterBase
     {
-        protected readonly Container _container;
-
-        public InstanceGetter(Container container) => _container = container;
+        public InstanceGetter(Container container) : base(container) { }
 
         public abstract object GetInstance(Type concreteType);
     }

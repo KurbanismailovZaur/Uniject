@@ -72,12 +72,12 @@ namespace Uniject
 
         public BindingToFactoryToBuilder<TResult, TFactory> Bind<TResult, TFactory>() where TFactory : Factory<TResult>, new()
         {
-            return new(this, CreateFactoryBinding<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
+            return new(this, CreateBindingToFactory<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         }
 
         public BindingToFactoryToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
 
-        private BindingToFactory<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
+        private BindingToFactory<TResult, TFactory> CreateBindingToFactory<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory<TResult>, new()
         {
             if (_bindings.ContainsKey(factoryType))
                 throw new InvalidOperationException($"Type {factoryType} is already bound.");
@@ -99,14 +99,14 @@ namespace Uniject
 
 
 
-        // public FactoryBindingToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() where TFactory : Factory<TResult>, new()
+        // public BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() where TFactory : Factory<TParam, TResult>, new()
         // {
-        //     return new(this, CreateFactoryBinding<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
+        //     return new(this, CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         // }
 
-        // public FactoryBindingToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
+        // public BindingToFactoryWithParameterToBuilder<TParam, TResult, Factory<TResult>> BindFactory<TParam, TResult>() => Bind<TParam, TResult, Factory<TResult>>();
 
-        // private BindingToFactory<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
+        // private BindingToFactory<TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
         // {
         //     if (_bindings.ContainsKey(factoryType))
         //         throw new InvalidOperationException($"Type {factoryType} is already bound.");

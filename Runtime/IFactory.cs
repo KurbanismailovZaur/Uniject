@@ -4,4 +4,9 @@ namespace Uniject
     {
         public TResult Create();
     }
+
+    public interface IFactory<in TParam, out TResult>
+    {
+        public TResult Create(TParam origin);
+    }
 }

@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Uniject.InstanceGetters
 {
-    public class FromNewComponentOnNewGameObjectGetter : InstanceGetter
+    public class InstanceGetterFromNewComponentOnNewGameObject : InstanceGetter
     {
-        public FromNewComponentOnNewGameObjectGetter(Container container, Type concreteType) : base(container)
+        public InstanceGetterFromNewComponentOnNewGameObject(Container container, Type concreteType) : base(container)
         {
             if (!TypeValidator.TypeCanBeAddedAsComponent(concreteType))
-                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewGameObjectGetter)} must be a non-abstract Component.");
+                throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromNewComponentOnNewGameObject)} must be a non-abstract Component.");
         }
 
         public override object GetInstance(Type concreteType)

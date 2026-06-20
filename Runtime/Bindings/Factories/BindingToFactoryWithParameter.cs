@@ -1,9 +1,12 @@
 using System;
 using Uniject.InstanceGetters;
+using Uniject.InstanceGetters.Factories;
+using UnityEngine;
 
 namespace Uniject.Bindings.Factories
 {
-    public class BindingToFactoryWithParameter<TParam, TResult, TFactory> : Binding where TFactory : Factory, new()
+    public class BindingToFactoryWithParameter<TParam, TResult, TFactory> : Binding 
+        where TFactory : Factory, new()
     {
         public InstanceGetterWithParameter<TParam> InstanceGetter { get; set; }
         public Type ResultContractType { get; set; }

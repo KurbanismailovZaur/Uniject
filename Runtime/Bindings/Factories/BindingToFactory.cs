@@ -4,7 +4,7 @@ using Uniject.InstanceGetters;
 
 namespace Uniject.Bindings.Factories
 {
-    public class BindingToFactory<TResult, TFactory> : Binding where TFactory : Factory, new()
+    public class BindingToFactory<TResult, TFactory> : Binding where TFactory : Factory<TResult>, new()
     {
         public InstanceGetter InstanceGetter { get; set; }
         public Type ResultContractType { get; set; }
@@ -12,7 +12,7 @@ namespace Uniject.Bindings.Factories
 
         public BindingToFactory(Container container, Type resultType, Type factoryType) : base(container, factoryType)
         {
-            InstanceGetter = new FromConstructorGetter(container);
+            InstanceGetter = new InstanceGetterFromConstructor(container);
             ResultContractType = resultType;
             ResultConcreteType = resultType;
         }

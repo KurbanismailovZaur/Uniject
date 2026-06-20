@@ -2,14 +2,14 @@ using System;
 
 namespace Uniject.InstanceGetters
 {
-    public class FromInstanceGetter : InstanceGetter
+    public class InstanceGetterFromInstance : InstanceGetter
     {
         private readonly object _instance;
 
-        public FromInstanceGetter(Container container, object instance, Type concreteType) : base(container)
+        public InstanceGetterFromInstance(Container container, object instance, Type concreteType) : base(container)
         {
             if (instance == null)
-                throw new ArgumentNullException(nameof(instance), $"Instance for {nameof(FromInstanceGetter)} can not be null.");
+                throw new ArgumentNullException(nameof(instance), $"Instance for {nameof(InstanceGetterFromInstance)} can not be null.");
 
             if (!concreteType.IsAssignableFrom(instance.GetType()))
                 throw new ArgumentNullException(nameof(instance), $"Instance must be assignable with type {concreteType}.");

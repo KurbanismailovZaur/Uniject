@@ -4,28 +4,28 @@ using UnityEngine;
 
 namespace Uniject.InstanceGetters
 {
-    public class FromNewComponentOnNewPrefabGetter : InstanceGetter
+    public class InstanceGetterFromNewComponentOnNewPrefab : InstanceGetter
     {
         private readonly GameObject _prefab;
 
-        private FromNewComponentOnNewPrefabGetter(Container container, object prefab, Type concreteType) : base(container)
+        private InstanceGetterFromNewComponentOnNewPrefab(Container container, object prefab, Type concreteType) : base(container)
         {
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab),
-                    $"Prefab for {nameof(FromNewComponentOnNewPrefabGetter)} can not be null.");
+                    $"Prefab for {nameof(InstanceGetterFromNewComponentOnNewPrefab)} can not be null.");
 
             if (!TypeValidator.TypeIsComponent(concreteType))
-                throw new ArgumentException($"Type {concreteType} for {nameof(FromNewComponentOnNewPrefabGetter)} " +
+                throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromNewComponentOnNewPrefab)} " +
                     "must be a Component, but it is not.");
         }
 
-        public FromNewComponentOnNewPrefabGetter(Container container, GameObject prefab, Type concreteType) 
+        public InstanceGetterFromNewComponentOnNewPrefab(Container container, GameObject prefab, Type concreteType) 
             : this(container, (object)prefab, concreteType)
         {
             _prefab = prefab;
         }
 
-        public FromNewComponentOnNewPrefabGetter(Container container, Component prefab, Type concreteType) 
+        public InstanceGetterFromNewComponentOnNewPrefab(Container container, Component prefab, Type concreteType) 
             : this(container, (object)prefab, concreteType)
         {
             _prefab = prefab.gameObject;

@@ -14,7 +14,7 @@ namespace Uniject.Bindings
 
         public BindingToType(Container container, Type contractType) : base(container, contractType)
         {
-            InstanceGetter = new FromConstructorGetter(container);
+            InstanceGetter = new InstanceGetterFromConstructor(container);
         }
 
         protected virtual object CreateAndConfigureInstance()

@@ -3,7 +3,7 @@ using Uniject.Bindings;
 
 namespace Uniject.Bindings.Factories
 {
-    public class BindingToFactoryBuilder<TResult, TFactory> where TFactory : Factory, new()
+    public class BindingToFactoryBuilder<TResult, TFactory> where TFactory : Factory<TResult>, new()
     {
         protected readonly BindingToFactory<TResult, TFactory> _binding;
         protected readonly Container _container;
