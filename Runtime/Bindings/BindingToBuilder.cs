@@ -5,7 +5,7 @@ namespace Uniject.Bindings
 {
     public class BindingToBuilder : BindingBuilder
     {
-        public BindingToBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingToBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         public BindingFromBuilder To(Type concreteType)
         {
@@ -46,7 +46,7 @@ namespace Uniject.Bindings
 
     public class BindingToBuilder<TContract> : BindingBuilder
     {
-        public BindingToBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingToBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         public BindingFromBuilder To(Type concreteType)
         {

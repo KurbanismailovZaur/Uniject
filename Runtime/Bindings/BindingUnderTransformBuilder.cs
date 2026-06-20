@@ -5,7 +5,7 @@ namespace Uniject.Bindings
 {
     public class BindingUnderTransformBuilder : BindingBuilder
     {
-        public BindingUnderTransformBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingUnderTransformBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         public BindingAsBuilder UnderTransform(Transform parent)
         {

@@ -8,7 +8,7 @@ namespace Uniject.Bindings.Factories
         where TResultConcrete : TResult
         where TFactory : Factory, new()
     {
-        public FactoryBindingFromBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
+        public FactoryBindingFromBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
 
         private FactoryBindingAsBuilder<TResult, TResultConcrete, TFactory> From(InstanceGetter instanceGetter)
         {

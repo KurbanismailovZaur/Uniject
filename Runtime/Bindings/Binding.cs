@@ -4,64 +4,22 @@ using UnityEngine;
 
 namespace Uniject.Bindings
 {
-    public class Binding : BindingBase
+    public abstract class Binding
     {
-        public InstanceGetter InstanceGetter { get; set; }
-        public bool IsNonLazy { get; set; }
-        public bool IsEntryPoint { get; set; }
-        public string ObjectName { get; set; }
-        public Transform ParentTransform { get; set; }
+        public Container Container { get; set; }
+        public Type ContractType { get; set; }
+        public Type ConcreteType { get; set; }
+        public Scope Scope { get; set; }
+        public object CachedInstance { get; protected set; }
 
-        public Binding(Container container, Type contractType) : base(container, contractType)
+        public Binding(Container container, Type contractType)
         {
-            InstanceGetter = new FromConstructorGetter(container);
+            Container = container;
+            ContractType = contractType;
+            ConcreteType = contractType;
+            Scope = Scope.Transient;
         }
 
-        protected virtual object CreateAndConfigureInstance()
-        {
-            var instance = InstanceGetter.GetInstance(ConcreteType);
-
-            if (instance is GameObject gameObject)
-            {
-                if (ObjectName != null)
-                    gameObject.name = ObjectName;
-
-                if (ParentTransform != null)
-                    gameObject.transform.SetParent(ParentTransform);
-                else if (Container.ParentTransformForGameObjects != null)
-                    gameObject.transform.SetParent(Container.ParentTransformForGameObjects);
-            }
-            else if (instance is Component component)
-            {
-                if (ObjectName != null)
-                    component.gameObject.name = ObjectName;
-
-                if (ParentTransform != null)
-                    component.transform.SetParent(ParentTransform);
-                else if (Container.ParentTransformForGameObjects != null)
-                    component.transform.SetParent(Container.ParentTransformForGameObjects);
-            }
-
-            return instance;
-        }
-
-        public override object GetInstance()
-        {
-            if (Scope == Scope.Transient)
-            {
-                if (CachedInstance != null)
-                {
-                    var cachedInstance = CachedInstance;
-                    CachedInstance = null;
-                    return cachedInstance;
-                }
-
-                return CreateAndConfigureInstance();
-            }
-
-            return CachedInstance ??= CreateAndConfigureInstance();
-        }
-
-        internal void PrepareNonLazyInstance() => CachedInstance ??= CreateAndConfigureInstance();
+        public abstract object GetInstance();
     }
 }

@@ -5,7 +5,7 @@ namespace Uniject.Bindings.Factories
 {
    public class FactoryBindingToBuilder<TResult, TFactory> : FactoryBindingBuilder<TResult, TFactory> where TFactory : Factory, new()
     {
-        public FactoryBindingToBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
+        public FactoryBindingToBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
 
         public FactoryBindingFromBuilder<TResult, TResultConcrete, TFactory> To<TResultConcrete>() where TResultConcrete : TResult
         {

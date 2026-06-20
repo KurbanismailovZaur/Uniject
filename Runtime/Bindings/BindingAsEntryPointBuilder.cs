@@ -5,10 +5,10 @@ namespace Uniject.Bindings
 {
     public class BindingAsEntryPointBuilder
     {
-        private readonly Binding _binding;
+        private readonly BindingToType _binding;
         private readonly Container _container;
 
-        public BindingAsEntryPointBuilder(Container container, Binding binding)
+        public BindingAsEntryPointBuilder(Container container, BindingToType binding)
         {
             _container = container;
             _binding = binding;

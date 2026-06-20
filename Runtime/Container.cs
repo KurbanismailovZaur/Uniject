@@ -14,7 +14,7 @@ namespace Uniject
     {
         private Container _parentContainer;
 
-        private readonly Dictionary<Type, BindingBase> _bindings = new();
+        private readonly Dictionary<Type, Binding> _bindings = new();
         private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
@@ -34,7 +34,7 @@ namespace Uniject
 
         public BindingToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
 
-        private Binding CreateBinding(Type contractType)
+        private BindingToType CreateBinding(Type contractType)
         {
             if (contractType == null)
                 throw new ArgumentNullException(nameof(contractType));
@@ -42,7 +42,7 @@ namespace Uniject
             if (_bindings.ContainsKey(contractType))
                 throw new InvalidOperationException($"Type {contractType} is already bound.");
 
-            var binding = new Binding(this, contractType);
+            var binding = new BindingToType(this, contractType);
             _bindings[contractType] = binding;
             _bindingsTypes.Add(contractType);
             return binding;
@@ -77,12 +77,12 @@ namespace Uniject
 
         public FactoryBindingToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
 
-        private FactoryBinding<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
+        private BindingToFactory<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
         {
             if (_bindings.ContainsKey(factoryType))
                 throw new InvalidOperationException($"Type {factoryType} is already bound.");
 
-            var binding = new FactoryBinding<TResult, TFactory>(this, resultType, factoryType);
+            var binding = new BindingToFactory<TResult, TFactory>(this, resultType, factoryType);
             _bindings[factoryType] = binding;
             _bindingsTypes.Add(factoryType);
             return binding;
@@ -119,10 +119,10 @@ namespace Uniject
 
         private void ExitResolving(Type contractType) => _resolvingTypes.RemoveLast(contractType);
 
-        private BindingBase FindBinding(Type contractType)
+        private Binding FindBinding(Type contractType)
         {
             var currentContainer = this;
-            var binding = default(BindingBase);
+            var binding = default(Binding);
 
             while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
                 currentContainer = currentContainer._parentContainer;
@@ -136,7 +136,7 @@ namespace Uniject
             {
                 var bindingBase = _bindings[bindingType];
 
-                if (bindingBase is not Binding binding || !binding.IsNonLazy)
+                if (bindingBase is not BindingToType binding || !binding.IsNonLazy)
                     continue;
 
                 EnterResolving(binding.ContractType);
@@ -158,7 +158,7 @@ namespace Uniject
             {
                 var bindingBase = _bindings[bindingType];
 
-                if (bindingBase is not Binding binding || !binding.IsNonLazy || !binding.IsEntryPoint)
+                if (bindingBase is not BindingToType binding || !binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
 
                 if (binding.CachedInstance is not Component && binding.CachedInstance is IDisposable disposable)

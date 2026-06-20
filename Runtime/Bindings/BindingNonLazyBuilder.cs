@@ -2,7 +2,7 @@ namespace Uniject.Bindings
 {
     public class BindingNonLazyBuilder : BindingBuilder
     {
-        public BindingNonLazyBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingNonLazyBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         public BindingAsEntryPointBuilder NonLazy()
         {

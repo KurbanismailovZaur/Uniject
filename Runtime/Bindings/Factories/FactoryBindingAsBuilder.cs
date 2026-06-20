@@ -6,7 +6,7 @@ namespace Uniject.Bindings.Factories
         where TResultConcrete : TResult
         where TFactory : Factory, new()
     {
-        public FactoryBindingAsBuilder(Container container, FactoryBinding<TResult, TFactory> binding) : base(container, binding) { }
+        public FactoryBindingAsBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
 
         public void AsTransient() => _binding.Scope = Scope.Transient;
 

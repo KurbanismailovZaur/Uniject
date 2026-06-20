@@ -5,7 +5,7 @@ namespace Uniject.Bindings
 {
     public class BindingFromBuilder : BindingBuilder
     {
-        public BindingFromBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingFromBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         private BindingWithGameObjectNameBuilder From(InstanceGetter instanceGetter)
         {

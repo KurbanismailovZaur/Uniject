@@ -2,10 +2,10 @@ namespace Uniject.Bindings
 {
     public class BindingBuilder
     {
-        protected readonly Binding _binding;
+        protected readonly BindingToType _binding;
         protected readonly Container _container;
 
-        public BindingBuilder(Container container, Binding binding)
+        public BindingBuilder(Container container, BindingToType binding)
         {
             _container = container;
             _binding = binding;

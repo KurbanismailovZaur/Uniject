@@ -4,7 +4,7 @@ namespace Uniject.Bindings
 {
     public class BindingWithGameObjectNameBuilder : BindingBuilder
     {
-        public BindingWithGameObjectNameBuilder(Container container, Binding binding) : base(container, binding) { }
+        public BindingWithGameObjectNameBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
         public BindingUnderTransformBuilder WithGameObjectName(string name)
         {
