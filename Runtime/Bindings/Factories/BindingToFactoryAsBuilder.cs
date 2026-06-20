@@ -2,11 +2,11 @@ using Uniject.Bindings;
 
 namespace Uniject.Bindings.Factories
 {
-    public class FactoryBindingAsBuilder<TResult, TResultConcrete, TFactory> : FactoryBindingBuilder<TResult, TFactory> 
+    public class BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> : BindingToFactoryBuilder<TResult, TFactory> 
         where TResultConcrete : TResult
         where TFactory : Factory, new()
     {
-        public FactoryBindingAsBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
+        public BindingToFactoryAsBuilder(Container container, BindingToFactory<TResult, TFactory> binding) : base(container, binding) { }
 
         public void AsTransient() => _binding.Scope = Scope.Transient;
 

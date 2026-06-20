@@ -3,12 +3,12 @@ using Uniject.Lifecycle;
 
 namespace Uniject.Bindings
 {
-    public class BindingAsEntryPointBuilder
+    public class BindingToTypeAsEntryPointBuilder
     {
         private readonly BindingToType _binding;
         private readonly Container _container;
 
-        public BindingAsEntryPointBuilder(Container container, BindingToType binding)
+        public BindingToTypeAsEntryPointBuilder(Container container, BindingToType binding)
         {
             _container = container;
             _binding = binding;

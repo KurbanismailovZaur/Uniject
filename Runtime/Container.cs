@@ -32,7 +32,7 @@ namespace Uniject
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
-        public BindingToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
+        public BindingToTypeToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
 
         private BindingToType CreateBinding(Type contractType)
         {
@@ -48,7 +48,7 @@ namespace Uniject
             return binding;
         }
 
-        public BindingAsEntryPointBuilder BindInstance<T>(T instance)
+        public BindingToTypeAsEntryPointBuilder BindInstance<T>(T instance)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
@@ -70,12 +70,12 @@ namespace Uniject
             }
         }
 
-        public FactoryBindingToBuilder<TResult, TFactory> Bind<TResult, TFactory>() where TFactory : Factory<TResult>, new()
+        public BindingToFactoryToBuilder<TResult, TFactory> Bind<TResult, TFactory>() where TFactory : Factory<TResult>, new()
         {
             return new(this, CreateFactoryBinding<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         }
 
-        public FactoryBindingToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
+        public BindingToFactoryToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
 
         private BindingToFactory<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
         {
@@ -87,6 +87,50 @@ namespace Uniject
             _bindingsTypes.Add(factoryType);
             return binding;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+        // public FactoryBindingToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() where TFactory : Factory<TResult>, new()
+        // {
+        //     return new(this, CreateFactoryBinding<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
+        // }
+
+        // public FactoryBindingToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
+
+        // private BindingToFactory<TResult, TFactory> CreateFactoryBinding<TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
+        // {
+        //     if (_bindings.ContainsKey(factoryType))
+        //         throw new InvalidOperationException($"Type {factoryType} is already bound.");
+
+        //     var binding = new BindingToFactory<TResult, TFactory>(this, resultType, factoryType);
+        //     _bindings[factoryType] = binding;
+        //     _bindingsTypes.Add(factoryType);
+        //     return binding;
+        // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public T Resolve<T>() => (T)Resolve(typeof(T));
         
