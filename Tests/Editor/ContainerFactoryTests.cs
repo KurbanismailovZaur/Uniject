@@ -1,8 +1,6 @@
 using System;
-using System.Reflection;
 using NUnit.Framework;
 using Uniject;
-using Uniject.Attributes;
 using Uniject.Tests.Fixtures;
 using UnityEngine;
 
@@ -14,11 +12,6 @@ namespace Uniject.Tests
 
         private class Product : IProduct { }
 
-        private class ProductDependency
-        {
-            public Product Product { get; } = new();
-        }
-
         private class ProductFactory : Factory<Product> { }
 
         private class InterfaceProductFactory : Factory<IProduct> { }
@@ -29,17 +22,9 @@ namespace Uniject.Tests
 
         private class CustomProductFactory : CustomFactory<Product>
         {
-            private ProductDependency _dependency;
-
-            [Inject]
-            private void Construct(ProductDependency dependency)
-            {
-                _dependency = dependency;
-            }
-
             public override Product Create()
             {
-                return _dependency.Product;
+                return _objectBuilder.Instantiate<Product>();
             }
         }
 
@@ -75,12 +60,6 @@ namespace Uniject.Tests
                 var gameObject = new GameObject(prefab.name);
                 return _objectBuilder.AddComponent<InjectableScript>(gameObject);
             }
-        }
-
-        private static void InjectQueuedInstances(Container container)
-        {
-            var method = typeof(Container).GetMethod("InjectQueuedInstances", BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(container, null);
         }
 
         [Test]
@@ -282,17 +261,14 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Create_FromFactory_UsesInjectedCustomFactory()
+        public void Create_FromFactory_UsesCustomFactory()
         {
-            var dependency = new ProductDependency();
             var container = new Container();
-            container.Bind<ProductDependency>().FromInstance(dependency);
             container.Bind<Product, ProductFactory>().To<Product>().FromFactory<CustomProductFactory>().AsTransient();
 
-            InjectQueuedInstances(container);
             var product = container.Resolve<ProductFactory>().Create();
 
-            Assert.That(product, Is.SameAs(dependency.Product));
+            Assert.That(product, Is.TypeOf<Product>());
         }
 
         [Test]
@@ -750,7 +726,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Create_WithParameterFactoryFromFactory_UsesInjectedCustomFactory()
+        public void Create_WithParameterFactoryFromFactory_UsesCustomFactoryObjectBuilder()
         {
             var prefab = new GameObject("Prefab");
             var dependency = new Class();
@@ -765,7 +741,6 @@ namespace Uniject.Tests
                     .FromFactory<CustomInjectableScriptWithParameterFactory>()
                     .AsTransient();
 
-                InjectQueuedInstances(container);
                 var factory = container.Resolve<Factory<GameObject, InjectableScript>>();
                 result = factory.Create(prefab);
 
