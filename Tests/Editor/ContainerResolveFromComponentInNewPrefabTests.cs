@@ -1,0 +1,168 @@
+using System;
+using NUnit.Framework;
+using Uniject;
+using Uniject.Attributes;
+using Uniject.Tests.Fixtures;
+using UnityEngine;
+
+namespace Uniject.Tests
+{
+    public class ContainerResolveFromComponentInNewPrefabTests : ContainerResolveTestFixture
+    {
+        [Test]
+        public void Bind_FromComponentInNewPrefab_WhenGameObjectPrefabIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Script>().To<Script>().FromComponentInNewPrefab((GameObject)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_FromComponentInNewPrefab_WhenComponentPrefabIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Script>().To<Script>().FromComponentInNewPrefab((Component)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_FromComponentInNewPrefab_WhenConcreteTypeIsNotComponentOrInterface_ThrowsArgumentException()
+        {
+            var prefab = new GameObject("Prefab");
+
+            try
+            {
+                var container = new Container();
+
+                Assert.That(
+                    () => container.Bind<Class>().To<Class>().FromComponentInNewPrefab(prefab),
+                    Throws.TypeOf<ArgumentException>());
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Bind_FromComponentInNewPrefab_WhenPrefabDoesNotHaveRequestedComponent_ThrowsArgumentException()
+        {
+            var prefab = new GameObject("Prefab");
+
+            try
+            {
+                var container = new Container();
+
+                Assert.That(
+                    () => container.Bind<Script>().To<Script>().FromComponentInNewPrefab(prefab),
+                    Throws.TypeOf<ArgumentException>());
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromComponentInNewPrefab_WhenPrefabIsGameObject_ReturnsComponentFromClonedPrefab()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<Script>();
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Script>().To<Script>().FromComponentInNewPrefab(prefabScript.gameObject);
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript, Is.Not.Null);
+                Assert.That(resolvedScript, Is.Not.SameAs(prefabScript));
+                Assert.That(resolvedScript.gameObject, Is.Not.SameAs(prefabScript.gameObject));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromComponentInNewPrefab_WhenPrefabIsComponent_ReturnsComponentFromClonedPrefab()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<Script>();
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Script>().To<Script>().FromComponentInNewPrefab(prefabScript);
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript, Is.Not.Null);
+                Assert.That(resolvedScript, Is.Not.SameAs(prefabScript));
+                Assert.That(resolvedScript.gameObject, Is.Not.SameAs(prefabScript.gameObject));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromComponentInNewPrefab_WhenConcreteTypeIsInterface_ReturnsComponentImplementingInterface()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<ScriptImplementedIInterface>();
+            var resolved = default(IInterface);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<IInterface>().To<IInterface>().FromComponentInNewPrefab(prefabScript.gameObject);
+
+                resolved = container.Resolve<IInterface>();
+
+                Assert.That(resolved, Is.Not.Null);
+                Assert.That(resolved, Is.TypeOf<ScriptImplementedIInterface>());
+                Assert.That(resolved, Is.Not.SameAs(prefabScript));
+                Assert.That(((ScriptImplementedIInterface)resolved).gameObject, Is.Not.SameAs(prefabScript.gameObject));
+            }
+            finally
+            {
+                if (resolved != null)
+                    UnityEngine.Object.DestroyImmediate(((ScriptImplementedIInterface)resolved).gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+
+        [Test]
+        public void Bind_FromComponentInNewPrefab_WhenPrefabDoesNotHaveComponentImplementingInterface_ThrowsArgumentException()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<Script>();
+
+            try
+            {
+                var container = new Container();
+
+                Assert.That(
+                    () => container.Bind<IInterface>().To<IInterface>().FromComponentInNewPrefab(prefabScript.gameObject),
+                    Throws.TypeOf<ArgumentException>());
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+    }
+}
