@@ -43,6 +43,48 @@ namespace Uniject.Tests
             }
         }
 
+        private class CustomScriptWithParameterFactory : IFactory<GameObject, Script>
+        {
+            public Script Create(GameObject prefab)
+            {
+                return new GameObject(prefab.name).AddComponent<Script>();
+            }
+        }
+
+        private class CustomInterfaceScriptWithParameterFactory : IFactory<GameObject, ScriptImplementedIInterface>
+        {
+            public ScriptImplementedIInterface Create(GameObject prefab)
+            {
+                return new GameObject(prefab.name).AddComponent<ScriptImplementedIInterface>();
+            }
+        }
+
+        private class CustomScriptWithInterfaceParameterFactory : IFactory<IInterface, Script>
+        {
+            public Script Create(IInterface prefab)
+            {
+                var prefabComponent = (Component)prefab;
+                return new GameObject(prefabComponent.gameObject.name).AddComponent<Script>();
+            }
+        }
+
+        private class CustomInjectableScriptWithParameterFactory : IFactory<GameObject, InjectableScript>
+        {
+            private IObjectBuilder _objectBuilder;
+
+            [Inject]
+            private void Construct(IObjectBuilder objectBuilder)
+            {
+                _objectBuilder = objectBuilder;
+            }
+
+            public InjectableScript Create(GameObject prefab)
+            {
+                var gameObject = new GameObject(prefab.name);
+                return _objectBuilder.AddComponent<InjectableScript>(gameObject);
+            }
+        }
+
         private static void InjectQueuedInstances(Container container)
         {
             var method = typeof(Container).GetMethod("InjectQueuedInstances", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -620,6 +662,132 @@ namespace Uniject.Tests
             Assert.That(
                 () => factory.Create(new ClassImplementedIInterface()),
                 Throws.TypeOf<ArgumentException>());
+        }
+
+        [Test]
+        public void Create_WithParameterFactoryFromFactory_UsesCustomFactory()
+        {
+            var prefab = new GameObject("Prefab");
+            var result = default(Script);
+
+            try
+            {
+                var container = new Container();
+                container.BindFactory<GameObject, Script>()
+                    .To<Script>()
+                    .FromFactory<CustomScriptWithParameterFactory>()
+                    .AsTransient();
+
+                var factory = container.Resolve<Factory<GameObject, Script>>();
+                result = factory.Create(prefab);
+
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.gameObject, Is.Not.SameAs(prefab));
+                Assert.That(result.gameObject.name, Is.EqualTo(prefab.name));
+                Assert.That(prefab.GetComponent<Script>(), Is.Null);
+            }
+            finally
+            {
+                if (result != null)
+                    UnityEngine.Object.DestroyImmediate(result.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Create_WithParameterFactoryFromFactoryAndConcreteResultType_ReturnsConcreteResultAsContract()
+        {
+            var prefab = new GameObject("Prefab");
+            var result = default(IInterface);
+
+            try
+            {
+                var container = new Container();
+                container.BindFactory<GameObject, IInterface>()
+                    .To<ScriptImplementedIInterface>()
+                    .FromFactory<CustomInterfaceScriptWithParameterFactory>()
+                    .AsTransient();
+
+                var factory = container.Resolve<Factory<GameObject, IInterface>>();
+                result = factory.Create(prefab);
+
+                Assert.That(result, Is.TypeOf<ScriptImplementedIInterface>());
+                Assert.That(((Component)result).gameObject, Is.Not.SameAs(prefab));
+                Assert.That(((Component)result).gameObject.name, Is.EqualTo(prefab.name));
+                Assert.That(prefab.GetComponent<ScriptImplementedIInterface>(), Is.Null);
+            }
+            finally
+            {
+                if (result is Component resultComponent)
+                    UnityEngine.Object.DestroyImmediate(resultComponent.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Create_WithParameterFactoryFromFactory_WhenParameterIsInterface_UsesCustomFactory()
+        {
+            var prefabScript = new GameObject("Prefab").AddComponent<ScriptImplementedIInterface>();
+            var result = default(Script);
+
+            try
+            {
+                var container = new Container();
+                container.BindFactory<IInterface, Script>()
+                    .To<Script>()
+                    .FromFactory<CustomScriptWithInterfaceParameterFactory>()
+                    .AsTransient();
+
+                var factory = container.Resolve<Factory<IInterface, Script>>();
+                result = factory.Create(prefabScript);
+
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.gameObject, Is.Not.SameAs(prefabScript.gameObject));
+                Assert.That(result.gameObject.name, Is.EqualTo(prefabScript.gameObject.name));
+                Assert.That(prefabScript.GetComponent<Script>(), Is.Null);
+            }
+            finally
+            {
+                if (result != null)
+                    UnityEngine.Object.DestroyImmediate(result.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
+            }
+        }
+
+        [Test]
+        public void Create_WithParameterFactoryFromFactory_UsesInjectedCustomFactory()
+        {
+            var prefab = new GameObject("Prefab");
+            var dependency = new Class();
+            var result = default(InjectableScript);
+
+            try
+            {
+                var container = new Container();
+                container.Bind<Class>().FromInstance(dependency);
+                container.BindFactory<GameObject, InjectableScript>()
+                    .To<InjectableScript>()
+                    .FromFactory<CustomInjectableScriptWithParameterFactory>()
+                    .AsTransient();
+
+                InjectQueuedInstances(container);
+                var factory = container.Resolve<Factory<GameObject, InjectableScript>>();
+                result = factory.Create(prefab);
+
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.gameObject.name, Is.EqualTo(prefab.name));
+                Assert.That(result.Dependency, Is.SameAs(dependency));
+            }
+            finally
+            {
+                if (result != null)
+                    UnityEngine.Object.DestroyImmediate(result.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
         }
 
         [Test]
