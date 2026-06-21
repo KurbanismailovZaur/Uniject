@@ -1,27 +1,34 @@
 using System;
 using Uniject.InstanceGetters;
+using Uniject.InstanceGetters.Factories;
 
 namespace Uniject
 {
     public abstract class Factory
     {
-        protected InstanceGetter _instanceGetter;
+        protected InstanceGetterBase _instanceGetter;
         protected Type _resultConcreteType;
+    }
 
+    public class Factory<TResult> : Factory, IFactory<TResult>
+    {
         internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType)
         {
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
         }
-    }
 
-    public class Factory<TResult> : Factory, IFactory<TResult>
-    {
-        public TResult Create() => (TResult)_instanceGetter.GetInstance(_resultConcreteType);
+        public TResult Create() => (TResult)((InstanceGetter)_instanceGetter).GetInstance(_resultConcreteType);
     }
 
     public class Factory<TParam, TResult> : Factory, IFactory<TParam, TResult>
     {
-        public TResult Create(TParam origin) => (TResult)_instanceGetter.GetInstance(_resultConcreteType);
+        internal void Construct(InstanceGetterWithParameter<TParam> instanceGetter, Type resultConcreteType)
+        {
+            _instanceGetter = instanceGetter;
+            _resultConcreteType = resultConcreteType;
+        }
+
+        public TResult Create(TParam origin) => (TResult)((InstanceGetterWithParameter<TParam>)_instanceGetter).GetInstance(_resultConcreteType, origin);
     }
 }

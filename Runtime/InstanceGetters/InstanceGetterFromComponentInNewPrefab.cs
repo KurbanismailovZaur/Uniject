@@ -18,7 +18,7 @@ namespace Uniject.InstanceGetters
         public InstanceGetterFromComponentInNewPrefab(Container container, GameObject prefab, Type concreteType) 
             : this(container, prefab)
         {
-            if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
+            if (!TypeValidator.TypeIsInterfaceOrComponent(concreteType))
                 throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromComponentInNewPrefab)} must " + 
                     "be a Component or an interface.", nameof(concreteType));
 
@@ -32,7 +32,7 @@ namespace Uniject.InstanceGetters
         public InstanceGetterFromComponentInNewPrefab(Container container, Component prefab, Type concreteType) 
             : this(container, prefab)
         {
-            if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
+            if (!TypeValidator.TypeIsInterfaceOrComponent(concreteType))
                 throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromComponentInNewPrefab)} must " + 
                     "be a Component or an interface.", nameof(concreteType));
 

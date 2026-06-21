@@ -4,37 +4,37 @@ using UnityEngine;
 
 namespace Uniject.InstanceGetters.Factories
 {
-    // public class InstanceGetterWithParameterFromComponentInNewPrefab<TParam> : InstanceGetterWithParameter<TParam>
-    // {
-    //     private readonly Component _prefab;
+    public class InstanceGetterWithParameterFromComponentInNewPrefab<TParam> : InstanceGetterWithParameter<TParam>
+    {
+        public InstanceGetterWithParameterFromComponentInNewPrefab(Container container, Type paramType, Type concreteType) : base(container)
+        {
+            if (paramType != typeof(GameObject) && !TypeValidator.TypeIsInterfaceOrComponent(paramType))
+                throw new ArgumentException($"Parameter type {paramType} for {nameof(InstanceGetterWithParameterFromComponentInNewPrefab<TParam>)} " + 
+                    "must be GameObject, Component or interface.", nameof(paramType));
 
-    //     public InstanceGetterWithParameterFromComponentInNewPrefab(Container container, Type concreteType) : base(container)
-    //     {
-    //         if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
-    //             throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromComponentInNewPrefab)} must " + 
-    //                 "be a Component or an interface.", nameof(concreteType));
+            if (!TypeValidator.TypeIsInterfaceOrComponent(concreteType))
+                throw new ArgumentException($"Concrete type {concreteType} for {nameof(InstanceGetterFromComponentInNewPrefab)} " + 
+                    "must be a Component or an interface.", nameof(concreteType));
+        }
 
-    //         _prefab = prefab.GetComponent(concreteType);
+        public override object GetInstance(Type concreteType, TParam prefab)
+        {
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab),
+                    $"Prefab for {nameof(InstanceGetterFromComponentInNewPrefab)} can not be null."); 
+            
+            var prefabComponent = prefab switch
+            {
+                GameObject gameObject => gameObject.GetComponent(concreteType),
+                Component component => concreteType.IsInstanceOfType(component) ? component : component.GetComponent(concreteType),
+                _ => throw new ArgumentException("Prefab must be GameObject or Component.", nameof(prefab))
+            };
 
-    //         if (_prefab == null)
-    //             throw new ArgumentException($"Prefab for {nameof(InstanceGetterFromComponentInNewPrefab)} must have a " +
-    //                 $"component assignable to type {concreteType}.", nameof(prefab));
-    //     }
+            if (prefabComponent == null)
+                throw new ArgumentException($"Prefab for {nameof(InstanceGetterFromComponentInNewPrefab)} must have a " + 
+                    $"component assignable to type {concreteType}.", nameof(prefab));
 
-    //     public InstanceGetterFromComponentInNewPrefab(Container container, Component prefab, Type concreteType) 
-    //         : this(container, prefab)
-    //     {
-    //         if (TypeValidator.TypeIsNotInterfaceOrComponent(concreteType))
-    //             throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromComponentInNewPrefab)} must " + 
-    //                 "be a Component or an interface.", nameof(concreteType));
-
-    //         _prefab = prefab.GetComponent(concreteType);
-
-    //         if (_prefab == null)
-    //             throw new ArgumentException($"Prefab for {nameof(InstanceGetterFromComponentInNewPrefab)} must have a " + 
-    //                 $"component assignable to type {concreteType}.", nameof(prefab));
-    //     }
-
-    //     public override object GetInstance(Type concreteType) => _container.Instantiate(_prefab);
-    // }
+            return _container.Instantiate(prefabComponent);
+        }
+    }
 }

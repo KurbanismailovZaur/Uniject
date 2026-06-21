@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactoryWithParameterBuilder<TParam, TResult, TFactory> 
-        where TFactory : Factory, new()
+        where TFactory : Factory<TParam, TResult>, new()
     {
         protected readonly BindingToFactoryWithParameter<TParam, TResult, TFactory> _binding;
         protected readonly Container _container;

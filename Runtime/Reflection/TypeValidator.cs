@@ -9,6 +9,6 @@ namespace Uniject.Reflection
 
         public static bool TypeIsComponent(Type type) => typeof(Component).IsAssignableFrom(type);
 
-        public static bool TypeIsNotInterfaceOrComponent(Type type) => !type.IsInterface && !TypeIsComponent(type);
+        public static bool TypeIsInterfaceOrComponent(Type type) => type.IsInterface || TypeIsComponent(type);
     }
 }

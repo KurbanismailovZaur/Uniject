@@ -4,11 +4,13 @@ using UnityEngine;
 
 namespace Uniject.Bindings.Factories
 {
-    public class BindingToFactoryWithParameterFromBuilder<TParam, TResult, TResultConcrete, TFactory> : BindingToFactoryWithParameterBuilder<TParam, TResult, TFactory> 
+    public class BindingToFactoryWithParameterFromBuilder<TParam, TResult, TResultConcrete, TFactory> 
+        : BindingToFactoryWithParameterBuilder<TParam, TResult, TFactory> 
         where TResultConcrete : TResult
-        where TFactory : Factory, new()
+        where TFactory : Factory<TParam, TResult>, new()
     {
-        public BindingToFactoryWithParameterFromBuilder(Container container, BindingToFactoryWithParameter<TParam, TResult, TFactory> binding) : base(container, binding) { }
+        public BindingToFactoryWithParameterFromBuilder(Container container, BindingToFactoryWithParameter<TParam, TResult, TFactory> binding) 
+            : base(container, binding) { }
 
         private BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> From(InstanceGetterWithParameter<TParam> instanceGetter)
         {
@@ -16,12 +18,16 @@ namespace Uniject.Bindings.Factories
             return new BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory>(_container, _binding);
         }
 
-        // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromComponentInNewPrefab() => From(new FromComponentInNewPrefabGetter(_container, prefab, _binding.ResultConcreteType));
-        
+        public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromComponentInNewPrefab()
+        {
+            return From(new InstanceGetterWithParameterFromComponentInNewPrefab<TParam>(_container, _binding.ParamType, 
+                _binding.ResultConcreteType));
+        }
+
         // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromNewComponentOnNewPrefab() => From(new FromNewComponentOnNewPrefabGetter(_container, prefab, _binding.ResultConcreteType));
 
         // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromNewComponentOnNewGameObject() => From(new InstanceGetterFromNewComponentOnNewGameObject(_container, _binding.ResultConcreteType));
-        
+
         // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromFactory<TCustomFactory>() where TCustomFactory : IFactory<TResultConcrete>, new() => From(new InstanceGetterFromFactory<TResultConcrete, TCustomFactory>(_container));
 
         // public void AsTransient() => FromComponentInNewPrefab().AsTransient();

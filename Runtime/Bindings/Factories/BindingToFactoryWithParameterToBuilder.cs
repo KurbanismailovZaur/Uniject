@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> : BindingToFactoryWithParameterBuilder<TParam, TResult, TFactory> 
-        where TFactory : Factory, new()
+        where TFactory : Factory<TParam, TResult>, new()
     {
         public BindingToFactoryWithParameterToBuilder(Container container, BindingToFactoryWithParameter<TParam, TResult, TFactory> binding) : base(container, binding) { }
 
@@ -14,7 +14,7 @@ namespace Uniject.Bindings.Factories
             return new BindingToFactoryWithParameterFromBuilder<TParam, TResult, TResultConcrete, TFactory>(_container, _binding);
         }
         
-        // public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab() => To<TResult>().FromComponentInNewPrefab();
+        public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromComponentInNewPrefab() => To<TResult>().FromComponentInNewPrefab();
         
         // public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab() => To<TResult>().FromNewComponentOnNewPrefab();
 

@@ -88,49 +88,23 @@ namespace Uniject
             return binding;
         }
 
+        public BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() where TFactory : Factory<TParam, TResult>, new()
+        {
+            return new(this, CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(typeof(TParam), typeof(TResult), typeof(TFactory)));
+        }
 
+        public BindingToFactoryWithParameterToBuilder<TParam, TResult, Factory<TParam, TResult>> BindFactory<TParam, TResult>() => Bind<TParam, TResult, Factory<TParam, TResult>>();
 
+        private BindingToFactoryWithParameter<TParam, TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type paramType, Type resultType, Type factoryType) where TFactory : Factory<TParam, TResult>, new()
+        {
+            if (_bindings.ContainsKey(factoryType))
+                throw new InvalidOperationException($"Type {factoryType} is already bound.");
 
-
-
-
-
-
-
-
-
-        // public BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() where TFactory : Factory<TParam, TResult>, new()
-        // {
-        //     return new(this, CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(typeof(TResult), typeof(TFactory)));
-        // }
-
-        // public BindingToFactoryWithParameterToBuilder<TParam, TResult, Factory<TResult>> BindFactory<TParam, TResult>() => Bind<TParam, TResult, Factory<TResult>>();
-
-        // private BindingToFactory<TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type resultType, Type factoryType) where TFactory : Factory, new()
-        // {
-        //     if (_bindings.ContainsKey(factoryType))
-        //         throw new InvalidOperationException($"Type {factoryType} is already bound.");
-
-        //     var binding = new BindingToFactory<TResult, TFactory>(this, resultType, factoryType);
-        //     _bindings[factoryType] = binding;
-        //     _bindingsTypes.Add(factoryType);
-        //     return binding;
-        // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            var binding = new BindingToFactoryWithParameter<TParam, TResult, TFactory>(this, paramType, resultType, factoryType);
+            _bindings[factoryType] = binding;
+            _bindingsTypes.Add(factoryType);
+            return binding;
+        }
 
         public T Resolve<T>() => (T)Resolve(typeof(T));
         
