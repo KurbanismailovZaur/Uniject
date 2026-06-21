@@ -30,9 +30,11 @@ namespace Uniject.Bindings.Factories
                 _binding.ResultConcreteType));
         }
 
-        // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromNewComponentOnNewGameObject() => From(new InstanceGetterFromNewComponentOnNewGameObject(_container, _binding.ResultConcreteType));
-
-        // public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromFactory<TCustomFactory>() where TCustomFactory : IFactory<TResultConcrete>, new() => From(new InstanceGetterFromFactory<TResultConcrete, TCustomFactory>(_container));
+        public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromFactory<TCustomFactory>()
+            where TCustomFactory : IFactory<TParam, TResultConcrete>, new()
+        {
+            return From(new InstanceGetterWithParameterFromFactory<TParam, TResultConcrete, TCustomFactory>(_container));
+        }
 
         public void AsTransient() => FromComponentInNewPrefab().AsTransient();
 
