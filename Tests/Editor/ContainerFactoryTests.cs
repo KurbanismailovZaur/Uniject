@@ -27,7 +27,7 @@ namespace Uniject.Tests
 
         private class InjectableScriptFactory : Factory<InjectableScript> { }
 
-        private class CustomProductFactory : IFactory<Product>
+        private class CustomProductFactory : CustomFactory<Product>
         {
             private ProductDependency _dependency;
 
@@ -37,48 +37,40 @@ namespace Uniject.Tests
                 _dependency = dependency;
             }
 
-            public Product Create()
+            public override Product Create()
             {
                 return _dependency.Product;
             }
         }
 
-        private class CustomScriptWithParameterFactory : IFactory<GameObject, Script>
+        private class CustomScriptWithParameterFactory : CustomFactory<GameObject, Script>
         {
-            public Script Create(GameObject prefab)
+            public override Script Create(GameObject prefab)
             {
                 return new GameObject(prefab.name).AddComponent<Script>();
             }
         }
 
-        private class CustomInterfaceScriptWithParameterFactory : IFactory<GameObject, ScriptImplementedIInterface>
+        private class CustomInterfaceScriptWithParameterFactory : CustomFactory<GameObject, ScriptImplementedIInterface>
         {
-            public ScriptImplementedIInterface Create(GameObject prefab)
+            public override ScriptImplementedIInterface Create(GameObject prefab)
             {
                 return new GameObject(prefab.name).AddComponent<ScriptImplementedIInterface>();
             }
         }
 
-        private class CustomScriptWithInterfaceParameterFactory : IFactory<IInterface, Script>
+        private class CustomScriptWithInterfaceParameterFactory : CustomFactory<IInterface, Script>
         {
-            public Script Create(IInterface prefab)
+            public override Script Create(IInterface prefab)
             {
                 var prefabComponent = (Component)prefab;
                 return new GameObject(prefabComponent.gameObject.name).AddComponent<Script>();
             }
         }
 
-        private class CustomInjectableScriptWithParameterFactory : IFactory<GameObject, InjectableScript>
+        private class CustomInjectableScriptWithParameterFactory : CustomFactory<GameObject, InjectableScript>
         {
-            private IObjectBuilder _objectBuilder;
-
-            [Inject]
-            private void Construct(IObjectBuilder objectBuilder)
-            {
-                _objectBuilder = objectBuilder;
-            }
-
-            public InjectableScript Create(GameObject prefab)
+            public override InjectableScript Create(GameObject prefab)
             {
                 var gameObject = new GameObject(prefab.name);
                 return _objectBuilder.AddComponent<InjectableScript>(gameObject);

@@ -31,7 +31,7 @@ namespace Uniject.Bindings.Factories
         }
 
         public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResultConcrete, TFactory> FromFactory<TCustomFactory>()
-            where TCustomFactory : IFactory<TParam, TResultConcrete>, new()
+            where TCustomFactory : CustomFactory<TParam, TResultConcrete>, new()
         {
             return From(new InstanceGetterWithParameterFromFactory<TParam, TResultConcrete, TCustomFactory>(_container));
         }

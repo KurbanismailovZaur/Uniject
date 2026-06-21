@@ -27,7 +27,7 @@ namespace Uniject.Bindings.Factories
         }
 
         public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromFactory<TCustomFactory>()
-            where TCustomFactory : IFactory<TParam, TResult>, new()
+            where TCustomFactory : CustomFactory<TParam, TResult>, new()
         {
             return To<TResult>().FromFactory<TCustomFactory>();
         }

@@ -12,22 +12,47 @@ namespace Uniject.Bindings.Factories
             _binding.ResultConcreteType = typeof(TResultConcrete);
             return new BindingToFactoryFromBuilder<TResult, TResultConcrete, TFactory>(_container, _binding);
         }
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromConstructor() => To<TResult>().FromConstructor();
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab(GameObject prefab) => To<TResult>().FromComponentInNewPrefab(prefab);
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab(Component prefab) => To<TResult>().FromComponentInNewPrefab(prefab);
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab(GameObject prefab) => To<TResult>().FromNewComponentOnNewPrefab(prefab);
 
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab(Component prefab) => To<TResult>().FromNewComponentOnNewPrefab(prefab);
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewGameObject() => To<TResult>().FromNewComponentOnNewGameObject();
-        
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromResolve() => To<TResult>().FromResolve();
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromConstructor()
+        {
+            return To<TResult>().FromConstructor();
+        }
 
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromFactory<TCustomFactory>() where TCustomFactory : IFactory<TResult>, new() => To<TResult>().FromFactory<TCustomFactory>();
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab(GameObject prefab)
+        {
+            return To<TResult>().FromComponentInNewPrefab(prefab);
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab(Component prefab)
+        {
+            return To<TResult>().FromComponentInNewPrefab(prefab);
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab(GameObject prefab)
+        {
+            return To<TResult>().FromNewComponentOnNewPrefab(prefab);
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab(Component prefab)
+        {
+            return To<TResult>().FromNewComponentOnNewPrefab(prefab);
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewGameObject()
+        {
+            return To<TResult>().FromNewComponentOnNewGameObject();
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromResolve()
+        {
+            return To<TResult>().FromResolve();
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromFactory<TCustomFactory>()
+            where TCustomFactory : CustomFactory<TResult>, new()
+        {
+            return To<TResult>().FromFactory<TCustomFactory>();
+        }
 
         public void AsTransient() => FromConstructor().AsTransient();
 
