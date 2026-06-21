@@ -16,14 +16,14 @@ namespace Uniject.Bindings.Factories
         
         public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromComponentInNewPrefab() => To<TResult>().FromComponentInNewPrefab();
         
-        // public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewPrefab() => To<TResult>().FromNewComponentOnNewPrefab();
+        public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromNewComponentOnNewPrefab() => To<TResult>().FromNewComponentOnNewPrefab();
 
         // public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnNewGameObject() => To<TResult>().FromNewComponentOnNewGameObject();
         
         // public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromFactory<TCustomFactory>() where TCustomFactory : IFactory<TResult>, new() => To<TResult>().FromFactory<TCustomFactory>();
 
-        // public void AsTransient() => FromComponentInNewPrefab().AsTransient();
+        public void AsTransient() => FromComponentInNewPrefab().AsTransient();
 
-        // public void AsCached() => FromComponentInNewPrefab().AsCached();
+        public void AsCached() => FromComponentInNewPrefab().AsCached();
     }
 }
