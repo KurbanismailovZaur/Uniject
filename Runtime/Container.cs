@@ -246,7 +246,7 @@ namespace Uniject
             InjectQueuedInstances();
             RunEntryPoints();
         }
-
+ 
         public T Instantiate<T>() => (T)Instantiate(typeof(T));
 
         public object Instantiate(Type concreteType)
