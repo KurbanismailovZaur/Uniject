@@ -5,54 +5,55 @@ namespace Uniject.Bindings
 {
     public class BindingToTypeFromBuilder : BindingToTypeBuilder
     {
-        public BindingToTypeFromBuilder(Container container, BindingToType binding) : base(container, binding) { }
-
-        private BindingToTypeWithGameObjectNameBuilder From(InstanceGetter instanceGetter)
-        {
-            _binding.InstanceGetter = instanceGetter;
-            return new BindingToTypeWithGameObjectNameBuilder(_container, _binding);
-        }
+        public BindingToTypeFromBuilder(Container container, BindingToType binding) 
+            : base(container, binding) { }
 
         public BindingToTypeAsBuilder FromConstructor()
         {
-            return From(new InstanceGetterFromConstructor(_container)).WithGameObjectName(null).UnderTransform(null);
+            _binding.InstanceGetter = new InstanceGetterFromConstructor(_container);
+            return new (_container, _binding);
         }
 
         public BindingToTypeAsBuilder FromInstance(object instance)
         {
-            return From(new InstanceGetterFromInstance(_container, instance, _binding.ConcreteType))
-                .WithGameObjectName(null).UnderTransform(null);
+            _binding.InstanceGetter = new InstanceGetterFromInstance(_container, instance, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab)
         {
-            return From(new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ConcreteType));
+            _binding.InstanceGetter = new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab)
         {
-            return From(new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ConcreteType));
+            _binding.InstanceGetter = new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab)
         {
-            return From(new InstanceGetterFromNewComponentOnNewPrefab(_container, prefab, _binding.ConcreteType));
+            _binding.InstanceGetter = new InstanceGetterFromNewComponentOnNewPrefab(_container, prefab, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab)
         {
-            return From(new InstanceGetterFromNewComponentOnNewPrefab(_container, prefab, _binding.ConcreteType));
+            _binding.InstanceGetter = new InstanceGetterFromNewComponentOnNewPrefab(_container, prefab, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewGameObject()
         {
-            return From(new InstanceGetterFromNewComponentOnNewGameObject(_container, _binding.ConcreteType));
+            _binding.InstanceGetter = new InstanceGetterFromNewComponentOnNewGameObject(_container, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeAsBuilder FromResolve()
         {
-            return From(new InstanceGetterFromResolve(_container, _binding.ContractType, _binding.ConcreteType))
-                .WithGameObjectName(null).UnderTransform(null);
+            _binding.InstanceGetter = new InstanceGetterFromResolve(_container, _binding.ContractType, _binding.ConcreteType);
+            return new (_container, _binding);
         }
 
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();

@@ -6,7 +6,6 @@ namespace Uniject.Bindings
 {
     public class BindingToType : Binding
     {
-        public InstanceGetter InstanceGetter { get; set; }
         public bool IsNonLazy { get; set; }
         public bool IsEntryPoint { get; set; }
         public string ObjectName { get; set; }
