@@ -1,12 +1,10 @@
 using System;
-using Uniject.Bindings;
 using Uniject.InstanceGetters;
 
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactory<TResult, TFactory> : Binding where TFactory : Factory<TResult>, new()
     {
-        public InstanceGetter InstanceGetter { get; set; }
         public Type ResultContractType { get; set; }
         public Type ResultConcreteType { get; set; }
 

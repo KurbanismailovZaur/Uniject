@@ -19,22 +19,51 @@ namespace Uniject.Bindings
             return new BindingToTypeFromBuilder(_container, _binding);
         }
 
-        public BindingToTypeFromBuilder To<TConcrete>() => To(typeof(TConcrete));
+        public BindingToTypeFromBuilder To<TConcrete>()
+        {
+            return To(typeof(TConcrete));
+        }
 
-        public BindingToTypeAsBuilder FromConstructor() => To(_binding.ContractType).FromConstructor();
+        public BindingToTypeAsBuilder FromConstructor()
+        {
+            return To(_binding.ContractType).FromConstructor();
+        }
 
-        public BindingToTypeAsBuilder FromInstance(object instance) => To(_binding.ContractType).FromInstance(instance);
-        
-        public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
-        
-        public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab) => To(_binding.ContractType).FromComponentInNewPrefab(prefab);
-        
-        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
+        public BindingToTypeAsBuilder FromInstance(object instance)
+        {
+            return To(_binding.ContractType).FromInstance(instance);
+        }
 
-        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab) => To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
-        
-        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewGameObject() => To(_binding.ContractType).FromNewComponentOnNewGameObject();
-        
+        public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab)
+        {
+            return To(_binding.ContractType).FromComponentInNewPrefab(prefab);
+        }
+
+        public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(Component prefab)
+        {
+            return To(_binding.ContractType).FromComponentInNewPrefab(prefab);
+        }
+
+        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(GameObject prefab)
+        {
+            return To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
+        }
+
+        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewPrefab(Component prefab)
+        {
+            return To(_binding.ContractType).FromNewComponentOnNewPrefab(prefab);
+        }
+
+        public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewGameObject()
+        {
+            return To(_binding.ContractType).FromNewComponentOnNewGameObject();
+        }
+
+        public BindingToTypeByBuilder FromSubcontainerResolve()
+        {
+            return To(_binding.ContractType).FromSubcontainerResolve();
+        }
+
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();
