@@ -52,9 +52,13 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsBuilder FromResolve()
         {
-            return From(new InstanceGetterFromResolve(_container, _binding.ContractType, _binding.ConcreteType))
-                .WithGameObjectName(null).UnderTransform(null);
             _binding.InstanceGetter = new InstanceGetterFromResolve(_container, _binding.ContractType, _binding.ConcreteType);
+            return new (_container, _binding);
+        }
+
+        public BindingToTypeByBuilder FromSubcontainerResolve()
+        {
+            _binding.InstanceGetter = new InstanceGetterFromSubContainerResolve(_container);
             return new (_container, _binding);
         }
 
