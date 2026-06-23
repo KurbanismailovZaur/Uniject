@@ -59,6 +59,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromNewComponentOnNewGameObject();
         }
 
+        public BindingToTypeByBuilder FromSubcontainerResolve()
+        {
+            return To(_binding.ContractType).FromSubcontainerResolve();
+        }
+
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();
@@ -100,6 +105,11 @@ namespace Uniject.Bindings
         
         public BindingToTypeWithGameObjectNameBuilder FromNewComponentOnNewGameObject() => To<TContract>().FromNewComponentOnNewGameObject();
         
+        public BindingToTypeByBuilder FromSubcontainerResolve()
+        {
+            return To(_binding.ContractType).FromSubcontainerResolve();
+        }
+
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();

@@ -56,6 +56,12 @@ namespace Uniject.Bindings
             return new (_container, _binding);
         }
 
+        public BindingToTypeByBuilder FromSubcontainerResolve()
+        {
+            _binding.InstanceGetter = new InstanceGetterFromSubContainerResolve(_container);
+            return new (_container, _binding);
+        }
+
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
         public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();
