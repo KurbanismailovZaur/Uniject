@@ -1,6 +1,7 @@
 using System;
 using Uniject.Bindings;
 using Uniject.SubcontainerGetters;
+using UnityEngine;
 
 namespace Uniject.InstanceGetters
 {
@@ -8,7 +9,7 @@ namespace Uniject.InstanceGetters
     {
         public SubcontainerGetter SubcontainerGetter { get; set; }
         public Scope Scope { get; set; }
-        public Container CachedInstance { get; protected set; }
+        public Container CachedContainer { get; protected set; }
 
         public InstanceGetterFromSubContainerResolve(Container container) : base(container)
         {
@@ -21,9 +22,18 @@ namespace Uniject.InstanceGetters
         public override object GetInstance(Type concreteType)
         {
             if (Scope == Scope.Transient)
-                return SubcontainerGetter.GetContainer().Resolve(concreteType);
+            {
+                var container = SubcontainerGetter.GetContainer();
+                container.Build();
+                return container.Resolve(concreteType);
+            }
 
-            return (CachedInstance ??= SubcontainerGetter.GetContainer()).Resolve(concreteType);
+            if (CachedContainer != null)
+                return CachedContainer.Resolve(concreteType);
+
+            CachedContainer = SubcontainerGetter.GetContainer();
+            CachedContainer.Build();
+            return CachedContainer.Resolve(concreteType);
         }
     }
 }

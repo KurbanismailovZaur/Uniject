@@ -22,13 +22,17 @@ namespace Uniject
 
         public Transform ParentTransformForGameObjects { get; set; }
 
+        public bool IsBuilded { get; private set; }
+
         public Container(Container parentContainer = null)
         {
-            _parentContainer = parentContainer;
+            SetParentContainer(parentContainer);
             
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
         }
+
+        public void SetParentContainer(Container parentContainer) => _parentContainer = parentContainer;
 
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
@@ -242,6 +246,11 @@ namespace Uniject
 
         internal void Build()
         {
+            if (IsBuilded)
+                return;
+
+            IsBuilded = true;
+
             ResolveNonLazyBindings();
             InjectQueuedInstances();
             RunEntryPoints();

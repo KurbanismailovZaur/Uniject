@@ -10,6 +10,7 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerAsBuilder ByInstance(Container instance)
         {
+            instance.SetParentContainer(_container);
             var instanceGetter = (InstanceGetterFromSubContainerResolve)_binding.InstanceGetter;
             instanceGetter.SubcontainerGetter = new SubcontainerGetterByInstance(_container, instance);
             return new(_container, _binding, instanceGetter);
