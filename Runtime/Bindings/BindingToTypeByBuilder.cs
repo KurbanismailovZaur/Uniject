@@ -33,9 +33,16 @@ namespace Uniject.Bindings
             return new (_container, _binding, instanceGetter);
         }
 
-        public BindingToSubcontainerAsBuilder ByInstaller<TInstaller>(TInstaller installer) where TInstaller : IInstaller
+        public BindingToSubcontainerAsBuilder ByInstaller<TInstaller>() where TInstaller : IInstaller, new()
         {
-            return default;
+            var installer = _container.Instantiate<TInstaller>(typeof(TInstaller));
+            return ByInstaller(installer);
+        }
+
+        public BindingToSubcontainerAsBuilder ByInstaller<TInstaller>(TInstaller installer) where TInstaller : IInstaller, new()
+        {
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByInstaller(_container, installer));
+            return new (_container, _binding, instanceGetter);
         }
     }
 }

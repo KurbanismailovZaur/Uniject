@@ -258,6 +258,8 @@ namespace Uniject
  
         public T Instantiate<T>() => (T)Instantiate(typeof(T));
 
+        public T Instantiate<T>(Type concreteType) => (T)Instantiate(concreteType);
+        
         public object Instantiate(Type concreteType)
         {
             var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
