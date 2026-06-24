@@ -79,6 +79,16 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Instantiate_WhenGenericContractAndConcreteTypeArePassed_ReturnsConcreteInstance()
+        {
+            var container = new Container();
+
+            var instance = container.Instantiate<IInterface>(typeof(ClassImplementedIInterface));
+
+            Assert.That(instance, Is.InstanceOf<ClassImplementedIInterface>());
+        }
+
+        [Test]
         public void Instantiate_WhenConstructorDependencyIsNotBound_ThrowsException()
         {
             var container = new Container();

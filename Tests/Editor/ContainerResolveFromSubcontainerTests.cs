@@ -38,6 +38,42 @@ namespace Uniject.Tests
             public void Run() => RunsCount++;
         }
 
+        private class CountingInstaller : IInstaller
+        {
+            public int InstallCallsCount { get; private set; }
+
+            public CountingInstaller() { }
+
+            public void Install(Container container)
+            {
+                InstallCallsCount++;
+                container.Bind<SubcontainerClass>().AsTransient();
+            }
+        }
+
+        private class StaticCountingInstaller : IInstaller
+        {
+            public static int InstallCallsCount { get; set; }
+
+            public StaticCountingInstaller() { }
+
+            public void Install(Container container)
+            {
+                InstallCallsCount++;
+                container.Bind<SubcontainerClass>().AsTransient();
+            }
+        }
+
+        private class ParentDependencyInstaller : IInstaller
+        {
+            public ParentDependencyInstaller() { }
+
+            public void Install(Container container)
+            {
+                container.Bind<ClassWithParentDependency>().AsTransient();
+            }
+        }
+
         [Test]
         public void Resolve_FromSubcontainerResolve_AsTransient_ReturnsDifferentInstancesFromSubcontainer()
         {
@@ -142,6 +178,78 @@ namespace Uniject.Tests
             Assert.That(
                 () => container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(null),
                 Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstaller_WhenScopeIsNotSpecified_ReusesSubcontainer()
+        {
+            SubcontainerClass.InstancesCount = 0;
+            var installer = new CountingInstaller();
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller(installer);
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installer.InstallCallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstaller_AsTransient_CreatesSubcontainerForEveryResolve()
+        {
+            SubcontainerClass.InstancesCount = 0;
+            var installer = new CountingInstaller();
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller(installer).AsTransient();
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installer.InstallCallsCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstallerGeneric_CreatesInstallerAndInstallsSubcontainer()
+        {
+            StaticCountingInstaller.InstallCallsCount = 0;
+            SubcontainerClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller<StaticCountingInstaller>();
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(StaticCountingInstaller.InstallCallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstaller_WhenSubcontainerNeedsParentDependency_ResolvesParentBinding()
+        {
+            var dependency = new Class();
+
+            var container = new Container();
+            container.Bind<Class>().FromInstance(dependency);
+            container.Bind<ClassWithParentDependency>().FromSubcontainerResolve()
+                .ByInstaller(new ParentDependencyInstaller()).AsTransient();
+
+            var resolved = container.Resolve<ClassWithParentDependency>();
+
+            Assert.That(resolved.Dependency, Is.SameAs(dependency));
         }
 
         [Test]
