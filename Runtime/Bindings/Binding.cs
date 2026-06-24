@@ -10,7 +10,6 @@ namespace Uniject.Bindings
         public Type ContractType { get; set; }
         public Type ConcreteType { get; set; }
         public Scope Scope { get; set; }
-        public InstanceGetter InstanceGetter { get; set; }
         public object CachedInstance { get; protected set; }
 
         public Binding(Container container, Type contractType)

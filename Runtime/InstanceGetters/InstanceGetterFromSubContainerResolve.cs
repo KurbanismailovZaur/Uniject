@@ -13,10 +13,8 @@ namespace Uniject.InstanceGetters
 
         public InstanceGetterFromSubContainerResolve(Container container) : base(container)
         {
-            // TODO: по умолчанию должен присваивать геттер через метод который не будет иметь биндингов.
-            // TODO: надо еще вызывать Build у подконтейнера.
-
-            // _subcontainerGetter = ?
+            SubcontainerGetter = new SubcontainerGetterByInstance(container, new Container());
+            Scope = Scope.Cached;
         }
 
         public override object GetInstance(Type concreteType)

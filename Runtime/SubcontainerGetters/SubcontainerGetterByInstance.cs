@@ -6,11 +6,12 @@ namespace Uniject.SubcontainerGetters
 {
     public class SubcontainerGetterByInstance : SubcontainerGetter
     {
-        private Container _instance;
+        private readonly Container _instance;
 
         public SubcontainerGetterByInstance(Container container, Container instance) : base(container)
         {
             _instance = instance;
+            _instance.SetParentContainer(_container);
         }
 
         public override Container GetContainer() => _instance;

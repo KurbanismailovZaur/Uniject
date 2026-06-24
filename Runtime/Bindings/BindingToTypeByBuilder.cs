@@ -8,17 +8,29 @@ namespace Uniject.Bindings
     {
         public BindingToTypeByBuilder(Container container, BindingToType binding) : base(container, binding) { }
 
+        private InstanceGetterFromSubContainerResolve SetSubcontainerGetter(SubcontainerGetter subcontainerGetter)
+        {
+            var instanceGetter = (InstanceGetterFromSubContainerResolve)_binding.InstanceGetter;
+            instanceGetter.SubcontainerGetter = subcontainerGetter;
+            return instanceGetter;
+        }
+
         public BindingToSubcontainerAsBuilder ByInstance(Container instance)
         {
-            instance.SetParentContainer(_container);
-            var instanceGetter = (InstanceGetterFromSubContainerResolve)_binding.InstanceGetter;
-            instanceGetter.SubcontainerGetter = new SubcontainerGetterByInstance(_container, instance);
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance), "Subcontainer instance can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByInstance(_container, instance));
             return new(_container, _binding, instanceGetter);
         }
 
         public BindingToSubcontainerAsBuilder ByMethod(Action<Container> installMethod)
         {
-            return default;
+            if (installMethod == null)
+                throw new ArgumentNullException(nameof(installMethod), "Install method can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByMethod(_container, installMethod));
+            return new (_container, _binding, instanceGetter);
         }
 
         public BindingToSubcontainerAsBuilder ByInstaller<TInstaller>(TInstaller installer) where TInstaller : IInstaller
