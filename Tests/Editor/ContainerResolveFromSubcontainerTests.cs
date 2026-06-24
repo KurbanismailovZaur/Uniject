@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Uniject.Lifecycle;
 using Uniject.Tests.Fixtures;
@@ -75,6 +76,72 @@ namespace Uniject.Tests
             Assert.That(second, Is.Not.Null);
             Assert.That(second, Is.Not.SameAs(first));
             Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByMethod_WhenScopeIsNotSpecified_ReusesSubcontainer()
+        {
+            var installCallsCount = 0;
+            SubcontainerClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(subcontainer =>
+            {
+                installCallsCount++;
+                subcontainer.Bind<SubcontainerClass>().AsTransient();
+            });
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installCallsCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByMethod_AsTransient_CreatesSubcontainerForEveryResolve()
+        {
+            var installCallsCount = 0;
+            SubcontainerClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(subcontainer =>
+            {
+                installCallsCount++;
+                subcontainer.Bind<SubcontainerClass>().AsTransient();
+            }).AsTransient();
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installCallsCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ByInstance_WhenInstanceIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstance(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void ByMethod_WhenInstallMethodIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(null),
+                Throws.TypeOf<ArgumentNullException>());
         }
 
         [Test]
