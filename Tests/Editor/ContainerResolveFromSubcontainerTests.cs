@@ -181,6 +181,16 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void ByInstaller_WhenInstallerIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller<CountingInstaller>(null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
         public void Resolve_FromSubcontainerResolve_ByInstaller_WhenScopeIsNotSpecified_ReusesSubcontainer()
         {
             SubcontainerClass.InstancesCount = 0;

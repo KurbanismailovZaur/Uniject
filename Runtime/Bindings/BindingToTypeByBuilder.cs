@@ -41,6 +41,9 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerAsBuilder ByInstaller<TInstaller>(TInstaller installer) where TInstaller : IInstaller, new()
         {
+            if (installer == null)
+                throw new ArgumentNullException(nameof(installer), "Installer can not be a null.");
+
             var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByInstaller(_container, installer));
             return new (_container, _binding, instanceGetter);
         }
