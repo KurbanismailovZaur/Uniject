@@ -40,13 +40,11 @@ namespace Uniject
             _factory = new Factory<TResult>();
             _factory.Construct(_instanceGetter, _resultConcreteType);
 
-            var capacity = _maxSize == -1 ? _initialSize : _maxSize;
-            _availableInstances = new List<TResult>(capacity);
-            _availableInstancesSet = new HashSet<TResult>(capacity);
+            var initialCapacity = _maxSize == -1 ? _initialSize : _maxSize;
+            _availableInstances = new List<TResult>(initialCapacity);
+            _availableInstancesSet = new HashSet<TResult>(initialCapacity);
 
-            var initialSize = Mathf.Min(_initialSize, _maxSize);
-
-            for (int i = 0; i < initialSize; i++)
+            for (int i = 0; i < initialCapacity; i++)
             {
                 var instance = _factory.Create();
                 Despawn(instance);
