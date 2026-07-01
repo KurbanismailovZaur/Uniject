@@ -17,12 +17,14 @@ namespace Uniject.Bindings.Pools
             InstanceGetter = new InstanceGetterFromConstructor(container);
             ResultContractType = resultType;
             ResultConcreteType = resultType;
+            MaxSize = -1;
         }
 
         private object CreatePool()
         {
             var pool = new TPool();
             pool.Construct(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType);
+            pool.Initialize();
             return pool;
         }
 
