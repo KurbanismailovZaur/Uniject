@@ -11,9 +11,9 @@ namespace Uniject.Bindings.Factories
 
         public BindingToFactory(Container container, Type resultType, Type factoryType) : base(container, factoryType)
         {
+            InstanceGetter = new InstanceGetterFromConstructor(container);
             ResultContractType = resultType;
             ResultConcreteType = resultType;
-            InstanceGetter = new InstanceGetterFromConstructor(container);
         }
 
         private object CreateFactory()

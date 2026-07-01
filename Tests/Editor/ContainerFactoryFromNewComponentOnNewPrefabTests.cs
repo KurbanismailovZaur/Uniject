@@ -17,7 +17,7 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.Bind<Script, ScriptFactory>().FromNewComponentOnNewPrefab(prefab).AsTransient();
+                container.BindFactory<Script, ScriptFactory>().FromNewComponentOnNewPrefab(prefab).AsTransient();
 
                 result = container.Resolve<ScriptFactory>().Create();
 
@@ -44,7 +44,7 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.Bind<Script, ScriptFactory>().FromNewComponentOnNewPrefab(prefabComponent).AsTransient();
+                container.BindFactory<Script, ScriptFactory>().FromNewComponentOnNewPrefab(prefabComponent).AsTransient();
 
                 result = container.Resolve<ScriptFactory>().Create();
 

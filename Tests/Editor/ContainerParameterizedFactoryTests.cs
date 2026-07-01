@@ -17,9 +17,9 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, Script>().FromComponentInNewPrefab().AsTransient();
+                container.BindFactory<GameObject, Script, GameObjectScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, Script>>();
+                var factory = container.Resolve<GameObjectScriptFactory>();
                 result = factory.Create(prefabScript.gameObject);
 
                 Assert.That(factory, Is.Not.Null);
@@ -41,10 +41,10 @@ namespace Uniject.Tests
         public void ResolveFactoryWithParameter_AsTransient_ReturnsDifferentFactories()
         {
             var container = new Container();
-            container.BindFactory<GameObject, Script>().FromComponentInNewPrefab().AsTransient();
+            container.BindFactory<GameObject, Script, GameObjectScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-            var first = container.Resolve<Factory<GameObject, Script>>();
-            var second = container.Resolve<Factory<GameObject, Script>>();
+            var first = container.Resolve<GameObjectScriptFactory>();
+            var second = container.Resolve<GameObjectScriptFactory>();
 
             Assert.That(first, Is.Not.SameAs(second));
         }
@@ -59,10 +59,10 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, Script>().FromComponentInNewPrefab().AsCached();
+                container.BindFactory<GameObject, Script, GameObjectScriptFactory>().FromComponentInNewPrefab().AsCached();
 
-                var firstFactory = container.Resolve<Factory<GameObject, Script>>();
-                var secondFactory = container.Resolve<Factory<GameObject, Script>>();
+                var firstFactory = container.Resolve<GameObjectScriptFactory>();
+                var secondFactory = container.Resolve<GameObjectScriptFactory>();
                 firstResult = firstFactory.Create(prefabScript.gameObject);
                 secondResult = secondFactory.Create(prefabScript.gameObject);
 

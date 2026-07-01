@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Bindings.Factories;
+using Uniject.Bindings.Pools;
 using Uniject.Collections;
 using Uniject.Components;
 using Uniject.Lifecycle;
@@ -74,12 +75,11 @@ namespace Uniject
             }
         }
 
-        public BindingToFactoryToBuilder<TResult, TFactory> Bind<TResult, TFactory>() where TFactory : Factory<TResult>, new()
+        public BindingToFactoryToBuilder<TResult, TFactory> BindFactory<TResult, TFactory>() 
+            where TFactory : Factory<TResult>, new()
         {
             return new(this, CreateBindingToFactory<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         }
-
-        public BindingToFactoryToBuilder<TResult, Factory<TResult>> BindFactory<TResult>() => Bind<TResult, Factory<TResult>>();
 
         private BindingToFactory<TResult, TFactory> CreateBindingToFactory<TResult, TFactory>(Type resultType, Type factoryType) 
             where TFactory : Factory<TResult>, new()
@@ -93,15 +93,10 @@ namespace Uniject
             return binding;
         }
 
-        public BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> Bind<TParam, TResult, TFactory>() 
+        public BindingToFactoryWithParameterToBuilder<TParam, TResult, TFactory> BindFactory<TParam, TResult, TFactory>()
             where TFactory : Factory<TParam, TResult>, new()
         {
             return new(this, CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(typeof(TParam), typeof(TResult), typeof(TFactory)));
-        }
-
-        public BindingToFactoryWithParameterToBuilder<TParam, TResult, Factory<TParam, TResult>> BindFactory<TParam, TResult>()
-        {
-            return Bind<TParam, TResult, Factory<TParam, TResult>>();
         }
 
         private BindingToFactoryWithParameter<TParam, TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type paramType, Type resultType, Type factoryType) 
@@ -116,6 +111,42 @@ namespace Uniject
             return binding;
         }
 
+
+
+
+
+
+
+
+        public BindingToPoolWithInitialSizeBuilder<TResult, TPool> BindPool<TResult, TPool>() 
+            where TPool : Pool<TResult>, new()
+        {
+            return new(this, CreateBindingToPool<TResult, TPool>(typeof(TResult), typeof(TPool)));
+        }
+
+        private BindingToPool<TResult, TPool> CreateBindingToPool<TResult, TPool>(Type resultType, Type poolType) 
+            where TPool : Pool<TResult>, new()
+        {
+            if (_bindings.ContainsKey(poolType))
+                throw new InvalidOperationException($"Type {poolType} is already bound.");
+
+            var binding = new BindingToPool<TResult, TPool>(this, resultType, poolType);
+            _bindings[poolType] = binding;
+            _bindingsTypes.Add(poolType);
+            return binding;
+        }
+
+
+
+
+
+
+
+
+
+
+
+        
         public T Resolve<T>() => (T)Resolve(typeof(T));
         
         public object Resolve(Type contractType)

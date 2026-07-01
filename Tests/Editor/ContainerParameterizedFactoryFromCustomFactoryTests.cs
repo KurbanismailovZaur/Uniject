@@ -17,12 +17,12 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, Script>()
+                container.BindFactory<GameObject, Script, GameObjectScriptFactory>()
                     .To<Script>()
                     .FromFactory<CustomScriptWithParameterFactory>()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, Script>>();
+                var factory = container.Resolve<GameObjectScriptFactory>();
                 result = factory.Create(prefab);
 
                 Assert.That(result, Is.Not.Null);
@@ -48,12 +48,12 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, IInterface>()
+                container.BindFactory<GameObject, IInterface, GameObjectInterfaceFactory>()
                     .To<ScriptImplementedIInterface>()
                     .FromFactory<CustomInterfaceScriptWithParameterFactory>()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, IInterface>>();
+                var factory = container.Resolve<GameObjectInterfaceFactory>();
                 result = factory.Create(prefab);
 
                 Assert.That(result, Is.TypeOf<ScriptImplementedIInterface>());
@@ -79,12 +79,12 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<IInterface, Script>()
+                container.BindFactory<IInterface, Script, InterfaceScriptFactory>()
                     .To<Script>()
                     .FromFactory<CustomScriptWithInterfaceParameterFactory>()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<IInterface, Script>>();
+                var factory = container.Resolve<InterfaceScriptFactory>();
                 result = factory.Create(prefabScript);
 
                 Assert.That(result, Is.Not.Null);
@@ -112,12 +112,12 @@ namespace Uniject.Tests
             {
                 var container = new Container();
                 container.Bind<Class>().FromInstance(dependency);
-                container.BindFactory<GameObject, InjectableScript>()
+                container.BindFactory<GameObject, InjectableScript, GameObjectInjectableScriptFactory>()
                     .To<InjectableScript>()
                     .FromFactory<CustomInjectableScriptWithParameterFactory>()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, InjectableScript>>();
+                var factory = container.Resolve<GameObjectInjectableScriptFactory>();
                 result = factory.Create(prefab);
 
                 Assert.That(result, Is.Not.Null);

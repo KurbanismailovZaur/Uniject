@@ -17,6 +17,26 @@ namespace Uniject.Tests
 
         protected class InjectableScriptFactory : Factory<InjectableScript> { }
 
+        protected class GameObjectScriptFactory : Factory<GameObject, Script> { }
+
+        protected class ScriptScriptFactory : Factory<Script, Script> { }
+
+        protected class TransformScriptFactory : Factory<Transform, Script> { }
+
+        protected class InterfaceScriptFactory : Factory<IInterface, Script> { }
+
+        protected class GameObjectInterfaceFactory : Factory<GameObject, IInterface> { }
+
+        protected class InterfaceInterfaceFactory : Factory<IInterface, IInterface> { }
+
+        protected class GameObjectInjectableScriptFactory : Factory<GameObject, InjectableScript> { }
+
+        protected class FloatScriptFactory : Factory<float, Script> { }
+
+        protected class GameObjectProductFactory : Factory<GameObject, Product> { }
+
+        protected class GameObjectIProductFactory : Factory<GameObject, IProduct> { }
+
         protected class CustomProductFactory : CustomFactory<Product>
         {
             public override Product Create()

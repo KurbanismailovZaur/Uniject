@@ -18,7 +18,7 @@ namespace Uniject.Tests
             {
                 var container = new Container();
                 container.Bind<Class>().FromInstance(dependency);
-                container.Bind<InjectableScript, InjectableScriptFactory>().FromNewComponentOnNewGameObject().AsTransient();
+                container.BindFactory<InjectableScript, InjectableScriptFactory>().FromNewComponentOnNewGameObject().AsTransient();
 
                 result = container.Resolve<InjectableScriptFactory>().Create();
 

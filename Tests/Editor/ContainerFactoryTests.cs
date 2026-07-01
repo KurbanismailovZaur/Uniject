@@ -12,7 +12,7 @@ namespace Uniject.Tests
         public void BindFactory_WhenFactoryWasBound_ResolvesFactoryByFactoryType()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>().FromConstructor().AsTransient();
+            container.BindFactory<Product, ProductFactory>().FromConstructor().AsTransient();
 
             var factory = container.Resolve<ProductFactory>();
             var product = factory.Create();
@@ -26,7 +26,7 @@ namespace Uniject.Tests
         public void ResolveFactory_AsTransient_ReturnsDifferentFactories()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>().FromConstructor().AsTransient();
+            container.BindFactory<Product, ProductFactory>().FromConstructor().AsTransient();
 
             var first = container.Resolve<ProductFactory>();
             var second = container.Resolve<ProductFactory>();
@@ -38,7 +38,7 @@ namespace Uniject.Tests
         public void ResolveFactory_AsCached_ReturnsSameFactoryButCreatesTransientResults()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>().FromConstructor().AsCached();
+            container.BindFactory<Product, ProductFactory>().FromConstructor().AsCached();
 
             var firstFactory = container.Resolve<ProductFactory>();
             var secondFactory = container.Resolve<ProductFactory>();
@@ -53,7 +53,7 @@ namespace Uniject.Tests
         public void Create_WhenFactoryUsesConcreteResultType_ReturnsConcreteResult()
         {
             var container = new Container();
-            container.Bind<IProduct, InterfaceProductFactory>().To<Product>().FromConstructor().AsTransient();
+            container.BindFactory<IProduct, InterfaceProductFactory>().To<Product>().FromConstructor().AsTransient();
 
             var factory = container.Resolve<InterfaceProductFactory>();
             var product = factory.Create();
@@ -65,10 +65,10 @@ namespace Uniject.Tests
         public void BindFactory_WhenFactoryTypeAlreadyBoundByFactoryBinding_ThrowsInvalidOperationException()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>();
+            container.BindFactory<Product, ProductFactory>();
 
             Assert.That(
-                () => container.Bind<Product, ProductFactory>(),
+                () => container.BindFactory<Product, ProductFactory>(),
                 Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -79,7 +79,7 @@ namespace Uniject.Tests
             container.Bind<ProductFactory>();
 
             Assert.That(
-                () => container.Bind<Product, ProductFactory>(),
+                () => container.BindFactory<Product, ProductFactory>(),
                 Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -87,7 +87,7 @@ namespace Uniject.Tests
         public void Bind_WhenFactoryTypeAlreadyBoundByFactoryBinding_ThrowsInvalidOperationException()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>();
+            container.BindFactory<Product, ProductFactory>();
 
             Assert.That(
                 () => container.Bind<ProductFactory>(),

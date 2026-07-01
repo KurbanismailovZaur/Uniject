@@ -17,12 +17,12 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, IInterface>()
+                container.BindFactory<GameObject, IInterface, GameObjectInterfaceFactory>()
                     .To<ScriptImplementedIInterface>()
                     .FromComponentInNewPrefab()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, IInterface>>();
+                var factory = container.Resolve<GameObjectInterfaceFactory>();
                 result = factory.Create(prefabScript.gameObject);
 
                 Assert.That(result, Is.TypeOf<ScriptImplementedIInterface>());
@@ -47,9 +47,9 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<Script, Script>().FromComponentInNewPrefab().AsTransient();
+                container.BindFactory<Script, Script, ScriptScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-                var factory = container.Resolve<Factory<Script, Script>>();
+                var factory = container.Resolve<ScriptScriptFactory>();
                 result = factory.Create(prefabScript);
 
                 Assert.That(result, Is.Not.Null);
@@ -74,12 +74,12 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<IInterface, IInterface>()
+                container.BindFactory<IInterface, IInterface, InterfaceInterfaceFactory>()
                     .To<ScriptImplementedIInterface>()
                     .FromComponentInNewPrefab()
                     .AsTransient();
 
-                var factory = container.Resolve<Factory<IInterface, IInterface>>();
+                var factory = container.Resolve<InterfaceInterfaceFactory>();
                 result = factory.Create(prefabScript);
 
                 Assert.That(result, Is.TypeOf<ScriptImplementedIInterface>());
@@ -101,7 +101,7 @@ namespace Uniject.Tests
             var container = new Container();
 
             Assert.That(
-                () => container.BindFactory<float, Script>().FromComponentInNewPrefab(),
+                () => container.BindFactory<float, Script, FloatScriptFactory>().FromComponentInNewPrefab(),
                 Throws.TypeOf<ArgumentException>());
         }
 
@@ -111,7 +111,7 @@ namespace Uniject.Tests
             var container = new Container();
 
             Assert.That(
-                () => container.BindFactory<GameObject, Product>().FromComponentInNewPrefab(),
+                () => container.BindFactory<GameObject, Product, GameObjectProductFactory>().FromComponentInNewPrefab(),
                 Throws.TypeOf<ArgumentException>());
         }
 
@@ -119,9 +119,9 @@ namespace Uniject.Tests
         public void Create_WithParameterFactory_WhenPrefabIsNull_ThrowsArgumentNullException()
         {
             var container = new Container();
-            container.BindFactory<GameObject, Script>().FromComponentInNewPrefab().AsTransient();
+            container.BindFactory<GameObject, Script, GameObjectScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-            var factory = container.Resolve<Factory<GameObject, Script>>();
+            var factory = container.Resolve<GameObjectScriptFactory>();
 
             Assert.That(
                 () => factory.Create(null),
@@ -136,9 +136,9 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.BindFactory<GameObject, Script>().FromComponentInNewPrefab().AsTransient();
+                container.BindFactory<GameObject, Script, GameObjectScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-                var factory = container.Resolve<Factory<GameObject, Script>>();
+                var factory = container.Resolve<GameObjectScriptFactory>();
 
                 Assert.That(
                     () => factory.Create(prefab),
@@ -154,9 +154,9 @@ namespace Uniject.Tests
         public void Create_WithParameterFactory_WhenInterfaceParameterIsNotComponent_ThrowsArgumentException()
         {
             var container = new Container();
-            container.BindFactory<IInterface, Script>().FromComponentInNewPrefab().AsTransient();
+            container.BindFactory<IInterface, Script, InterfaceScriptFactory>().FromComponentInNewPrefab().AsTransient();
 
-            var factory = container.Resolve<Factory<IInterface, Script>>();
+            var factory = container.Resolve<InterfaceScriptFactory>();
 
             Assert.That(
                 () => factory.Create(new ClassImplementedIInterface()),

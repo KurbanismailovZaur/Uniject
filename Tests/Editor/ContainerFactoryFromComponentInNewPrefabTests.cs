@@ -17,7 +17,7 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.Bind<Script, ScriptFactory>().FromComponentInNewPrefab(prefabScript.gameObject).AsTransient();
+                container.BindFactory<Script, ScriptFactory>().FromComponentInNewPrefab(prefabScript.gameObject).AsTransient();
 
                 result = container.Resolve<ScriptFactory>().Create();
 
@@ -43,7 +43,7 @@ namespace Uniject.Tests
             try
             {
                 var container = new Container();
-                container.Bind<Script, ScriptFactory>().FromComponentInNewPrefab(prefabScript).AsTransient();
+                container.BindFactory<Script, ScriptFactory>().FromComponentInNewPrefab(prefabScript).AsTransient();
 
                 result = container.Resolve<ScriptFactory>().Create();
 

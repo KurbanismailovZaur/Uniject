@@ -13,7 +13,7 @@ namespace Uniject.Tests
         {
             var container = new Container();
             container.Bind<Product>().AsCached();
-            container.Bind<Product, ProductFactory>().FromResolve().AsTransient();
+            container.BindFactory<Product, ProductFactory>().FromResolve().AsTransient();
 
             var factory = container.Resolve<ProductFactory>();
             var first = factory.Create();

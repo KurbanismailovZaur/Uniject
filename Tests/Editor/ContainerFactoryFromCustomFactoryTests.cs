@@ -12,7 +12,7 @@ namespace Uniject.Tests
         public void Create_FromFactory_UsesCustomFactory()
         {
             var container = new Container();
-            container.Bind<Product, ProductFactory>().To<Product>().FromFactory<CustomProductFactory>().AsTransient();
+            container.BindFactory<Product, ProductFactory>().To<Product>().FromFactory<CustomProductFactory>().AsTransient();
 
             var product = container.Resolve<ProductFactory>().Create();
 
