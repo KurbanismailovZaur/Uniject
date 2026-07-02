@@ -41,7 +41,7 @@ namespace Uniject.Tests
         {
             public override Product Create()
             {
-                return _objectBuilder.Instantiate<Product>();
+                return _container.Instantiate<Product>();
             }
         }
 
@@ -75,7 +75,7 @@ namespace Uniject.Tests
             public override InjectableScript Create(GameObject prefab)
             {
                 var gameObject = new GameObject(prefab.name);
-                return _objectBuilder.AddComponent<InjectableScript>(gameObject);
+                return _container.AddComponent<InjectableScript>(gameObject);
             }
         }
     }

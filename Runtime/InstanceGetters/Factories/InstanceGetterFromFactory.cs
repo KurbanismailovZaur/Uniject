@@ -11,6 +11,7 @@ namespace Uniject.InstanceGetters.Factories
         {
             _factory = new TFactory();
             _factory.Construct(_container);
+            _factory.InitializeInternal();
         }
 
         public override object GetInstance(Type concreteType) => _factory.Create();

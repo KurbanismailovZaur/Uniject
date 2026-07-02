@@ -2,9 +2,13 @@ namespace Uniject
 {
     public abstract class CustomFactory
     {
-        protected IObjectBuilder _objectBuilder;
+        protected Container _container;
 
-        internal void Construct(IObjectBuilder objectBuilder) => _objectBuilder = objectBuilder;
+        internal void Construct(Container container) => _container = container;
+
+        internal void InitializeInternal() => Initialize();
+
+        protected virtual void Initialize() { }
     }
     
     public abstract class CustomFactory<TResult> : CustomFactory, IFactory<TResult>
