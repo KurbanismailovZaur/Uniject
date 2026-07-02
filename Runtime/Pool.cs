@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Uniject.Bindings.Pools;
 using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
@@ -16,6 +17,15 @@ namespace Uniject
         public abstract void Clear();
 
         public abstract void Dispose();
+
+        public sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+        {
+            public static ReferenceEqualityComparer<T> Instance { get; } = new();
+
+            public bool Equals(T x, T y) => ReferenceEquals(x, y);
+
+            public int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
+        }
     }
 
     public abstract class PoolBase<TObjectType> : PoolBase where TObjectType : class
@@ -48,9 +58,11 @@ namespace Uniject
             _factory.Construct(_instanceGetter, _resultConcreteType);
 
             var initialCapacity = MaxSize == -1 ? InitialSize : Mathf.Min(InitialSize, MaxSize);
-            _spawnedInstancesSet = new HashSet<TResult>();
+
+            var comparer = ReferenceEqualityComparer<TResult>.Instance;
+            _spawnedInstancesSet = new HashSet<TResult>(comparer);
             _despawnedInstances = new List<TResult>(initialCapacity);
-            _despawnedInstancesSet = new HashSet<TResult>(initialCapacity);
+            _despawnedInstancesSet = new HashSet<TResult>(initialCapacity, comparer);
 
             for (int i = 0; i < initialCapacity; i++)
                 CreateDespawnedInstance();
@@ -60,7 +72,10 @@ namespace Uniject
         {
             var instance = _factory.Create();
 
-            if (_despawnedInstancesSet.Contains(instance))
+            if (instance is null)
+                throw new InvalidOperationException("Factory returned a null instance.");
+
+            if (_spawnedInstancesSet.Contains(instance) || _despawnedInstancesSet.Contains(instance))
                 throw new InvalidOperationException("Instance is already in the pool.");
 
             _despawnedInstances.Add(instance);
