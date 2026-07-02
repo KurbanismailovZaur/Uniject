@@ -9,15 +9,18 @@ namespace Uniject
 {
     public abstract class PoolBase
     {
-        protected int _initialSize;
-        protected int _maxSize;
-        protected ExpandType _expandType;
+        public int InitialSize { get; protected set; }
+        public int MaxSize { get; protected set; }
+        public ExpandType ExpandType { get; protected set; }
     }
 
     public abstract class PoolBase<TObjectType> : PoolBase
     {
-        protected List<TObjectType> _availableInstances;
-        protected HashSet<TObjectType> _availableInstancesSet;
+        protected List<TObjectType> _spawnedInstances;
+        protected HashSet<TObjectType> _spawnedInstancesSet;
+        protected List<TObjectType> _despawnedInstances;
+        protected HashSet<TObjectType> _despawnedInstancesSet;
+        public int InstanceCount => _spawnedInstances.Count + _despawnedInstances.Count;
     }
 
     public class Pool<TResult> : PoolBase<TResult>, IPool<TResult>
@@ -26,11 +29,12 @@ namespace Uniject
         private InstanceGetter _instanceGetter;
         private Type _resultConcreteType;
 
-        internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize, int maxSize, ExpandType expandType)
+        internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize,
+            int maxSize, ExpandType expandType)
         {
-            _initialSize = initialSize;
-            _maxSize = maxSize;
-            _expandType = expandType;
+            InitialSize = initialSize;
+            MaxSize = maxSize;
+            ExpandType = expandType;
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
         }
@@ -40,75 +44,90 @@ namespace Uniject
             _factory = new Factory<TResult>();
             _factory.Construct(_instanceGetter, _resultConcreteType);
 
-            var initialCapacity = _maxSize == -1 ? _initialSize : _maxSize;
-            _availableInstances = new List<TResult>(initialCapacity);
-            _availableInstancesSet = new HashSet<TResult>(initialCapacity);
+            var initialCapacity = MaxSize == -1 ? InitialSize : Mathf.Min(InitialSize, MaxSize);
+            _spawnedInstances = new List<TResult>();
+            _spawnedInstancesSet = new HashSet<TResult>();
+            _despawnedInstances = new List<TResult>(initialCapacity);
+            _despawnedInstancesSet = new HashSet<TResult>(initialCapacity);
 
             for (int i = 0; i < initialCapacity; i++)
-            {
-                var instance = _factory.Create();
-                Despawn(instance);
-            }
+                CreateDespawnedInstance();
+        }
+
+        private TResult CreateDespawnedInstance()
+        {
+            var instance = _factory.Create();
+
+            if (_despawnedInstancesSet.Contains(instance))
+                throw new InvalidOperationException("Instance is already in the pool.");
+
+            _despawnedInstances.Add(instance);
+            _despawnedInstancesSet.Add(instance);
+            
+            Reset(instance);
+            TrySetActiveForGameObject(instance, false);
+
+            return instance;
+        }
+
+        private void TrySetActiveForGameObject(TResult instance, bool active)
+        {
+            if (instance is GameObject gameObject)
+                gameObject.SetActive(active);
+            else if (instance is Component component)
+                component.gameObject.SetActive(active);
         }
 
         public TResult Spawn()
         {
-            if (_availableInstances.Count > 0)
+            if (_despawnedInstances.Count == 0)
             {
-                var instance = _availableInstances[_availableInstances.Count - 1];
-                _availableInstances.RemoveAt(_availableInstances.Count - 1);
-                _availableInstancesSet.Remove(instance);
+                if (MaxSize != -1 && InstanceCount >= MaxSize)
+                    throw new InvalidOperationException("Pool has reached its maximum size.");
 
-                if (instance is GameObject gameObject)
-                    gameObject.SetActive(true);
-                else if (instance is Component component)
-                    component.gameObject.SetActive(true);
+                var nextCount = ExpandType switch
+                {
+                    ExpandType.ByOne => InstanceCount + 1,
+                    ExpandType.ByDoubling => InstanceCount == 0 ? 1 : InstanceCount * 2,
+                    _ => throw new NotImplementedException()
+                };
 
-                return instance;
+                nextCount = MaxSize == -1 ? nextCount : Mathf.Min(nextCount, MaxSize);
+
+                for (int i = InstanceCount; i < nextCount; i++)
+                    CreateDespawnedInstance();
             }
 
-            return _factory.Create();
+            var instance = _despawnedInstances[_despawnedInstances.Count - 1];
+            
+            _despawnedInstances.RemoveAt(_despawnedInstances.Count - 1);
+            _despawnedInstancesSet.Remove(instance);
+            _spawnedInstances.Add(instance);
+            _spawnedInstancesSet.Add(instance);
+
+            TrySetActiveForGameObject(instance, true);
+
+            return instance;
         }
 
         public void Despawn(TResult instance)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance), "Despawning instance can not be a null.");
+                
+            if (!_spawnedInstancesSet.Contains(instance))
+                throw new InvalidOperationException("Despawning instance is not from the pool.");
 
-            if (_availableInstancesSet.Contains(instance))
+            if (_despawnedInstancesSet.Contains(instance))
                 throw new InvalidOperationException("Despawning instance is already in the pool.");
 
-            if (_maxSize == -1 || _availableInstances.Count < _maxSize)
-            {
-                Reset(instance);
-
-                if (instance is GameObject gameObject)
-                    gameObject.SetActive(false);
-                else if (instance is Component component)
-                    component.gameObject.SetActive(false);
-
-                if (_availableInstances.Count == _availableInstances.Capacity)
-                {
-                    var nextCapacity = _expandType switch
-                    {
-                        ExpandType.ByDoubling => _availableInstances.Capacity * 2,
-                        ExpandType.ByOne => _availableInstances.Capacity + 1,
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    _availableInstances.Capacity = _maxSize == -1 ? nextCapacity : Mathf.Min(nextCapacity, _maxSize);
-                }
-
-                _availableInstances.Add(instance);
-                _availableInstancesSet.Add(instance);
-            }
-            else
-            {
-                if (instance is GameObject gameObject)
-                    UnityEngine.Object.Destroy(gameObject);
-                else if (instance is Component component)
-                    UnityEngine.Object.Destroy(component.gameObject);
-            }
+            _spawnedInstances.Remove(instance);
+            _spawnedInstancesSet.Remove(instance);
+            _despawnedInstances.Add(instance);
+            _despawnedInstancesSet.Add(instance);
+            
+            Reset(instance);
+            TrySetActiveForGameObject(instance, false);
         }
 
         protected virtual void Reset(TResult instance) { }
@@ -122,9 +141,9 @@ namespace Uniject
 
         internal void Construct(InstanceGetterWithParameter<TParam> instanceGetter, Type resultConcreteType, int initialSize, int maxSize, ExpandType expandType)
         {
-            _initialSize = initialSize;
-            _maxSize = maxSize;
-            _expandType = expandType;
+            InitialSize = initialSize;
+            MaxSize = maxSize;
+            ExpandType = expandType;
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
         }

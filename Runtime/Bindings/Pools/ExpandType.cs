@@ -5,7 +5,7 @@ namespace Uniject.Bindings.Pools
 {
     public enum ExpandType
     {
-        ByDoubling,
-        ByOne
+        ByOne,
+        ByDoubling
     }
 }
