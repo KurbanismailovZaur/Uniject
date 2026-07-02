@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using Uniject.Bindings.Pools;
 using Uniject.Tests.Fixtures;
+using UnityEngine;
 
 namespace Uniject.Tests
 {
@@ -161,6 +162,143 @@ namespace Uniject.Tests
             Assert.That(
                 () => pool.Despawn(instance),
                 Throws.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void Adopt_AddsInstanceAsDespawnedAndResetsItsState()
+        {
+            var pool = CreateProductPool();
+            var instance = new Product { Value = 42 };
+
+            pool.Adopt(instance);
+
+            Assert.That(instance.Value, Is.Zero);
+            Assert.That(pool.ResetCallsCount, Is.EqualTo(1));
+            Assert.That(pool.InstanceCount, Is.EqualTo(1));
+
+            var spawnedInstance = pool.Spawn();
+            Assert.That(spawnedInstance, Is.SameAs(instance));
+            Assert.That(pool.InstanceCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Adopt_WhenInstanceIsAlreadyDespawned_ThrowsInvalidOperationException()
+        {
+            var pool = CreateProductPool();
+            var instance = new Product();
+            pool.Adopt(instance);
+
+            Assert.That(
+                () => pool.Adopt(instance),
+                Throws.TypeOf<InvalidOperationException>());
+            Assert.That(pool.InstanceCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Adopt_WhenInstanceIsSpawned_ThrowsInvalidOperationException()
+        {
+            var pool = CreateProductPool();
+            var instance = new Product();
+            pool.Adopt(instance);
+            pool.Spawn();
+
+            Assert.That(
+                () => pool.Adopt(instance),
+                Throws.TypeOf<InvalidOperationException>());
+            Assert.That(pool.InstanceCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Adopt_WhenMaximumSizeIsReached_ThrowsWithoutResettingInstance()
+        {
+            var pool = CreateProductPool(initialSize: 1, maxSize: 1);
+            var instance = new Product { Value = 42 };
+
+            Assert.That(
+                () => pool.Adopt(instance),
+                Throws.TypeOf<InvalidOperationException>());
+            Assert.That(instance.Value, Is.EqualTo(42));
+            Assert.That(pool.ResetCallsCount, Is.EqualTo(1));
+            Assert.That(pool.InstanceCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Adopt_WithNull_ThrowsArgumentNullException()
+        {
+            var pool = CreateProductPool();
+
+            Assert.That(
+                () => pool.Adopt(null),
+                Throws.TypeOf<ArgumentNullException>());
+            Assert.That(pool.InstanceCount, Is.Zero);
+        }
+
+        [Test]
+        public void Adopt_WhenDistinctInstancesAreEqual_TracksThemByReference()
+        {
+            var container = new Container();
+            container.BindPool<EquatableProduct, EquatableProductPool>()
+                .ExpandByOne()
+                .FromConstructor()
+                .AsCached();
+            var pool = container.Resolve<EquatableProductPool>();
+            var first = new EquatableProduct();
+            var second = new EquatableProduct();
+
+            pool.Adopt(first);
+            pool.Adopt(second);
+
+            Assert.That(pool.InstanceCount, Is.EqualTo(2));
+            Assert.That(pool.Spawn(), Is.SameAs(second));
+            Assert.That(pool.Spawn(), Is.SameAs(first));
+        }
+
+        [Test]
+        public void Adopt_Component_DeactivatesItAndSpawnReactivatesIt()
+        {
+            var instance = new GameObject("Adopted").AddComponent<Script>();
+
+            try
+            {
+                var container = new Container();
+                container.BindPool<Script, PooledScriptPool>()
+                    .ExpandByOne()
+                    .FromFactory<PooledScriptFactory>()
+                    .AsCached();
+                var pool = container.Resolve<PooledScriptPool>();
+
+                pool.Adopt(instance);
+
+                Assert.That(instance.gameObject.activeSelf, Is.False);
+                Assert.That(pool.InstanceCount, Is.EqualTo(1));
+
+                var spawnedInstance = pool.Spawn();
+                Assert.That(spawnedInstance, Is.SameAs(instance));
+                Assert.That(instance.gameObject.activeSelf, Is.True);
+            }
+            finally
+            {
+                if (instance != null)
+                    UnityEngine.Object.DestroyImmediate(instance.gameObject);
+            }
+        }
+
+        [Test]
+        public void Adopt_WithDestroyedComponent_ThrowsArgumentNullException()
+        {
+            var instance = new GameObject("Destroyed").AddComponent<Script>();
+            var container = new Container();
+            container.BindPool<Script, PooledScriptPool>()
+                .ExpandByOne()
+                .FromFactory<PooledScriptFactory>()
+                .AsCached();
+            var pool = container.Resolve<PooledScriptPool>();
+            UnityEngine.Object.DestroyImmediate(instance.gameObject);
+
+            Assert.That(
+                () => pool.Adopt(instance),
+                Throws.TypeOf<ArgumentNullException>());
+            Assert.That(pool.InstanceCount, Is.Zero);
         }
 
         [Test]

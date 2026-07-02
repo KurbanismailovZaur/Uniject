@@ -145,6 +145,24 @@ namespace Uniject
             TrySetActiveForGameObject(instance, false);
         }
 
+        public void Adopt(TResult instance)
+        {
+            if (instance == null || instance is UnityEngine.Object unityObject && unityObject == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            if (_spawnedInstancesSet.Contains(instance) || _despawnedInstancesSet.Contains(instance))
+                throw new InvalidOperationException("Instance is already tracked by the pool.");
+
+            if (MaxSize != -1 && InstanceCount >= MaxSize)
+                throw new InvalidOperationException("Pool has reached its maximum size.");
+
+            Reset(instance);
+            TrySetActiveForGameObject(instance, false);
+
+            _despawnedInstances.Add(instance);
+            _despawnedInstancesSet.Add(instance);
+        }
+
         protected virtual void Reset(TResult instance) { }
 
         override public void Clear()
