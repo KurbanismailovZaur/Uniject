@@ -8,6 +8,12 @@ namespace Uniject.Tests
 {
     public class ContainerParameterizedFactoryFromCustomFactoryTests : ContainerFactoryTestFixture
     {
+        [SetUp]
+        public void SetUp()
+        {
+            InitializableCustomScriptWithParameterFactory.Reset();
+        }
+
         [Test]
         public void Create_WithParameterFactoryFromFactory_UsesCustomFactory()
         {
@@ -128,6 +134,48 @@ namespace Uniject.Tests
             {
                 if (result != null)
                     UnityEngine.Object.DestroyImmediate(result.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void FromFactory_WithParameter_InitializesCustomFactoryOnceBeforeCreate()
+        {
+            var prefab = new GameObject("Prefab");
+            var firstResult = default(Script);
+            var secondResult = default(Script);
+
+            try
+            {
+                var dependency = new Class();
+                var container = new Container();
+                container.Bind<Class>().FromInstance(dependency);
+                container.BindFactory<GameObject, Script, GameObjectScriptFactory>()
+                    .To<Script>()
+                    .FromFactory<InitializableCustomScriptWithParameterFactory>()
+                    .AsTransient();
+
+                Assert.That(InitializableCustomScriptWithParameterFactory.InitializeCallsCount, Is.EqualTo(1));
+                Assert.That(InitializableCustomScriptWithParameterFactory.CreateCallsCount, Is.Zero);
+                Assert.That(InitializableCustomScriptWithParameterFactory.ResolvedDependency, Is.SameAs(dependency));
+
+                var firstFactory = container.Resolve<GameObjectScriptFactory>();
+                var secondFactory = container.Resolve<GameObjectScriptFactory>();
+                firstResult = firstFactory.Create(prefab);
+                secondResult = secondFactory.Create(prefab);
+
+                Assert.That(InitializableCustomScriptWithParameterFactory.InitializeCallsCount, Is.EqualTo(1));
+                Assert.That(InitializableCustomScriptWithParameterFactory.CreateCallsCount, Is.EqualTo(2));
+                Assert.That(InitializableCustomScriptWithParameterFactory.WasInitializedBeforeCreate, Is.True);
+            }
+            finally
+            {
+                if (firstResult != null)
+                    UnityEngine.Object.DestroyImmediate(firstResult.gameObject);
+
+                if (secondResult != null)
+                    UnityEngine.Object.DestroyImmediate(secondResult.gameObject);
 
                 UnityEngine.Object.DestroyImmediate(prefab);
             }
