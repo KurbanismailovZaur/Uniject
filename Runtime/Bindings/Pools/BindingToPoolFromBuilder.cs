@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Uniject.Bindings.Pools
 {
     public class BindingToPoolFromBuilder<TResult, TResultConcrete, TPool> : BindingToPoolBuilder<TResult, TPool> 
+        where TResult : class
         where TResultConcrete : TResult
         where TPool : Pool<TResult>, new()
     {

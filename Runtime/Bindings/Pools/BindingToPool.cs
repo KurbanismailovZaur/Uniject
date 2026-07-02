@@ -3,7 +3,9 @@ using Uniject.InstanceGetters;
 
 namespace Uniject.Bindings.Pools
 {
-    public class BindingToPool<TResult, TPool> : Binding where TPool : Pool<TResult>, new()
+    public class BindingToPool<TResult, TPool> : Binding 
+        where TResult : class
+        where TPool : Pool<TResult>, new()
     {
         public InstanceGetter InstanceGetter { get; set; }
         public Type ResultContractType { get; set; }

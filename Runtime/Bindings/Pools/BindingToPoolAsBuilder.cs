@@ -3,6 +3,7 @@ using Uniject.Bindings;
 namespace Uniject.Bindings.Pools
 {
     public class BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> : BindingToPoolBuilder<TResult, TPool> 
+        where TResult : class
         where TResultConcrete : TResult
         where TPool : Pool<TResult>, new()
     {

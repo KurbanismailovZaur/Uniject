@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace Uniject.Bindings.Pools
 {
-   public class BindingToPoolWithInitialSizeBuilder<TResult, TPool> : BindingToPoolBuilder<TResult, TPool> where TPool : Pool<TResult>, new()
+    public class BindingToPoolWithInitialSizeBuilder<TResult, TPool> : BindingToPoolBuilder<TResult, TPool> 
+        where TResult : class
+        where TPool : Pool<TResult>, new()
     {
         public BindingToPoolWithInitialSizeBuilder(Container container, BindingToPool<TResult, TPool> binding) : base(container, binding) { }
 

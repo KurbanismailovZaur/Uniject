@@ -119,12 +119,14 @@ namespace Uniject
 
 
         public BindingToPoolWithInitialSizeBuilder<TResult, TPool> BindPool<TResult, TPool>() 
+            where TResult : class
             where TPool : Pool<TResult>, new()
         {
             return new(this, CreateBindingToPool<TResult, TPool>(typeof(TResult), typeof(TPool)));
         }
 
         private BindingToPool<TResult, TPool> CreateBindingToPool<TResult, TPool>(Type resultType, Type poolType) 
+            where TResult : class
             where TPool : Pool<TResult>, new()
         {
             if (_bindings.ContainsKey(poolType))

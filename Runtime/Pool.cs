@@ -7,23 +7,26 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public abstract class PoolBase
+    public abstract class PoolBase : IDisposable
     {
         public int InitialSize { get; protected set; }
         public int MaxSize { get; protected set; }
         public ExpandType ExpandType { get; protected set; }
+
+        public abstract void Clear();
+
+        public abstract void Dispose();
     }
 
-    public abstract class PoolBase<TObjectType> : PoolBase
+    public abstract class PoolBase<TObjectType> : PoolBase where TObjectType : class
     {
-        protected List<TObjectType> _spawnedInstances;
         protected HashSet<TObjectType> _spawnedInstancesSet;
         protected List<TObjectType> _despawnedInstances;
         protected HashSet<TObjectType> _despawnedInstancesSet;
-        public int InstanceCount => _spawnedInstances.Count + _despawnedInstances.Count;
+        public int InstanceCount => _spawnedInstancesSet.Count + _despawnedInstances.Count;
     }
 
-    public class Pool<TResult> : PoolBase<TResult>, IPool<TResult>
+    public class Pool<TResult> : PoolBase<TResult>, IPool<TResult> where TResult : class
     {
         private Factory<TResult> _factory;
         private InstanceGetter _instanceGetter;
@@ -45,7 +48,6 @@ namespace Uniject
             _factory.Construct(_instanceGetter, _resultConcreteType);
 
             var initialCapacity = MaxSize == -1 ? InitialSize : Mathf.Min(InitialSize, MaxSize);
-            _spawnedInstances = new List<TResult>();
             _spawnedInstancesSet = new HashSet<TResult>();
             _despawnedInstances = new List<TResult>(initialCapacity);
             _despawnedInstancesSet = new HashSet<TResult>(initialCapacity);
@@ -102,7 +104,6 @@ namespace Uniject
             
             _despawnedInstances.RemoveAt(_despawnedInstances.Count - 1);
             _despawnedInstancesSet.Remove(instance);
-            _spawnedInstances.Add(instance);
             _spawnedInstancesSet.Add(instance);
 
             TrySetActiveForGameObject(instance, true);
@@ -121,7 +122,6 @@ namespace Uniject
             if (_despawnedInstancesSet.Contains(instance))
                 throw new InvalidOperationException("Despawning instance is already in the pool.");
 
-            _spawnedInstances.Remove(instance);
             _spawnedInstancesSet.Remove(instance);
             _despawnedInstances.Add(instance);
             _despawnedInstancesSet.Add(instance);
@@ -131,9 +131,31 @@ namespace Uniject
         }
 
         protected virtual void Reset(TResult instance) { }
+
+        override public void Clear()
+        {
+            foreach (var instance in _spawnedInstancesSet)
+            {
+                if (instance is UnityEngine.Object unityObject)
+                    UnityEngine.Object.Destroy(unityObject);
+            }
+
+            foreach (var instance in _despawnedInstances)
+            {
+                if (instance is UnityEngine.Object unityObject)
+                    UnityEngine.Object.Destroy(unityObject);
+            }
+
+            _spawnedInstancesSet.Clear();
+            _spawnedInstancesSet.Clear();
+            _despawnedInstances.Clear();
+            _despawnedInstancesSet.Clear();
+        }
+
+        public override void Dispose() => Clear();
     }
 
-    public class Pool<TParam, TResult> : PoolBase, IPool<TParam, TResult>
+    public class Pool<TParam, TResult> : PoolBase, IPool<TParam, TResult> where TParam : class where TResult : class
     {
         private Factory<TParam, TResult> _factory;
         private InstanceGetterWithParameter<TParam> _instanceGetter;
@@ -160,6 +182,16 @@ namespace Uniject
         {
             if (instance is UnityEngine.Object unityObject)
                 UnityEngine.Object.Destroy(unityObject);
+        }
+
+        public override void Clear()
+        {
+            
+        }
+
+        override public void Dispose()
+        {
+            
         }
     }
 }
