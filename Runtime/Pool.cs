@@ -169,44 +169,4 @@ namespace Uniject
 
         public override void Dispose() => Clear();
     }
-
-    public class Pool<TParam, TResult> : PoolBase, IPool<TParam, TResult> where TParam : class where TResult : class
-    {
-        private Factory<TParam, TResult> _factory;
-        private InstanceGetterWithParameter<TParam> _instanceGetter;
-        private Type _resultConcreteType;
-
-        internal void Construct(InstanceGetterWithParameter<TParam> instanceGetter, Type resultConcreteType, int initialSize, int maxSize, ExpandType expandType)
-        {
-            InitialSize = initialSize;
-            MaxSize = maxSize;
-            ExpandType = expandType;
-            _instanceGetter = instanceGetter;
-            _resultConcreteType = resultConcreteType;
-        }
-
-        internal void Initialize()
-        {
-            _factory = new Factory<TParam, TResult>();
-            _factory.Construct(_instanceGetter, _resultConcreteType);
-        }
-
-        public TResult Spawn(TParam origin) => _factory.Create(origin);
-
-        public void Despawn(TResult instance)
-        {
-            if (instance is UnityEngine.Object unityObject)
-                UnityEngine.Object.Destroy(unityObject);
-        }
-
-        public override void Clear()
-        {
-            
-        }
-
-        override public void Dispose()
-        {
-            
-        }
-    }
 }
