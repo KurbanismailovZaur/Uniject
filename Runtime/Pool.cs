@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public abstract class PoolBase : IDisposable
+    public abstract class Pool : IDisposable
     {
         public int InitialSize { get; protected set; }
         public int MaxSize { get; protected set; }
@@ -28,19 +28,16 @@ namespace Uniject
         }
     }
 
-    public abstract class PoolBase<TObjectType> : PoolBase where TObjectType : class
-    {
-        protected HashSet<TObjectType> _spawnedInstancesSet;
-        protected List<TObjectType> _despawnedInstances;
-        protected HashSet<TObjectType> _despawnedInstancesSet;
-        public int InstanceCount => _spawnedInstancesSet.Count + _despawnedInstances.Count;
-    }
-
-    public class Pool<TResult> : PoolBase<TResult>, IPool<TResult> where TResult : class
+    public class Pool<TResult> : Pool, IPool<TResult> where TResult : class
     {
         private Factory<TResult> _factory;
         private InstanceGetter _instanceGetter;
         private Type _resultConcreteType;
+        protected HashSet<TResult> _spawnedInstancesSet;
+        protected List<TResult> _despawnedInstances;
+        protected HashSet<TResult> _despawnedInstancesSet;
+
+        public int InstanceCount => _spawnedInstancesSet.Count + _despawnedInstances.Count;
 
         internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize,
             int maxSize, ExpandType expandType)
