@@ -12,6 +12,7 @@ namespace Uniject.Tests
         public void SetUp()
         {
             InitializableCustomScriptWithParameterFactory.Reset();
+            CustomProductWithClassParameterFactory.Reset();
         }
 
         [Test]
@@ -43,6 +44,22 @@ namespace Uniject.Tests
 
                 UnityEngine.Object.DestroyImmediate(prefab);
             }
+        }
+
+        [Test]
+        public void Create_FromFactory_WhenParameterAndResultAreClasses_UsesCustomFactory()
+        {
+            var parameter = new Class();
+            var container = new Container();
+            container.BindFactory<Class, Product, ClassProductFactory>()
+                .FromFactory<CustomProductWithClassParameterFactory>()
+                .AsCached();
+
+            var factory = container.Resolve<ClassProductFactory>();
+            var result = factory.Create(parameter);
+
+            Assert.That(result, Is.TypeOf<Product>());
+            Assert.That(CustomProductWithClassParameterFactory.LastParameter, Is.SameAs(parameter));
         }
 
         [Test]

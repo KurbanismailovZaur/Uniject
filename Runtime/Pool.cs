@@ -39,18 +39,15 @@ namespace Uniject
 
         public int InstanceCount => _spawnedInstancesSet.Count + _despawnedInstances.Count;
 
-        internal void Construct(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize,
-            int maxSize, ExpandType expandType)
+        public void Initialize(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize, int maxSize, 
+            ExpandType expandType)
         {
             InitialSize = initialSize;
             MaxSize = maxSize;
             ExpandType = expandType;
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
-        }
-
-        internal void Initialize()
-        {
+            
             _factory = new Factory<TResult>();
             _factory.Construct(_instanceGetter, _resultConcreteType);
 

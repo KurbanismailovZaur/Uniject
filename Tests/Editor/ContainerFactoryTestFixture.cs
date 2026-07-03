@@ -37,6 +37,8 @@ namespace Uniject.Tests
 
         protected class GameObjectIProductFactory : Factory<GameObject, IProduct> { }
 
+        protected class ClassProductFactory : Factory<Class, Product> { }
+
         protected class CustomProductFactory : CustomFactory<Product>
         {
             public override Product Create()
@@ -79,6 +81,19 @@ namespace Uniject.Tests
             public override Script Create(GameObject prefab)
             {
                 return new GameObject(prefab.name).AddComponent<Script>();
+            }
+        }
+
+        protected class CustomProductWithClassParameterFactory : CustomFactory<Class, Product>
+        {
+            public static Class LastParameter { get; private set; }
+
+            public static void Reset() => LastParameter = null;
+
+            public override Product Create(Class parameter)
+            {
+                LastParameter = parameter;
+                return _container.Instantiate<Product>();
             }
         }
 

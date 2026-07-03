@@ -25,8 +25,7 @@ namespace Uniject.Bindings.Pools
         private object CreatePool()
         {
             var pool = new TPool();
-            pool.Construct(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType);
-            pool.Initialize();
+            pool.Initialize(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType);
             return pool;
         }
 

@@ -81,5 +81,21 @@ namespace Uniject.Tests
                 UnityEngine.Object.DestroyImmediate(prefabScript.gameObject);
             }
         }
+
+        [Test]
+        public void ResolveFactoryWithParameter_WhenSourceIsNotConfigured_ThrowsInvalidOperationException()
+        {
+            var container = new Container();
+            container.BindFactory<Class, Product, ClassProductFactory>();
+
+            var expectedMessage =
+                $"Source for parameterized factory {typeof(ClassProductFactory)} is not configured. " +
+                "Use FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), " +
+                "or FromFactory<TCustomFactory>().";
+
+            Assert.That(
+                () => container.Resolve<ClassProductFactory>(),
+                Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(expectedMessage));
+        }
     }
 }

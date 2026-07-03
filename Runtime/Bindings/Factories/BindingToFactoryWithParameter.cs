@@ -1,7 +1,5 @@
 using System;
-using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
-using UnityEngine;
 
 namespace Uniject.Bindings.Factories
 {
@@ -17,11 +15,14 @@ namespace Uniject.Bindings.Factories
             ParamType = paramType;
             ResultContractType = resultType;
             ResultConcreteType = resultType;
-            InstanceGetter = new InstanceGetterWithParameterFromComponentInNewPrefab<TParam>(container, ParamType, ResultContractType);
         }
 
         private object CreateFactory()
         {
+            if (InstanceGetter == null)
+                throw new InvalidOperationException($"Source for parameterized factory {typeof(TFactory)} is not " + 
+                    "configured. Use FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), or FromFactory<TCustomFactory>().");
+
             var factory = new TFactory();
             factory.Construct(InstanceGetter, ResultConcreteType);
             return factory;
