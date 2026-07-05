@@ -277,7 +277,7 @@ namespace Uniject
                 Inject(_injectQueue.PopFirst());
         }
 
-        internal void Build()
+        public void Build()
         {
             if (IsBuilded)
                 return;

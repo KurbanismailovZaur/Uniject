@@ -1,4 +1,5 @@
 using System;
+using Uniject.Installers;
 using Uniject.InstanceGetters;
 using UnityEngine;
 

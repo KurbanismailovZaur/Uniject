@@ -1,4 +1,4 @@
-namespace Uniject
+namespace Uniject.Installers
 {
     public interface IInstaller
     {

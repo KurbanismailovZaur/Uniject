@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using Uniject.Installers;
 using Uniject.Lifecycle;
 using Uniject.Tests.Fixtures;
 
