@@ -111,13 +111,6 @@ namespace Uniject
             return binding;
         }
 
-
-
-
-
-
-
-
         public BindingToPoolWithInitialSizeBuilder<TResult, TPool> BindPool<TResult, TPool>() 
             where TResult : class
             where TPool : Pool<TResult>, new()
@@ -137,17 +130,6 @@ namespace Uniject
             _bindingsTypes.Add(poolType);
             return binding;
         }
-
-
-
-
-
-
-
-
-
-
-
         
         public T Resolve<T>() => (T)Resolve(typeof(T));
         

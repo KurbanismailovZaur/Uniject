@@ -8,21 +8,24 @@ namespace Uniject.Contexts
 {
     public class SceneContext : MonoBehaviour
     {
-        [SerializeField] private bool _autoStart;
         [SerializeField] private List<MonoInstaller> _installers;
         [SerializeField] private List<MonoBehaviour> _injectTargets;
         
         public Container Container { get; private set; }
+        public bool IsBuilded => Container?.IsBuilded ?? false;
 
-        private void Start()
+        private void Awake() => Container = new Container();
+
+        private void Start() => Build();
+
+        public void Build()
         {
-            if (!_autoStart)
+            if (IsBuilded)
                 return;
 
-            Container = new Container();
-
-            var tickableManager = gameObject.AddComponent<TickableManager>();
-            Container.BindInstance(tickableManager);
+            Container.BindInstance(this);
+            Container.Bind<SceneLoader>().AsCached();
+            Container.BindInstance(gameObject.AddComponent<TickableManager>());
 
             foreach (var installer in _installers)
                 installer.Install(Container);
