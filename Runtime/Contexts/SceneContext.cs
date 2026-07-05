@@ -22,7 +22,7 @@ namespace Uniject.Contexts
         {
             if (IsBuilded)
                 return;
-
+            
             Container.BindInstance(this);
             Container.Bind<SceneLoader>().AsCached();
             Container.BindInstance(gameObject.AddComponent<TickableManager>());
@@ -39,6 +39,12 @@ namespace Uniject.Contexts
             }
 
             Container.Build();
+        }
+
+        void OnDestroy()
+        {
+            if (IsBuilded)
+                Container.Dispose();
         }
     }
 }
