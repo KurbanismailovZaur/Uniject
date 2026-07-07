@@ -40,7 +40,7 @@ namespace Uniject.Tests
 
         private static void Build(Container container)
         {
-            var method = typeof(Container).GetMethod("Build", BindingFlags.Instance | BindingFlags.NonPublic);
+            var method = typeof(Container).GetMethod("Build", BindingFlags.Instance | BindingFlags.Public);
 
             try
             {
