@@ -6,10 +6,12 @@ using UnityEngine;
 
 namespace Uniject.Contexts
 {
-    public class SceneContext : Context
+    public class GameObjectContext : Context
     {
-        protected void Awake() => Container = new Container();
-
-        protected void Start() => Build();
+        public override void Build()
+        {
+            Container = new Container();
+            base.Build();
+        }
     }
 }
