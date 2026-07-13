@@ -5,6 +5,7 @@ using Uniject.Bindings.Factories;
 using Uniject.Bindings.Pools;
 using Uniject.Collections;
 using Uniject.Components;
+using Uniject.Contexts;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
@@ -23,12 +24,14 @@ namespace Uniject
 
         public Transform ParentTransformForGameObjects { get; set; }
 
+        public Context Context { get; set; }
+
         public bool IsBuilded { get; private set; }
 
         public Container(Container parentContainer = null)
         {
             SetParentContainer(parentContainer);
-            
+
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
         }
@@ -75,13 +78,13 @@ namespace Uniject
             }
         }
 
-        public BindingToFactoryToBuilder<TResult, TFactory> BindFactory<TResult, TFactory>() 
+        public BindingToFactoryToBuilder<TResult, TFactory> BindFactory<TResult, TFactory>()
             where TFactory : Factory<TResult>, new()
         {
             return new(this, CreateBindingToFactory<TResult, TFactory>(typeof(TResult), typeof(TFactory)));
         }
 
-        private BindingToFactory<TResult, TFactory> CreateBindingToFactory<TResult, TFactory>(Type resultType, Type factoryType) 
+        private BindingToFactory<TResult, TFactory> CreateBindingToFactory<TResult, TFactory>(Type resultType, Type factoryType)
             where TFactory : Factory<TResult>, new()
         {
             if (_bindings.ContainsKey(factoryType))
@@ -99,7 +102,7 @@ namespace Uniject
             return new(this, CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(typeof(TParam), typeof(TResult), typeof(TFactory)));
         }
 
-        private BindingToFactoryWithParameter<TParam, TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type paramType, Type resultType, Type factoryType) 
+        private BindingToFactoryWithParameter<TParam, TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type paramType, Type resultType, Type factoryType)
             where TFactory : Factory<TParam, TResult>, new()
         {
             if (_bindings.ContainsKey(factoryType))
@@ -111,14 +114,14 @@ namespace Uniject
             return binding;
         }
 
-        public BindingToPoolWithInitialSizeBuilder<TResult, TPool> BindPool<TResult, TPool>() 
+        public BindingToPoolWithInitialSizeBuilder<TResult, TPool> BindPool<TResult, TPool>()
             where TResult : class
             where TPool : Pool<TResult>, new()
         {
             return new(this, CreateBindingToPool<TResult, TPool>(typeof(TResult), typeof(TPool)));
         }
 
-        private BindingToPool<TResult, TPool> CreateBindingToPool<TResult, TPool>(Type resultType, Type poolType) 
+        private BindingToPool<TResult, TPool> CreateBindingToPool<TResult, TPool>(Type resultType, Type poolType)
             where TResult : class
             where TPool : Pool<TResult>, new()
         {
@@ -130,26 +133,26 @@ namespace Uniject
             _bindingsTypes.Add(poolType);
             return binding;
         }
-        
+
         public T Resolve<T>() => (T)Resolve(typeof(T));
-        
+
         public object Resolve(Type contractType)
         {
             EnterResolving(contractType);
-            
+
             try
             {
                 var binding = FindBinding(contractType);
 
                 if (binding == null)
-                    throw new Exception($"No binding found for type {contractType}. " + 
+                    throw new Exception($"No binding found for type {contractType}. " +
                         $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
 
                 return binding.GetInstance();
             }
             finally
             {
-                ExitResolving(contractType);            
+                ExitResolving(contractType);
             }
         }
 
@@ -169,7 +172,7 @@ namespace Uniject
 
             while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
                 currentContainer = currentContainer._parentContainer;
-                
+
             return binding;
         }
 
@@ -270,11 +273,11 @@ namespace Uniject
             InjectQueuedInstances();
             RunEntryPoints();
         }
- 
+
         public T Instantiate<T>() => (T)Instantiate(typeof(T));
 
         public T Instantiate<T>(Type concreteType) => (T)Instantiate(concreteType);
-        
+
         public object Instantiate(Type concreteType)
         {
             var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
@@ -292,10 +295,10 @@ namespace Uniject
         public GameObject Instantiate(GameObject prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
-            
+
             if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
                 Inject(injectionTargets.Targets);
-            
+
             return cloned;
         }
 
@@ -307,10 +310,10 @@ namespace Uniject
         public Component Instantiate(Component prefab)
         {
             var cloned = UnityEngine.Object.Instantiate(prefab);
-            
+
             if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
                 Inject(injectionTargets.Targets);
-            
+
             return cloned;
         }
 

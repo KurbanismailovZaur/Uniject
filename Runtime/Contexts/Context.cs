@@ -8,18 +8,28 @@ namespace Uniject.Contexts
 {
     public abstract class Context : MonoBehaviour
     {
-        [SerializeField] private List<MonoInstaller> _installers;
-        [SerializeField] private List<MonoBehaviour> _injectTargets;
-        [SerializeField] private List<GameObjectContext> _gameObjectContexts;
+        [SerializeField] protected List<MonoInstaller> _installers;
+        [SerializeField] protected List<MonoBehaviour> _injectTargets;
+        [SerializeField] protected List<GameObjectContext> _gameObjectContexts;
+        [SerializeField] protected Transform ParentTransformForGameObjects;
         
-        public Container Container { get; protected set; }
-        public bool IsBuilded => Container?.IsBuilded ?? false;
+        public Container Container { get; protected set; } = new Container();
+        public bool IsInstalled { get; protected set; }
+        public bool IsBuilded { get; protected set; }
 
-        public virtual void Build()
+        protected void Awake()
         {
-            if (IsBuilded)
+            Container.ParentTransformForGameObjects = ParentTransformForGameObjects;
+            Container.Context = this;
+        }
+
+        public virtual void Install()
+        {
+            if (IsInstalled)
                 return;
-            
+
+            IsInstalled = true;
+
             Container.BindInstance(this);
             Container.Bind<SceneLoader>().AsCached();
             Container.BindInstance(gameObject.AddComponent<TickableManager>());
@@ -35,7 +45,21 @@ namespace Uniject.Contexts
                     Container.AddToInjectionQueue(target);
             }
 
+            foreach (var context in _gameObjectContexts)
+                context.Install();
+        }
+
+        public virtual void Build()
+        {
+            if (IsBuilded)
+                return;
+
+            IsBuilded = true;
+
             Container.Build();
+
+            foreach (var context in _gameObjectContexts)
+                context.Build();
         }
 
         protected virtual void OnDestroy()

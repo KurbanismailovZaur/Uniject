@@ -8,10 +8,5 @@ namespace Uniject.Contexts
 {
     public class GameObjectContext : Context
     {
-        public override void Build()
-        {
-            Container = new Container();
-            base.Build();
-        }
     }
 }

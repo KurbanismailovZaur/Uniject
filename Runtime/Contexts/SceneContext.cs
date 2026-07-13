@@ -8,8 +8,10 @@ namespace Uniject.Contexts
 {
     public class SceneContext : Context
     {
-        protected void Awake() => Container = new Container();
-
-        protected void Start() => Build();
+        protected void Start()
+        {
+            Install();
+            Build();
+        }
     }
 }
