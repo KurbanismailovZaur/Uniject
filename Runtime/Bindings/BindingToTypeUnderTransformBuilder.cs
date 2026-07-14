@@ -9,7 +9,7 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsBuilder UnderTransform(Transform parent)
         {
-            _binding.ParentTransform = parent;
+            _binding.UnderTransform = parent;
             return new BindingToTypeAsBuilder(_container, _binding);
         }
 

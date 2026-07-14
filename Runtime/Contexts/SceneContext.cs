@@ -10,6 +10,7 @@ namespace Uniject.Contexts
     {
         protected void Start()
         {
+            Initialize();
             Install();
             Build();
         }

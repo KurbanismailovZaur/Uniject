@@ -24,8 +24,6 @@ namespace Uniject
 
         public Transform ParentTransformForGameObjects { get; set; }
 
-        public Context Context { get; set; }
-
         public bool IsBuilded { get; private set; }
 
         public Container(Container parentContainer = null)
@@ -261,6 +259,8 @@ namespace Uniject
             while (_injectQueue.Count > 0)
                 Inject(_injectQueue.PopFirst());
         }
+
+        public Context GetNearestContext() => Resolve<Context>();
 
         public void Build()
         {

@@ -14,13 +14,17 @@ namespace Uniject.Contexts
         [SerializeField] protected Transform ParentTransformForGameObjects;
         
         public Container Container { get; protected set; } = new Container();
+        public bool IsInitialized { get; protected set; }
         public bool IsInstalled { get; protected set; }
         public bool IsBuilded { get; protected set; }
 
-        protected void Awake()
+        protected void Initialize()
         {
+            if (IsInitialized)
+                return;
+            
+            IsInitialized = true;
             Container.ParentTransformForGameObjects = ParentTransformForGameObjects;
-            Container.Context = this;
         }
 
         public virtual void Install()
@@ -29,10 +33,7 @@ namespace Uniject.Contexts
                 return;
 
             IsInstalled = true;
-
             Container.BindInstance(this);
-            Container.Bind<SceneLoader>().AsCached();
-            Container.BindInstance(gameObject.AddComponent<TickableManager>());
 
             foreach (var installer in _installers)
                 installer.Install(Container);
@@ -46,7 +47,10 @@ namespace Uniject.Contexts
             }
 
             foreach (var context in _gameObjectContexts)
+            {
+                context.Initialize();
                 context.Install();
+            }
         }
 
         public virtual void Build()
