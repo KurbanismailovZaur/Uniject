@@ -13,18 +13,21 @@ namespace Uniject.Contexts
         [SerializeField] protected List<GameObjectContext> _gameObjectContexts;
         [SerializeField] protected Transform ParentTransformForGameObjects;
         
-        public Container Container { get; protected set; } = new Container();
+        public Container Container { get; protected set; }
         public bool IsInitialized { get; protected set; }
         public bool IsInstalled { get; protected set; }
         public bool IsBuilded { get; protected set; }
 
-        protected void Initialize()
+        protected void Initialize(Container parentContainer = null)
         {
             if (IsInitialized)
                 return;
             
             IsInitialized = true;
-            Container.ParentTransformForGameObjects = ParentTransformForGameObjects;
+            Container = new Container (parentContainer, ParentTransformForGameObjects); 
+
+            foreach (var context in _gameObjectContexts)
+                context.Initialize(Container);
         }
 
         public virtual void Install()
@@ -47,10 +50,7 @@ namespace Uniject.Contexts
             }
 
             foreach (var context in _gameObjectContexts)
-            {
-                context.Initialize();
                 context.Install();
-            }
         }
 
         public virtual void Build()

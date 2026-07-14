@@ -26,9 +26,10 @@ namespace Uniject
 
         public bool IsBuilded { get; private set; }
 
-        public Container(Container parentContainer = null)
+        public Container(Container parentContainer = null, Transform parentTransformForGameObjects = null)
         {
             SetParentContainer(parentContainer);
+            ParentTransformForGameObjects = parentTransformForGameObjects;
 
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();

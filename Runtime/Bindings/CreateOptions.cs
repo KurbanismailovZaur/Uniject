@@ -9,6 +9,8 @@ namespace Uniject.Bindings
         public readonly Transform parentTransformForGameObjects;
         public readonly Transform contextTransform;
 
+        public static CreateOptions Default => new (null, null, null, null);
+
         public CreateOptions(string gameObjectName, Transform underTransform, 
             Transform parentTransformForGameObjects, Transform contextTransform)
         {

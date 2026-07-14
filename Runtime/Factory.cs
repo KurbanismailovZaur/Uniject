@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
 
@@ -18,7 +19,7 @@ namespace Uniject
             _resultConcreteType = resultConcreteType;
         }
 
-        public TResult Create() => (TResult)((InstanceGetter)_instanceGetter).GetInstance(_resultConcreteType);
+        public TResult Create() => (TResult)((InstanceGetter)_instanceGetter).GetInstance(_resultConcreteType, CreateOptions.Default);
     }
 
     public class Factory<TParam, TResult> : Factory, IFactory<TParam, TResult>
