@@ -18,7 +18,7 @@ namespace Uniject.Contexts
         public bool IsInstalled { get; protected set; }
         public bool IsBuilded { get; protected set; }
 
-        protected void Initialize(Container parentContainer = null)
+        public virtual void Initialize(Container parentContainer = null)
         {
             if (IsInitialized)
                 return;
@@ -36,7 +36,9 @@ namespace Uniject.Contexts
                 return;
 
             IsInstalled = true;
+
             Container.BindInstance(this);
+            Container.BindInstance(gameObject.AddComponent<TickableManager>());
 
             foreach (var installer in _installers)
                 installer.Install(Container);
@@ -64,6 +66,13 @@ namespace Uniject.Contexts
 
             foreach (var context in _gameObjectContexts)
                 context.Build();
+        }
+
+        public void Run()
+        {
+            Initialize();
+            Install();
+            Build();
         }
 
         protected virtual void OnDestroy()

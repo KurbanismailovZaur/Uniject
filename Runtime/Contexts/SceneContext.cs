@@ -8,11 +8,6 @@ namespace Uniject.Contexts
 {
     public class SceneContext : Context
     {
-        protected void Start()
-        {
-            Initialize();
-            Install();
-            Build();
-        }
+        protected void Start() => Run();
     }
 }

@@ -21,15 +21,10 @@ namespace Uniject.InstanceGetters
                 component.transform.SetParent(createOptions.underTransform);
             else if (createOptions.parentTransformForGameObjects != null)
                 component.transform.SetParent(createOptions.parentTransformForGameObjects);
-            else
-            {
-                var context = _container.GetNearestContext();
-                
-                if (context is GameObjectContext)
-                    component.transform.SetParent(context.transform);
-                else if (context is SceneContext)
-                    SceneManager.MoveGameObjectToScene(component.gameObject, context.gameObject.scene);
-            }
+            else if (createOptions.context is GameObjectContext)
+                component.transform.SetParent(createOptions.context.transform);
+            else if (createOptions.context is SceneContext)
+                SceneManager.MoveGameObjectToScene(component.gameObject, createOptions.context.gameObject.scene);
         }
     }
 }

@@ -6,6 +6,7 @@ using Uniject.Bindings.Pools;
 using Uniject.Collections;
 using Uniject.Components;
 using Uniject.Contexts;
+using Uniject.Exceptions;
 using Uniject.Lifecycle;
 using Uniject.Reflection;
 using UnityEngine;
@@ -33,6 +34,7 @@ namespace Uniject
 
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
+            Bind<SceneLoader>().AsCached();
         }
 
         public void SetParentContainer(Container parentContainer) => _parentContainer = parentContainer;
@@ -144,7 +146,7 @@ namespace Uniject
                 var binding = FindBinding(contractType);
 
                 if (binding == null)
-                    throw new Exception($"No binding found for type {contractType}. " +
+                    throw new NoBindingFoundException($"No binding found for type {contractType}. " +
                         $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
 
                 return binding.GetInstance();
@@ -163,7 +165,7 @@ namespace Uniject
             {
                 return Resolve(contractType);
             }
-            catch
+            catch (NoBindingFoundException)
             {
                 return null;
             }

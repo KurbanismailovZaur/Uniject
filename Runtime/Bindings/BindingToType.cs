@@ -22,7 +22,8 @@ namespace Uniject.Bindings
         {
             IsNonLazyCreated = true;
 
-            var createOptions = new CreateOptions(ObjectName, UnderTransform, Container.ParentTransformForGameObjects);
+            var context = Container.GetNearestContext();
+            var createOptions = new CreateOptions(ObjectName, UnderTransform, Container.ParentTransformForGameObjects, context);
             return InstanceGetter.GetInstance(ConcreteType, createOptions);
         }
 

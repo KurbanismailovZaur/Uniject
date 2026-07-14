@@ -30,15 +30,16 @@ namespace Uniject
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
             var rootObjects = loadedScene.GetRootGameObjects();
+            var sceneContext = default(SceneContext);
+
             foreach (var gameObject in rootObjects)
             {
-                if (!gameObject.TryGetComponent<SceneContext>(out var sceneContext))   
-                    continue;
-
-                sceneContext.Container.SetParentContainer(_container);
-                installMethod?.Invoke(sceneContext.Container);
-                break;
+                if (gameObject.TryGetComponent(out sceneContext))   
+                    break;
             }
+
+            sceneContext.Initialize(_container);
+            installMethod?.Invoke(sceneContext.Container);
         }
     }
 }
