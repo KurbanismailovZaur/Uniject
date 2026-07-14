@@ -24,6 +24,7 @@ namespace Uniject.InstanceGetters
             else
             {
                 var context = _container.GetNearestContext();
+                
                 if (context is GameObjectContext)
                     component.transform.SetParent(context.transform);
                 else if (context is SceneContext)

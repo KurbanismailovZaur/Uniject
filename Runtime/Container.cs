@@ -155,6 +155,20 @@ namespace Uniject
             }
         }
 
+        public T TryResolve<T>() => (T)TryResolve(typeof(T));
+
+        public object TryResolve(Type contractType)
+        {
+            try
+            {
+                return Resolve(contractType);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private void EnterResolving(Type contractType)
         {
             if (!_resolvingTypes.Add(contractType))
@@ -261,7 +275,7 @@ namespace Uniject
                 Inject(_injectQueue.PopFirst());
         }
 
-        public Context GetNearestContext() => Resolve<Context>();
+        public Context GetNearestContext() => TryResolve<Context>();
 
         public void Build()
         {
