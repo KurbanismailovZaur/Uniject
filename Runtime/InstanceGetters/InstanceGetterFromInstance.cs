@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 
 namespace Uniject.InstanceGetters
 {
@@ -17,6 +18,6 @@ namespace Uniject.InstanceGetters
             _instance = instance;
         }
 
-        public override object GetInstance(Type concreteType) => _instance;
+        public override object GetInstance(Type concreteType, CreateOptions createOptions) => _instance;
     }
 }

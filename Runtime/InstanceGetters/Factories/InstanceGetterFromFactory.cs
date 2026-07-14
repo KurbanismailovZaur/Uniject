@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 
 namespace Uniject.InstanceGetters.Factories
 {
@@ -14,6 +15,6 @@ namespace Uniject.InstanceGetters.Factories
             _factory.InitializeInternal();
         }
 
-        public override object GetInstance(Type concreteType) => _factory.Create();
+        public override object GetInstance(Type concreteType, CreateOptions createOptions) => _factory.Create();
     }
 }

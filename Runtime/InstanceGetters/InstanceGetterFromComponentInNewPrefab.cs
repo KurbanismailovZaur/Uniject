@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 using Uniject.Reflection;
 using UnityEngine;
 
@@ -43,6 +44,12 @@ namespace Uniject.InstanceGetters
                     $"component assignable to type {concreteType}.", nameof(prefab));
         }
 
-        public override object GetInstance(Type concreteType) => _container.Instantiate(_prefab);
+        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        {
+            var component = _container.Instantiate(_prefab);
+            SetGameObjectNameAndParent(component, createOptions);
+
+            return component;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 
 namespace Uniject.InstanceGetters
 {
@@ -10,6 +11,9 @@ namespace Uniject.InstanceGetters
                 throw new ArgumentException($"Contract type and concrete type for {nameof(InstanceGetterFromResolve)} must be different types.");
         }
 
-        public override object GetInstance(Type concreteType) => _container.Resolve(concreteType);
+        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        {
+            return _container.Resolve(concreteType);
+        }
     }
 }

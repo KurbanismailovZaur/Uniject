@@ -17,7 +17,7 @@ namespace Uniject.InstanceGetters
             Scope = Scope.Cached;
         }
 
-        public override object GetInstance(Type concreteType)
+        public override object GetInstance(Type concreteType, CreateOptions createOptions)
         {
             if (Scope == Scope.Transient)
             {

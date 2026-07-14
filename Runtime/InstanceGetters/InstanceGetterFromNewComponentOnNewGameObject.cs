@@ -1,4 +1,5 @@
 using System;
+using Uniject.Bindings;
 using Uniject.Reflection;
 using UnityEngine;
 
@@ -12,11 +13,12 @@ namespace Uniject.InstanceGetters
                 throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromNewComponentOnNewGameObject)} must be a non-abstract Component.");
         }
 
-        public override object GetInstance(Type concreteType)
+        public override object GetInstance(Type concreteType, CreateOptions createOptions)
         {
             var gameObject = new GameObject(concreteType.Name);
             var component = _container.AddComponent(gameObject, concreteType);
 
+            SetGameObjectNameAndParent(component, createOptions);
             return component;
         }
     }

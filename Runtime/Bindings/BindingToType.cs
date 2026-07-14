@@ -22,33 +22,10 @@ namespace Uniject.Bindings
         {
             IsNonLazyCreated = true;
 
-            var objectCreateOptions = new ObjectCreateOptions(ObjectName, UnderTransform, 
+            var createOptions = new CreateOptions(ObjectName, UnderTransform, 
                 Container.ParentTransformForGameObjects, Container.GetNearestContext().transform);
-                
-            var instance = InstanceGetter.GetInstance(ConcreteType);
 
-            if (instance is GameObject gameObject)
-            {
-                if (ObjectName != null)
-                    gameObject.name = ObjectName;
-
-                if (UnderTransform != null)
-                    gameObject.transform.SetParent(UnderTransform);
-                else if (Container.ParentTransformForGameObjects != null)
-                    gameObject.transform.SetParent(Container.ParentTransformForGameObjects);
-            }
-            else if (instance is Component component)
-            {
-                if (ObjectName != null)
-                    component.gameObject.name = ObjectName;
-
-                if (UnderTransform != null)
-                    component.transform.SetParent(UnderTransform);
-                else if (Container.ParentTransformForGameObjects != null)
-                    component.transform.SetParent(Container.ParentTransformForGameObjects);
-            }
-
-            return instance;
+            return InstanceGetter.GetInstance(ConcreteType, createOptions);
         }
 
         public override object GetInstance()
