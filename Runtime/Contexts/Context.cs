@@ -24,7 +24,7 @@ namespace Uniject.Contexts
                 return;
             
             IsInitialized = true;
-            Container = new Container (parentContainer, ParentTransformForGameObjects); 
+            Container = new Container(parentContainer, ParentTransformForGameObjects, this); 
 
             foreach (var context in _gameObjectContexts)
                 context.Initialize(Container);
@@ -36,8 +36,6 @@ namespace Uniject.Contexts
                 return;
 
             IsInstalled = true;
-
-            Container.BindInstance(this);
             Container.BindInstance(gameObject.AddComponent<TickableManager>());
 
             foreach (var installer in _installers)

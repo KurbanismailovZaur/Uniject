@@ -62,6 +62,19 @@ namespace Uniject.Tests
             public SecondNonLazyClass() => NonLazyOrder.Items.Add("Second");
         }
 
+        private class FailsOnFirstCreationClass
+        {
+            public static int CreationAttemptsCount { get; set; }
+
+            public FailsOnFirstCreationClass()
+            {
+                CreationAttemptsCount++;
+
+                if (CreationAttemptsCount == 1)
+                    throw new System.Exception("First creation failed.");
+            }
+        }
+
         [Test]
         public void ResolveNonLazyBindings_WhenTransientBindingIsNonLazy_CreatesInstanceBeforeResolve()
         {
@@ -144,6 +157,39 @@ namespace Uniject.Tests
             ResolveNonLazyBindings(container);
 
             Assert.That(NonLazyOrder.Items, Is.EqualTo(new[] { "First", "Second" }));
+        }
+
+        [Test]
+        public void ResolveNonLazyBindings_WhenTransientWasResolvedBeforeBuild_DoesNotCreateExtraInstance()
+        {
+            NonLazyTransientClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<NonLazyTransientClass>().AsTransient().NonLazy();
+
+            container.Resolve<NonLazyTransientClass>();
+            ResolveNonLazyBindings(container);
+
+            Assert.That(NonLazyTransientClass.InstancesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ResolveNonLazyBindings_WhenPreviousCreationFailed_DoesNotRetryCreation()
+        {
+            FailsOnFirstCreationClass.CreationAttemptsCount = 0;
+
+            var container = new Container();
+            container.Bind<FailsOnFirstCreationClass>().AsTransient().NonLazy();
+
+            Assert.That(
+                () => container.Resolve<FailsOnFirstCreationClass>(),
+                Throws.Exception);
+
+            Assert.That(
+                () => ResolveNonLazyBindings(container),
+                Throws.Nothing);
+
+            Assert.That(FailsOnFirstCreationClass.CreationAttemptsCount, Is.EqualTo(1));
         }
     }
 }

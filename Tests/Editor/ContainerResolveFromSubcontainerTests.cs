@@ -318,5 +318,29 @@ namespace Uniject.Tests
 
             Assert.That(resolved, Is.InstanceOf<ClassImplementedIInterface>());
         }
+
+        [Test]
+        public void Build_WhenNonLazyBindingUsesSubcontainer_BuildsSubcontainerBeforeResolving()
+        {
+            SubcontainerClass.InstancesCount = 0;
+            SubcontainerNonLazyClass.InstancesCount = 0;
+
+            var subcontainer = new Container();
+            subcontainer.Bind<SubcontainerNonLazyClass>().AsTransient().NonLazy();
+            subcontainer.Bind<SubcontainerClass>().AsTransient();
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>()
+                .FromSubcontainerResolve()
+                .ByInstance(subcontainer)
+                .AsTransient()
+                .NonLazy();
+
+            container.Build();
+
+            Assert.That(subcontainer.IsBuilded, Is.True);
+            Assert.That(SubcontainerNonLazyClass.InstancesCount, Is.EqualTo(1));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(1));
+        }
     }
 }

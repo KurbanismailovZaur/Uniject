@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using Uniject.Bindings.Pools;
+using Uniject.Contexts;
 using Uniject.Tests.Fixtures;
 using UnityEngine;
 
@@ -399,6 +400,39 @@ namespace Uniject.Tests
 
             pool.Despawn(spawnedInstance);
             Assert.That(spawnedInstance.gameObject.activeSelf, Is.False);
+        }
+
+        [Test]
+        public void Spawn_Component_IgnoresContainerParentAndContext()
+        {
+            var contextObject = new GameObject("GameObjectContext");
+            var containerParent = new GameObject("ContainerParent").transform;
+            var instance = default(Script);
+
+            try
+            {
+                var context = contextObject.AddComponent<GameObjectContext>();
+                ContextTestUtility.Configure(context, parentTransformForGameObjects: containerParent);
+                context.Initialize();
+                context.Install();
+                context.Container.BindPool<Script, PooledScriptPool>()
+                    .ExpandByOne()
+                    .FromNewComponentOnNewGameObject()
+                    .AsCached();
+
+                var pool = context.Container.Resolve<PooledScriptPool>();
+                instance = pool.Spawn();
+
+                Assert.That(instance.transform.parent, Is.Null);
+            }
+            finally
+            {
+                if (instance != null)
+                    UnityEngine.Object.DestroyImmediate(instance.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(containerParent.gameObject);
+                UnityEngine.Object.DestroyImmediate(contextObject);
+            }
         }
 
         [Test]

@@ -24,13 +24,15 @@ namespace Uniject
         private Stack<IDisposable> _disposables = new();
 
         public Transform ParentTransformForGameObjects { get; set; }
+        public Context Context { get; private set; }
 
         public bool IsBuilded { get; private set; }
 
-        public Container(Container parentContainer = null, Transform parentTransformForGameObjects = null)
+        public Container(Container parentContainer = null, Transform parentTransformForGameObjects = null, Context context = null)
         {
             SetParentContainer(parentContainer);
             ParentTransformForGameObjects = parentTransformForGameObjects;
+            Context = context;
 
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
@@ -277,7 +279,19 @@ namespace Uniject
                 Inject(_injectQueue.PopFirst());
         }
 
-        public Context GetNearestContext() => TryResolve<Context>();
+        public Context GetNearestContext()
+        {
+            var container = this;
+            while (container != null)
+            {
+                if (container.Context != null)
+                    return container.Context;
+
+                container = container._parentContainer;
+            }
+
+            return null;
+        }
 
         public void Build()
         {
