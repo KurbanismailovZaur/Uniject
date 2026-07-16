@@ -3,7 +3,9 @@ using NUnit.Framework;
 using Uniject.Bindings.Pools;
 using Uniject.Contexts;
 using Uniject.Tests.Fixtures;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Uniject.Tests
 {
@@ -403,7 +405,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Spawn_Component_IgnoresContainerParentAndContext()
+        public void Spawn_Component_IgnoresInheritedContainerParentAndContext()
         {
             var contextObject = new GameObject("GameObjectContext");
             var containerParent = new GameObject("ContainerParent").transform;
@@ -415,12 +417,13 @@ namespace Uniject.Tests
                 ContextTestUtility.Configure(context, parentTransformForGameObjects: containerParent);
                 context.Initialize();
                 context.Install();
-                context.Container.BindPool<Script, PooledScriptPool>()
+                var childContainer = new Container(context.Container);
+                childContainer.BindPool<Script, PooledScriptPool>()
                     .ExpandByOne()
                     .FromNewComponentOnNewGameObject()
                     .AsCached();
 
-                var pool = context.Container.Resolve<PooledScriptPool>();
+                var pool = childContainer.Resolve<PooledScriptPool>();
                 instance = pool.Spawn();
 
                 Assert.That(instance.transform.parent, Is.Null);
@@ -432,6 +435,45 @@ namespace Uniject.Tests
 
                 UnityEngine.Object.DestroyImmediate(containerParent.gameObject);
                 UnityEngine.Object.DestroyImmediate(contextObject);
+            }
+        }
+
+        [Test]
+        public void Spawn_Component_IgnoresInheritedSceneContext()
+        {
+            var contextScene = EditorSceneManager.NewPreviewScene();
+            var contextObject = new GameObject("SceneContext");
+            var instance = default(Script);
+
+            try
+            {
+                SceneManager.MoveGameObjectToScene(contextObject, contextScene);
+
+                var context = contextObject.AddComponent<SceneContext>();
+                ContextTestUtility.Configure(context);
+                context.Initialize();
+                context.Install();
+                var childContainer = new Container(context.Container);
+                childContainer.BindPool<Script, PooledScriptPool>()
+                    .ExpandByOne()
+                    .FromNewComponentOnNewGameObject()
+                    .AsCached();
+
+                var pool = childContainer.Resolve<PooledScriptPool>();
+                instance = pool.Spawn();
+
+                Assert.That(instance.gameObject.scene, Is.Not.EqualTo(contextScene));
+                Assert.That(instance.transform.parent, Is.Null);
+            }
+            finally
+            {
+                if (instance != null)
+                    UnityEngine.Object.DestroyImmediate(instance.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(contextObject);
+
+                if (contextScene.IsValid() && contextScene.isLoaded)
+                    EditorSceneManager.ClosePreviewScene(contextScene);
             }
         }
 

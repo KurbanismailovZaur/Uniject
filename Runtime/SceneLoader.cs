@@ -23,7 +23,13 @@ namespace Uniject
             Action<Container> installMethod = null)
         {
             Scene loadedScene = default;
-            void OnSceneLoaded(Scene scene, LoadSceneMode mode) => loadedScene = scene;
+            void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+            {
+                if (scene.name != sceneName)
+                    return;
+                    
+                loadedScene = scene;
+            }
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             await SceneManager.LoadSceneAsync(sceneName, new LoadSceneParameters(LoadSceneMode.Additive, localPhysicsMode));

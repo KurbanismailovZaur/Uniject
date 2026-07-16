@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Uniject.Installers;
 using Uniject.Lifecycle;
 using Uniject.Tests.Fixtures;
+using UnityEngine;
 
 namespace Uniject.Tests
 {
@@ -72,6 +73,16 @@ namespace Uniject.Tests
             public void Install(Container container)
             {
                 container.Bind<ClassWithParentDependency>().AsTransient();
+            }
+        }
+
+        private class ScriptInstaller : IInstaller
+        {
+            public void Install(Container container)
+            {
+                container.Bind<Script>()
+                    .FromNewComponentOnNewGameObject()
+                    .AsTransient();
             }
         }
 
@@ -341,6 +352,106 @@ namespace Uniject.Tests
             Assert.That(subcontainer.IsBuilded, Is.True);
             Assert.That(SubcontainerNonLazyClass.InstancesCount, Is.EqualTo(1));
             Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstance_InheritsParentTransform()
+        {
+            var parentTransform = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var subcontainer = new Container();
+                subcontainer.Bind<Script>()
+                    .FromNewComponentOnNewGameObject()
+                    .AsTransient();
+
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parentTransform
+                };
+                container.Bind<Script>()
+                    .FromSubcontainerResolve()
+                    .ByInstance(subcontainer)
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parentTransform));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parentTransform.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByMethod_InheritsParentTransform()
+        {
+            var parentTransform = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parentTransform
+                };
+                container.Bind<Script>()
+                    .FromSubcontainerResolve()
+                    .ByMethod(subcontainer =>
+                    {
+                        subcontainer.Bind<Script>()
+                            .FromNewComponentOnNewGameObject()
+                            .AsTransient();
+                    })
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parentTransform));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parentTransform.gameObject);
+            }
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstaller_InheritsParentTransform()
+        {
+            var parentTransform = new GameObject("Parent").transform;
+            var resolvedScript = default(Script);
+
+            try
+            {
+                var container = new Container
+                {
+                    ParentTransformForGameObjects = parentTransform
+                };
+                container.Bind<Script>()
+                    .FromSubcontainerResolve()
+                    .ByInstaller(new ScriptInstaller())
+                    .AsTransient();
+
+                resolvedScript = container.Resolve<Script>();
+
+                Assert.That(resolvedScript.transform.parent, Is.SameAs(parentTransform));
+            }
+            finally
+            {
+                if (resolvedScript != null)
+                    UnityEngine.Object.DestroyImmediate(resolvedScript.gameObject);
+
+                UnityEngine.Object.DestroyImmediate(parentTransform.gameObject);
+            }
         }
     }
 }

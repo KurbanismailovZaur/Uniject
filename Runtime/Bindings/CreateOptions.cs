@@ -7,17 +7,17 @@ namespace Uniject.Bindings
     {
         public readonly string gameObjectName;
         public readonly Transform underTransform;
-        public readonly Transform parentTransformForGameObjects;
+        public readonly Transform parentForGameObjects;
         public readonly Context context;
 
         public static CreateOptions Default => new (null, null, null, null);
 
         public CreateOptions(string gameObjectName, Transform underTransform, 
-            Transform parentTransformForGameObjects, Context context)
+            Transform parentForGameObjects, Context context)
         {
             this.gameObjectName = gameObjectName;
             this.underTransform = underTransform;
-            this.parentTransformForGameObjects = parentTransformForGameObjects;
+            this.parentForGameObjects = parentForGameObjects;
             this.context = context;
         }
     }

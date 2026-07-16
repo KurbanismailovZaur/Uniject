@@ -159,7 +159,16 @@ namespace Uniject
             }
         }
 
-        public T TryResolve<T>() => (T)TryResolve(typeof(T));
+        public (T, bool resolved) TryResolve<T>()
+        {
+            var instance = TryResolve(typeof(T));
+
+            return instance switch
+            {
+                null => (default, false),
+                _ => ((T)instance, true)
+            };
+        }
 
         public object TryResolve(Type contractType)
         {
@@ -292,6 +301,27 @@ namespace Uniject
 
             return null;
         }
+
+        public Transform GetNearestParentForGameObjects()
+        {
+            var container = this;
+            var parentTransform = default(Transform);
+
+            while (container != null && parentTransform == null)
+            {
+                if (container.ParentTransformForGameObjects != null)
+                    parentTransform = container.ParentTransformForGameObjects;
+                else if (container.Context != null && container.Context is GameObjectContext)
+                    parentTransform = container.Context.transform;
+                else if (container.Context != null && container.Context is SceneContext)
+                    break;
+
+                container = container._parentContainer;
+            }
+
+            return parentTransform;
+        }
+
 
         public void Build()
         {

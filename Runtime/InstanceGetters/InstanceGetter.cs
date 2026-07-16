@@ -19,10 +19,8 @@ namespace Uniject.InstanceGetters
 
             if (createOptions.underTransform != null)
                 component.transform.SetParent(createOptions.underTransform);
-            else if (createOptions.parentTransformForGameObjects != null)
-                component.transform.SetParent(createOptions.parentTransformForGameObjects);
-            else if (createOptions.context is GameObjectContext)
-                component.transform.SetParent(createOptions.context.transform);
+            else if (createOptions.parentForGameObjects != null)
+                component.transform.SetParent(createOptions.parentForGameObjects);
             else if (createOptions.context is SceneContext)
                 SceneManager.MoveGameObjectToScene(component.gameObject, createOptions.context.gameObject.scene);
         }
