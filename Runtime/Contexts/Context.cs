@@ -8,9 +8,9 @@ namespace Uniject.Contexts
 {
     public abstract class Context : MonoBehaviour
     {
-        [SerializeField] protected List<MonoInstaller> _installers;
-        [SerializeField] protected List<MonoBehaviour> _injectTargets;
-        [SerializeField] protected List<GameObjectContext> _gameObjectContexts;
+        [SerializeField] protected List<MonoInstaller> _installers = new();
+        [SerializeField] protected List<MonoBehaviour> _injectTargets = new();
+        [SerializeField] protected List<GameObjectContext> _gameObjectContexts = new();
         [SerializeField] protected Transform ParentTransformForGameObjects;
         
         public Container Container { get; protected set; }

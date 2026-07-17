@@ -302,7 +302,7 @@ namespace Uniject
             return null;
         }
 
-        public Transform GetNearestParentForGameObjects()
+        public (Context context, Transform parentTransform) GetInfoAboutNearestParentForGameObjects()
         {
             var container = this;
             var parentTransform = default(Transform);
@@ -310,16 +310,22 @@ namespace Uniject
             while (container != null && parentTransform == null)
             {
                 if (container.ParentTransformForGameObjects != null)
+                {
                     parentTransform = container.ParentTransformForGameObjects;
+                    break;
+                }
                 else if (container.Context != null && container.Context is GameObjectContext)
+                {
                     parentTransform = container.Context.transform;
+                    break;
+                }
                 else if (container.Context != null && container.Context is SceneContext)
                     break;
 
                 container = container._parentContainer;
             }
 
-            return parentTransform;
+            return (container.Context, parentTransform);
         }
 
 

@@ -27,9 +27,6 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerAsBuilder ByMethod(Action<Container> installMethod)
         {
-            if (installMethod == null)
-                throw new ArgumentNullException(nameof(installMethod), "Install method can not be a null.");
-
             var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByMethod(_container, installMethod));
             return new (_container, _binding, instanceGetter);
         }
@@ -46,6 +43,12 @@ namespace Uniject.Bindings
                 throw new ArgumentNullException(nameof(installer), "Installer can not be a null.");
 
             var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByInstaller(_container, installer));
+            return new (_container, _binding, instanceGetter);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromMethodOnNewGameObject(Action<Container> installMethod)
+        {
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextMethodOnNewGameObject(_container, installMethod));
             return new (_container, _binding, instanceGetter);
         }
     }

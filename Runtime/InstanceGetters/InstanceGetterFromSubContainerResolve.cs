@@ -14,7 +14,6 @@ namespace Uniject.InstanceGetters
         public InstanceGetterFromSubContainerResolve(Container container) : base(container)
         {
             SubcontainerGetter = new SubcontainerGetterByInstance(container, new Container());
-            Scope = Scope.Cached;
         }
 
         public override object GetInstance(Type concreteType, CreateOptions createOptions)

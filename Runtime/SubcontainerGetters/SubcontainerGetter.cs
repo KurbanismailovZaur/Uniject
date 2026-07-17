@@ -7,6 +7,10 @@ namespace Uniject.SubcontainerGetters
     public abstract class SubcontainerGetter
     {
         protected readonly Container _container;
+        
+        public string ContextGameObjectName { get; set; }
+        
+        public Transform ContextUnderTransform { get; set; }
 
         public SubcontainerGetter(Container container) => _container = container;
 

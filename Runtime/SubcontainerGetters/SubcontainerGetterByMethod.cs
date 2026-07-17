@@ -16,7 +16,7 @@ namespace Uniject.SubcontainerGetters
         public override Container GetContainer()
         {
             var container = new Container(_container);
-            _installMethod.Invoke(container);
+            _installMethod?.Invoke(container);
             return container;
         }
     }
