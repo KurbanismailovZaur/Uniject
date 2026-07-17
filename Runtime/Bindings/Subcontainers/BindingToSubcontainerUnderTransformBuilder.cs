@@ -16,26 +16,18 @@ namespace Uniject.Bindings
             _instanceGetter = instanceGetter;
         }
 
-        public BindingToTypeAsBuilder UnderTransform(Transform parent)
+        public BindingToSubcontainerAsBuilder UnderTransform(Transform parent)
         {
             _instanceGetter.SubcontainerGetter.ContextUnderTransform = parent;
-            return new BindingToTypeAsBuilder(_container, _binding);
+            return new BindingToSubcontainerAsBuilder(_container, _binding, _instanceGetter);
         }
 
-        public BindingToTypeNonLazyBuilder AsTransient()
-        {
-            _instanceGetter.Scope = Scope.Transient;
-            return new BindingToTypeNonLazyBuilder(_container, _binding);
-        }
+        public BindingToTypeNonLazyBuilder AsTransient() => UnderTransform(null).AsTransient();
 
-        public BindingToTypeNonLazyBuilder AsCached()
-        {
-            _instanceGetter.Scope = Scope.Cached;
-            return new BindingToTypeNonLazyBuilder(_container, _binding);
-        }
+        public BindingToTypeNonLazyBuilder AsCached() => UnderTransform(null).AsCached();
 
-        public BindingToTypeAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
-        
+        public BindingToTypeAsEntryPointBuilder NonLazy()=> AsCached().NonLazy();
+
         public void AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

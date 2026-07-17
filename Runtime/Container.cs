@@ -325,7 +325,7 @@ namespace Uniject
                 container = container._parentContainer;
             }
 
-            return (container.Context, parentTransform);
+            return (container?.Context, parentTransform);
         }
 
 

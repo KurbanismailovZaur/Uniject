@@ -22,7 +22,7 @@ namespace Uniject.Bindings
             return new BindingToSubcontainerUnderTransformBuilder(_container, _binding, _instanceGetter);
         }
 
-        public BindingToTypeAsBuilder UnderTransform(Transform parent) => WithGameObjectName(null).UnderTransform(parent);
+        public BindingToSubcontainerAsBuilder UnderTransform(Transform parent) => WithGameObjectName(null).UnderTransform(parent);
 
         public BindingToTypeNonLazyBuilder AsTransient() => UnderTransform(null).AsTransient();
 
