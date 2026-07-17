@@ -6,11 +6,11 @@ using UnityEngine.SceneManagement;
 
 namespace Uniject.SubcontainerGetters
 {
-    public class SubcontainerGetterByNewContextMethodOnNewGameObject : SubcontainerGetter
+    public class SubcontainerGetterByNewContextFromMethodOnNewGameObject : SubcontainerGetter
     {
         private readonly Action<Container> _installMethod;
 
-        public SubcontainerGetterByNewContextMethodOnNewGameObject(Container container, Action<Container> installMethod) : base(container)
+        public SubcontainerGetterByNewContextFromMethodOnNewGameObject(Container container, Action<Container> installMethod) : base(container)
         {
             _installMethod = installMethod;
         }

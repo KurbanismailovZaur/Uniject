@@ -48,7 +48,24 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromMethodOnNewGameObject(Action<Container> installMethod)
         {
-            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextMethodOnNewGameObject(_container, installMethod));
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromMethodOnNewGameObject(_container, installMethod));
+            return new (_container, _binding, instanceGetter);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromInstallerOnNewGameObject<TInstaller>() 
+            where TInstaller : IInstaller, new()
+        {
+            var installer = _container.Instantiate<TInstaller>(typeof(TInstaller));
+            return ByNewContextFromInstallerOnNewGameObject(installer);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromInstallerOnNewGameObject<TInstaller>(TInstaller installer) 
+            where TInstaller : IInstaller, new()
+        {
+            if (installer == null)
+                throw new ArgumentNullException(nameof(installer), "Installer can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromInstallerOnNewGameObject(_container, installer));
             return new (_container, _binding, instanceGetter);
         }
     }
