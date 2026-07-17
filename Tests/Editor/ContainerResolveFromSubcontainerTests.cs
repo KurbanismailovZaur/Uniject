@@ -127,7 +127,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromSubcontainerResolve_ByMethod_WhenScopeIsNotSpecified_ReusesSubcontainer()
+        public void Resolve_FromSubcontainerResolve_ByMethod_WhenScopeIsNotSpecified_CreatesSubcontainerForEveryResolve()
         {
             var installCallsCount = 0;
             SubcontainerClass.InstancesCount = 0;
@@ -138,6 +138,29 @@ namespace Uniject.Tests
                 installCallsCount++;
                 subcontainer.Bind<SubcontainerClass>().AsTransient();
             });
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installCallsCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByMethod_AsCached_ReusesSubcontainer()
+        {
+            var installCallsCount = 0;
+            SubcontainerClass.InstancesCount = 0;
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(subcontainer =>
+            {
+                installCallsCount++;
+                subcontainer.Bind<SubcontainerClass>().AsTransient();
+            }).AsCached();
 
             var first = container.Resolve<SubcontainerClass>();
             var second = container.Resolve<SubcontainerClass>();
@@ -183,13 +206,18 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void ByMethod_WhenInstallMethodIsNull_ThrowsArgumentNullException()
+        public void Resolve_FromSubcontainerResolve_ByMethod_WhenInstallMethodIsNull_ResolvesFromEmptySubcontainer()
         {
             var container = new Container();
+            container.Bind<object>().To<Container>()
+                .FromSubcontainerResolve()
+                .ByMethod(null)
+                .AsCached();
 
-            Assert.That(
-                () => container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByMethod(null),
-                Throws.TypeOf<ArgumentNullException>());
+            var resolved = container.Resolve<object>();
+
+            Assert.That(resolved, Is.TypeOf<Container>());
+            Assert.That(resolved, Is.Not.SameAs(container));
         }
 
         [Test]
@@ -203,13 +231,32 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromSubcontainerResolve_ByInstaller_WhenScopeIsNotSpecified_ReusesSubcontainer()
+        public void Resolve_FromSubcontainerResolve_ByInstaller_WhenScopeIsNotSpecified_CreatesSubcontainerForEveryResolve()
         {
             SubcontainerClass.InstancesCount = 0;
             var installer = new CountingInstaller();
 
             var container = new Container();
             container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller(installer);
+
+            var first = container.Resolve<SubcontainerClass>();
+            var second = container.Resolve<SubcontainerClass>();
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second, Is.Not.SameAs(first));
+            Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
+            Assert.That(installer.InstallCallsCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Resolve_FromSubcontainerResolve_ByInstaller_AsCached_ReusesSubcontainer()
+        {
+            SubcontainerClass.InstancesCount = 0;
+            var installer = new CountingInstaller();
+
+            var container = new Container();
+            container.Bind<SubcontainerClass>().FromSubcontainerResolve().ByInstaller(installer).AsCached();
 
             var first = container.Resolve<SubcontainerClass>();
             var second = container.Resolve<SubcontainerClass>();
@@ -241,7 +288,7 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Resolve_FromSubcontainerResolve_ByInstallerGeneric_CreatesInstallerAndInstallsSubcontainer()
+        public void Resolve_FromSubcontainerResolve_ByInstallerGeneric_WhenScopeIsNotSpecified_CreatesSubcontainerForEveryResolve()
         {
             StaticCountingInstaller.InstallCallsCount = 0;
             SubcontainerClass.InstancesCount = 0;
@@ -256,7 +303,7 @@ namespace Uniject.Tests
             Assert.That(second, Is.Not.Null);
             Assert.That(second, Is.Not.SameAs(first));
             Assert.That(SubcontainerClass.InstancesCount, Is.EqualTo(2));
-            Assert.That(StaticCountingInstaller.InstallCallsCount, Is.EqualTo(1));
+            Assert.That(StaticCountingInstaller.InstallCallsCount, Is.EqualTo(2));
         }
 
         [Test]
