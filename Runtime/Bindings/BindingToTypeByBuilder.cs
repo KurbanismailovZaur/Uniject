@@ -98,5 +98,14 @@ namespace Uniject.Bindings
             var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromInstallerOnNewPrefab(_container, prefab, installer));
             return new (_container, _binding, instanceGetter);
         }
+    
+        public BindingToSubcontainerWithGameObjectNameBuilder ByContextOnNewPrefab(GameObject prefab)
+        {
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab), "Prefab can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByContextOnNewPrefab(_container, prefab));
+            return new (_container, _binding, instanceGetter);
+        }
     }
 }
