@@ -2,6 +2,7 @@ using System;
 using Uniject.Installers;
 using Uniject.InstanceGetters;
 using Uniject.SubcontainerGetters;
+using UnityEngine;
 
 namespace Uniject.Bindings
 {
@@ -66,6 +67,35 @@ namespace Uniject.Bindings
                 throw new ArgumentNullException(nameof(installer), "Installer can not be a null.");
 
             var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromInstallerOnNewGameObject(_container, installer));
+            return new (_container, _binding, instanceGetter);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromMethodOnNewPrefab(GameObject prefab, Action<Container> installMethod)
+        {
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab), "Prefab can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromMethodOnNewPrefab(_container, prefab, installMethod));
+            return new (_container, _binding, instanceGetter);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromInstallerOnNewPrefab<TInstaller>(GameObject prefab)
+            where TInstaller : IInstaller, new()
+        {
+            var installer = _container.Instantiate<TInstaller>(typeof(TInstaller));
+            return ByNewContextFromInstallerOnNewPrefab(prefab, installer);
+        }
+
+        public BindingToSubcontainerWithGameObjectNameBuilder ByNewContextFromInstallerOnNewPrefab<TInstaller>(GameObject prefab, TInstaller installer)
+            where TInstaller : IInstaller, new()
+        {
+            if (prefab == null)
+                throw new ArgumentNullException(nameof(prefab), "Prefab can not be a null.");
+
+            if (installer == null)
+                throw new ArgumentNullException(nameof(installer), "Installer can not be a null.");
+
+            var instanceGetter = SetSubcontainerGetter(new SubcontainerGetterByNewContextFromInstallerOnNewPrefab(_container, prefab, installer));
             return new (_container, _binding, instanceGetter);
         }
     }
