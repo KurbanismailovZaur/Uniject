@@ -114,12 +114,46 @@ namespace Uniject.Tests
                 Assert.That(gameObjectContext.Container.Context, Is.SameAs(gameObjectContext));
                 Assert.That(sceneContext.Container.GetNearestContext(), Is.SameAs(sceneContext));
                 Assert.That(gameObjectContext.Container.GetNearestContext(), Is.SameAs(gameObjectContext));
-                Assert.That(sceneContextObject.GetComponents<TickableManager>(), Has.Length.EqualTo(1));
-                Assert.That(gameObjectContextObject.GetComponents<TickableManager>(), Has.Length.EqualTo(1));
+                Assert.That(sceneContextObject.GetComponents<TickableManager>(), Is.Empty);
+                Assert.That(gameObjectContextObject.GetComponents<TickableManager>(), Is.Empty);
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(gameObjectContextObject);
+                UnityEngine.Object.DestroyImmediate(sceneContextObject);
+            }
+        }
+
+        [Test]
+        public void Run_WithTickableManagerInstalledByInstaller_BindsInstallerCreatedManager()
+        {
+            var sceneContextObject = new GameObject("SceneContext");
+
+            try
+            {
+                var sceneContext = sceneContextObject.AddComponent<SceneContext>();
+                var installer = sceneContextObject.AddComponent<ContextLifecycleTestInstaller>();
+                TickableManager installedManager = null;
+
+                installer.EventName = "install";
+                installer.InstallAction = container =>
+                {
+                    installedManager = container.Context.gameObject.AddComponent<TickableManager>();
+                    container.BindInstance(installedManager);
+                };
+
+                ContextTestUtility.Configure(sceneContext, installers: new[] { installer });
+
+                sceneContext.Run();
+                sceneContext.Run();
+
+                Assert.That(installer.InstallCallsCount, Is.EqualTo(1));
+                Assert.That(installedManager, Is.Not.Null);
+                Assert.That(sceneContext.Container.Resolve<TickableManager>(), Is.SameAs(installedManager));
+                Assert.That(sceneContextObject.GetComponents<TickableManager>(), Has.Length.EqualTo(1));
+            }
+            finally
+            {
                 UnityEngine.Object.DestroyImmediate(sceneContextObject);
             }
         }

@@ -36,7 +36,6 @@ namespace Uniject.Contexts
                 return;
 
             IsInstalled = true;
-            Container.BindInstance(gameObject.AddComponent<TickableManager>());
 
             foreach (var installer in _installers)
                 installer.Install(Container);

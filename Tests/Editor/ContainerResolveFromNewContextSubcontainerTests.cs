@@ -318,7 +318,7 @@ namespace Uniject.Tests
             Assert.That(context.IsBuilded, Is.True);
             Assert.That(context.Container.IsBuilded, Is.True);
             Assert.That(context.Container.Context, Is.SameAs(context));
-            Assert.That(context.GetComponents<TickableManager>(), Has.Length.EqualTo(1));
+            Assert.That(context.GetComponents<TickableManager>(), Is.Empty);
         }
 
         private static void DestroyContexts(IReadOnlyList<GameObjectContext> contexts)
