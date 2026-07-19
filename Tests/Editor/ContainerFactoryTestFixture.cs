@@ -39,6 +39,8 @@ namespace Uniject.Tests
 
         protected class ClassProductFactory : Factory<Class, Product> { }
 
+        protected class ClassIProductFactory : Factory<Class, IProduct> { }
+
         protected class CustomProductFactory : CustomFactory<Product>
         {
             public override Product Create()

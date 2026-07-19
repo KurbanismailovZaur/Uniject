@@ -90,7 +90,7 @@ namespace Uniject.Tests
 
             var expectedMessage =
                 $"Source for parameterized factory {typeof(ClassProductFactory)} is not configured. " +
-                "Use FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), " +
+                "Use FromMethod(), FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), " +
                 "or FromFactory<TCustomFactory>().";
 
             Assert.That(

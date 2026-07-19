@@ -50,6 +50,65 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void ResolvePool_FromMethod_InvokesMethodWithContainerForEveryCreatedInstance()
+        {
+            var container = new Container();
+            var callsCount = 0;
+            var receivedContainer = default(Container);
+            container.BindPool<Product, ProductPool>()
+                .WithInitialSize(2)
+                .WithMaxSize(3)
+                .ExpandByOne()
+                .FromMethod(currentContainer =>
+                {
+                    callsCount++;
+                    receivedContainer = currentContainer;
+                    return new Product();
+                })
+                .AsCached();
+
+            var pool = container.Resolve<ProductPool>();
+            var first = pool.Spawn();
+            var second = pool.Spawn();
+
+            Assert.That(receivedContainer, Is.SameAs(container));
+            Assert.That(callsCount, Is.EqualTo(2));
+            Assert.That(second, Is.Not.SameAs(first));
+        }
+
+        [Test]
+        public void Spawn_FromMethodShortcut_UsesDefaultPoolConfiguration()
+        {
+            var expected = new Product();
+            var container = new Container();
+            container.BindPool<Product, ProductPool>()
+                .FromMethod(_ => expected)
+                .AsCached();
+
+            var pool = container.Resolve<ProductPool>();
+            var instance = pool.Spawn();
+
+            Assert.That(instance, Is.SameAs(expected));
+            Assert.That(pool.InitialSize, Is.Zero);
+            Assert.That(pool.MaxSize, Is.EqualTo(-1));
+            Assert.That(pool.ExpandType, Is.EqualTo(ExpandType.ByDoubling));
+        }
+
+        [Test]
+        public void ResolvePool_FromMethod_WhenMethodReturnsNull_ThrowsInvalidOperationException()
+        {
+            var container = new Container();
+            container.BindPool<Product, ProductPool>()
+                .WithInitialSize(1)
+                .FromMethod(_ => null)
+                .AsCached();
+
+            Assert.That(
+                () => container.Resolve<ProductPool>(),
+                Throws.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
         public void ResolvePool_WithInitialSize_PrewarmsPool()
         {
             var pool = CreateProductPool(initialSize: 3);
@@ -402,6 +461,88 @@ namespace Uniject.Tests
 
             pool.Despawn(spawnedInstance);
             Assert.That(spawnedInstance.gameObject.activeSelf, Is.False);
+        }
+
+        [Test]
+        public void SpawnDespawnAndAdopt_WithoutGameObjectActivation_DoesNotChangeGameObjectActiveState()
+        {
+            var adoptedInstance = new GameObject("Adopted").AddComponent<Script>();
+
+            try
+            {
+                var container = new Container();
+                container.BindPool<Script, PooledScriptPool>()
+                    .WithInitialSize(1)
+                    .WithMaxSize(2)
+                    .ExpandByOne()
+                    .WithoutGameObjectActivation()
+                    .FromFactory<PooledScriptFactory>()
+                    .AsCached();
+                var pool = container.Resolve<PooledScriptPool>();
+                var createdInstance = PooledScriptFactory.CreatedInstances[0];
+
+                Assert.That(pool.WithoutGameObjectActivation, Is.True);
+                Assert.That(createdInstance.gameObject.activeSelf, Is.True);
+
+                var spawnedInstance = pool.Spawn();
+                Assert.That(spawnedInstance.gameObject.activeSelf, Is.True);
+
+                spawnedInstance.gameObject.SetActive(false);
+                pool.Despawn(spawnedInstance);
+                Assert.That(spawnedInstance.gameObject.activeSelf, Is.False);
+
+                pool.Spawn();
+                Assert.That(spawnedInstance.gameObject.activeSelf, Is.False);
+
+                pool.Adopt(adoptedInstance);
+                Assert.That(adoptedInstance.gameObject.activeSelf, Is.True);
+            }
+            finally
+            {
+                if (adoptedInstance != null)
+                    UnityEngine.Object.DestroyImmediate(adoptedInstance.gameObject);
+            }
+        }
+
+        [Test]
+        public void ResolvePool_WithoutGameObjectActivationShortcuts_UseDefaultConfiguration()
+        {
+            var defaultContainer = new Container();
+            defaultContainer.BindPool<Product, ProductPool>()
+                .WithoutGameObjectActivation()
+                .FromConstructor()
+                .AsCached();
+
+            var initialSizeContainer = new Container();
+            initialSizeContainer.BindPool<Product, ProductPool>()
+                .WithInitialSize(2)
+                .WithoutGameObjectActivation()
+                .FromConstructor()
+                .AsCached();
+
+            var maxSizeContainer = new Container();
+            maxSizeContainer.BindPool<Product, ProductPool>()
+                .WithMaxSize(3)
+                .WithoutGameObjectActivation()
+                .FromConstructor()
+                .AsCached();
+
+            var defaultPool = defaultContainer.Resolve<ProductPool>();
+            var initialSizePool = initialSizeContainer.Resolve<ProductPool>();
+            var maxSizePool = maxSizeContainer.Resolve<ProductPool>();
+
+            Assert.That(defaultPool.WithoutGameObjectActivation, Is.True);
+            Assert.That(defaultPool.InitialSize, Is.Zero);
+            Assert.That(defaultPool.MaxSize, Is.EqualTo(-1));
+            Assert.That(defaultPool.ExpandType, Is.EqualTo(ExpandType.ByDoubling));
+            Assert.That(initialSizePool.WithoutGameObjectActivation, Is.True);
+            Assert.That(initialSizePool.InitialSize, Is.EqualTo(2));
+            Assert.That(initialSizePool.MaxSize, Is.EqualTo(-1));
+            Assert.That(initialSizePool.ExpandType, Is.EqualTo(ExpandType.ByDoubling));
+            Assert.That(maxSizePool.WithoutGameObjectActivation, Is.True);
+            Assert.That(maxSizePool.InitialSize, Is.Zero);
+            Assert.That(maxSizePool.MaxSize, Is.EqualTo(3));
+            Assert.That(maxSizePool.ExpandType, Is.EqualTo(ExpandType.ByDoubling));
         }
 
         [Test]
