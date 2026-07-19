@@ -16,6 +16,12 @@ namespace Uniject.Bindings.Factories
             return new BindingToFactoryWithParameterFromBuilder<TParam, TResult, TResultConcrete, TFactory>(_container, _binding);
         }
 
+        public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromMethod(
+            Func<Container, TParam, TResult> method)
+        {
+            return To<TResult>().FromMethod(method);
+        }
+
         public BindingToFactoryWithParameterAsBuilder<TParam, TResult, TResult, TFactory> FromComponentInNewPrefab()
         {
             return To<TResult>().FromComponentInNewPrefab();

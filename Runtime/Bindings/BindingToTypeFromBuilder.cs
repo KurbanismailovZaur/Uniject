@@ -1,3 +1,4 @@
+using System;
 using Uniject.InstanceGetters;
 using UnityEngine;
 
@@ -11,6 +12,12 @@ namespace Uniject.Bindings
         public BindingToTypeAsBuilder FromConstructor()
         {
             _binding.InstanceGetter = new InstanceGetterFromConstructor(_container);
+            return new (_container, _binding);
+        }
+
+        public BindingToTypeAsBuilder FromMethod<TResult>(Func<Container, TResult> method)
+        {
+            _binding.InstanceGetter = new InstanceGetterFromMethod<TResult>(_container, method);
             return new (_container, _binding);
         }
 

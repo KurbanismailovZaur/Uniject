@@ -29,6 +29,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromConstructor();
         }
 
+        public BindingToTypeAsBuilder FromMethod<TResult>(Func<Container, TResult> method)
+        {
+            return To(_binding.ContractType).FromMethod(method);
+        }
+
         public BindingToTypeAsBuilder FromInstance(object instance)
         {
             return To(_binding.ContractType).FromInstance(instance);
@@ -92,6 +97,9 @@ namespace Uniject.Bindings
         public BindingToTypeFromBuilder To<TConcrete>() where TConcrete : TContract => To(typeof(TConcrete));
 
         public BindingToTypeAsBuilder FromConstructor() => To<TContract>().FromConstructor();
+
+        public BindingToTypeAsBuilder FromMethod(Func<Container, TContract> method) =>
+            To<TContract>().FromMethod(method);
 
         public BindingToTypeAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
         

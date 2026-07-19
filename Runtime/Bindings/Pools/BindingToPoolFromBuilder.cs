@@ -1,3 +1,4 @@
+using System;
 using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
 using UnityEngine;
@@ -20,6 +21,12 @@ namespace Uniject.Bindings.Pools
         public BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> FromConstructor()
         {
             return From(new InstanceGetterFromConstructor(_container));
+        }
+
+        public BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> FromMethod(
+            Func<Container, TResultConcrete> method)
+        {
+            return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
         }
 
         public BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> FromComponentInNewPrefab(GameObject prefab)

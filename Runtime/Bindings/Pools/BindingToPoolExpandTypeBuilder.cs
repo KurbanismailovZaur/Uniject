@@ -31,6 +31,12 @@ namespace Uniject.Bindings.Pools
             return To<TResult>().FromConstructor();
         }
 
+        public BindingToPoolAsBuilder<TResult, TResult, TPool> FromMethod(
+            Func<Container, TResult> method)
+        {
+            return To<TResult>().FromMethod(method);
+        }
+
         public BindingToPoolAsBuilder<TResult, TResult, TPool> FromComponentInNewPrefab(GameObject prefab)
         {
             return To<TResult>().FromComponentInNewPrefab(prefab);

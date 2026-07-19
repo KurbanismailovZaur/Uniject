@@ -1,3 +1,4 @@
+using System;
 using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
 using UnityEngine;
@@ -19,6 +20,12 @@ namespace Uniject.Bindings.Factories
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromConstructor()
         {
             return From(new InstanceGetterFromConstructor(_container));
+        }
+
+        public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromMethod(
+            Func<Container, TResultConcrete> method)
+        {
+            return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
         }
 
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromComponentInNewPrefab(GameObject prefab)

@@ -21,7 +21,8 @@ namespace Uniject.Bindings.Factories
         {
             if (InstanceGetter == null)
                 throw new InvalidOperationException($"Source for parameterized factory {typeof(TFactory)} is not " + 
-                    "configured. Use FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), or FromFactory<TCustomFactory>().");
+                    "configured. Use FromMethod(), FromComponentInNewPrefab(), FromNewComponentOnNewPrefab(), " +
+                    "or FromFactory<TCustomFactory>().");
 
             var factory = new TFactory();
             factory.Construct(InstanceGetter, ResultConcreteType);
