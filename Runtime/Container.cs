@@ -36,7 +36,6 @@ namespace Uniject
 
             Bind<Container>().FromInstance(this).AsCached();
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
-            Bind<SceneLoader>().AsCached();
         }
 
         public void SetParentContainer(Container parentContainer) => _parentContainer = parentContainer;

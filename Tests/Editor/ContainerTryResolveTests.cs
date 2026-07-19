@@ -1,6 +1,8 @@
 using NUnit.Framework;
 using Uniject.Exceptions;
+using Uniject.Installers;
 using Uniject.Tests.Fixtures;
+using UnityEngine;
 
 namespace Uniject.Tests
 {
@@ -148,15 +150,27 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Constructor_BindsCachedSceneLoader()
+        public void SceneLoaderInstaller_Install_BindsCachedSceneLoader()
         {
+            var gameObject = new GameObject("SceneLoaderInstaller");
             var container = new Container();
 
-            var first = container.Resolve<SceneLoader>();
-            var second = container.Resolve<SceneLoader>();
+            try
+            {
+                var installer = gameObject.AddComponent<SceneLoaderInstaller>();
 
-            Assert.That(first, Is.Not.Null);
-            Assert.That(second, Is.SameAs(first));
+                installer.Install(container);
+
+                var first = container.Resolve<SceneLoader>();
+                var second = container.Resolve<SceneLoader>();
+
+                Assert.That(first, Is.Not.Null);
+                Assert.That(second, Is.SameAs(first));
+            }
+            finally
+            {
+                Object.DestroyImmediate(gameObject);
+            }
         }
     }
 }
