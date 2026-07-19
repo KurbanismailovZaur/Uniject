@@ -39,6 +39,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromInstance(instance);
         }
 
+        public BindingToTypeAsBuilder FromNewComponentOn(GameObject gameObject)
+        {
+            return To(_binding.ContractType).FromNewComponentOn(gameObject);
+        }
+
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab)
         {
             return To(_binding.ContractType).FromComponentInNewPrefab(prefab);
@@ -102,6 +107,8 @@ namespace Uniject.Bindings
             To<TContract>().FromMethod(method);
 
         public BindingToTypeAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
+
+        public BindingToTypeAsBuilder FromNewComponentOn(GameObject gameObject) => To<TContract>().FromNewComponentOn(gameObject);
         
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         

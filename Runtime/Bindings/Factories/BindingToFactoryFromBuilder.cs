@@ -28,6 +28,11 @@ namespace Uniject.Bindings.Factories
             return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromNewComponentOn(GameObject gameObject)
+        {
+            return From(new InstanceGetterFromNewComponentOn(_container, gameObject, _binding.ResultConcreteType));
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromComponentInNewPrefab(GameObject prefab)
         {
             return From(new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ResultConcreteType));
