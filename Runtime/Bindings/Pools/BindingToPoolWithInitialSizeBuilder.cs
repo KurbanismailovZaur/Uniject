@@ -23,14 +23,19 @@ namespace Uniject.Bindings.Pools
             return WithInitialSize(0).WithMaxSize(maxSize);
         }
 
-        public BindingToPoolToBuilder<TResult, TPool> ExpandByDoubling()
+        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByDoubling()
         {
             return WithMaxSize(-1).ExpandByDoubling();
         }
 
-        public BindingToPoolToBuilder<TResult, TPool> ExpandByOne()
+        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByOne()
         {
             return WithMaxSize(-1).ExpandByOne();
+        }
+
+        public BindingToPoolToBuilder<TResult, TPool> WithoutGameObjectActivation()
+        {
+            return ExpandByDoubling().WithoutGameObjectActivation();
         }
 
         public BindingToPoolFromBuilder<TResult, TResultConcrete, TPool> To<TResultConcrete>() where TResultConcrete : TResult

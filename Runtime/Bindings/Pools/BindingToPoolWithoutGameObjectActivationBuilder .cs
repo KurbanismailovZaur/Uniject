@@ -3,39 +3,23 @@ using UnityEngine;
 
 namespace Uniject.Bindings.Pools
 {
-    public class BindingToPoolWithMaxSizeBuilder<TResult, TPool> : BindingToPoolBuilder<TResult, TPool> 
+    public class BindingToPoolWithoutGameObjectActivationBuilder <TResult, TPool> : BindingToPoolBuilder<TResult, TPool> 
         where TResult : class
         where TPool : Pool<TResult>, new()
     {
-        public BindingToPoolWithMaxSizeBuilder(Container container, BindingToPool<TResult, TPool> binding) : base(container, binding) { }
-
-        public BindingToPoolExpandTypeBuilder<TResult, TPool> WithMaxSize(int maxSize)
-        {
-            if (maxSize < -1)
-                throw new ArgumentOutOfRangeException(nameof(maxSize), "Max size can not be less than -1.");
-
-            _binding.MaxSize = maxSize;
-            return new BindingToPoolExpandTypeBuilder<TResult, TPool>(_container, _binding);
-        }
-
-        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByDoubling()
-        {
-            return WithMaxSize(-1).ExpandByDoubling();
-        }
-
-        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByOne()
-        {
-            return WithMaxSize(-1).ExpandByOne();
-        }
+        public BindingToPoolWithoutGameObjectActivationBuilder (Container container, BindingToPool<TResult, TPool> binding) 
+            : base(container, binding) { }
 
         public BindingToPoolToBuilder<TResult, TPool> WithoutGameObjectActivation()
         {
-            return ExpandByDoubling().WithoutGameObjectActivation();
+            _binding.WithoutGameObjectActivation = true;
+            return new BindingToPoolToBuilder<TResult, TPool>(_container, _binding);
         }
 
         public BindingToPoolFromBuilder<TResult, TResultConcrete, TPool> To<TResultConcrete>() where TResultConcrete : TResult
         {
-            return ExpandByDoubling().To<TResultConcrete>();
+            var toBuilder = new BindingToPoolToBuilder<TResult, TPool>(_container, _binding);
+            return toBuilder.To<TResultConcrete>();
         }
 
         public BindingToPoolAsBuilder<TResult, TResult, TPool> FromConstructor()

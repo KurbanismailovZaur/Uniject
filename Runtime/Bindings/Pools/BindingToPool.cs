@@ -13,6 +13,7 @@ namespace Uniject.Bindings.Pools
         public int InitialSize { get; set; }
         public int MaxSize { get; set; }
         public ExpandType ExpandType { get; set; }
+        public bool WithoutGameObjectActivation { get; set; }
 
         public BindingToPool(Container container, Type resultType, Type poolType) : base(container, poolType)
         {
@@ -25,7 +26,8 @@ namespace Uniject.Bindings.Pools
         private object CreatePool()
         {
             var pool = new TPool();
-            pool.Initialize(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType);
+            pool.Initialize(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType,
+                WithoutGameObjectActivation);
             return pool;
         }
 

@@ -7,18 +7,24 @@ namespace Uniject.Bindings.Pools
         where TResult : class
         where TPool : Pool<TResult>, new()
     {
-        public BindingToPoolExpandTypeBuilder(Container container, BindingToPool<TResult, TPool> binding) : base(container, binding) { }
+        public BindingToPoolExpandTypeBuilder(Container container, BindingToPool<TResult, TPool> binding) 
+            : base(container, binding) { }
 
-        public BindingToPoolToBuilder<TResult, TPool> ExpandByDoubling()
+        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByDoubling()
         {
             _binding.ExpandType = ExpandType.ByDoubling;
-            return new BindingToPoolToBuilder<TResult, TPool>(_container, _binding);
+            return new BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool>(_container, _binding);
         }
 
-        public BindingToPoolToBuilder<TResult, TPool> ExpandByOne()
+        public BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool> ExpandByOne()
         {
             _binding.ExpandType = ExpandType.ByOne;
-            return new BindingToPoolToBuilder<TResult, TPool>(_container, _binding);
+            return new BindingToPoolWithoutGameObjectActivationBuilder<TResult, TPool>(_container, _binding);
+        }
+
+        public BindingToPoolToBuilder<TResult, TPool> WithoutGameObjectActivation()
+        {
+            return ExpandByDoubling().WithoutGameObjectActivation();
         }
 
         public BindingToPoolFromBuilder<TResult, TResultConcrete, TPool> To<TResultConcrete>() where TResultConcrete : TResult

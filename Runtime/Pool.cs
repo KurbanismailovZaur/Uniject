@@ -13,6 +13,8 @@ namespace Uniject
         public int InitialSize { get; protected set; }
         public int MaxSize { get; protected set; }
         public ExpandType ExpandType { get; protected set; }
+        public bool WithoutGameObjectActivation { get; protected set; }
+
 
         public abstract void Clear();
 
@@ -40,11 +42,12 @@ namespace Uniject
         public int InstanceCount => _spawnedInstancesSet.Count + _despawnedInstances.Count;
 
         public void Initialize(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize, int maxSize, 
-            ExpandType expandType)
+            ExpandType expandType, bool withoutGameObjectActivation)
         {
             InitialSize = initialSize;
             MaxSize = maxSize;
             ExpandType = expandType;
+            WithoutGameObjectActivation = withoutGameObjectActivation;
             _instanceGetter = instanceGetter;
             _resultConcreteType = resultConcreteType;
             
@@ -83,6 +86,9 @@ namespace Uniject
 
         private void TrySetActiveForGameObject(TResult instance, bool active)
         {
+            if (WithoutGameObjectActivation)
+                return;
+
             if (instance is GameObject gameObject)
                 gameObject.SetActive(active);
             else if (instance is Component component)
