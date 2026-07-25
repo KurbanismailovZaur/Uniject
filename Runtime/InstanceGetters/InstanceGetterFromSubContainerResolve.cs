@@ -16,21 +16,24 @@ namespace Uniject.InstanceGetters
             SubcontainerGetter = new SubcontainerGetterByInstance(container, new Container());
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             if (Scope == Scope.Transient)
             {
                 var container = SubcontainerGetter.GetContainer();
                 container.Build();
-                return container.Resolve(concreteType);
+                return container.Resolve(concreteType, context);
             }
 
             if (CachedContainer != null)
-                return CachedContainer.Resolve(concreteType);
+                return CachedContainer.Resolve(concreteType, context);
 
             CachedContainer = SubcontainerGetter.GetContainer();
             CachedContainer.Build();
-            return CachedContainer.Resolve(concreteType);
+            return CachedContainer.Resolve(concreteType, context);
         }
     }
 }

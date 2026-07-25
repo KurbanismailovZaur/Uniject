@@ -48,7 +48,17 @@ namespace Uniject.Tests
             var container = new Container();
 
             Assert.That(
-                () => container.Bind<Class>().FromMethod(null),
+                () => container.Bind<Class>().FromMethod((Func<Container, Class>)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void Bind_FromMethod_WhenContextAwareMethodIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.Bind<Class>().FromMethod((Func<Container, InjectContext, Class>)null),
                 Throws.TypeOf<ArgumentNullException>());
         }
 

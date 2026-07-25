@@ -18,6 +18,9 @@ namespace Uniject.InstanceGetters
             _instance = instance;
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions) => _instance;
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context) => _instance;
     }
 }

@@ -34,6 +34,7 @@ namespace Uniject
     {
         private Factory<TResult> _factory;
         private InstanceGetter _instanceGetter;
+        private Type _resultContractType;
         private Type _resultConcreteType;
         protected HashSet<TResult> _spawnedInstancesSet;
         protected List<TResult> _despawnedInstances;
@@ -44,15 +45,35 @@ namespace Uniject
         public void Initialize(InstanceGetter instanceGetter, Type resultConcreteType, int initialSize, int maxSize, 
             ExpandType expandType, bool withoutGameObjectActivation)
         {
+            Initialize(
+                instanceGetter,
+                typeof(TResult),
+                resultConcreteType,
+                initialSize,
+                maxSize,
+                expandType,
+                withoutGameObjectActivation);
+        }
+
+        internal void Initialize(
+            InstanceGetter instanceGetter,
+            Type resultContractType,
+            Type resultConcreteType,
+            int initialSize,
+            int maxSize,
+            ExpandType expandType,
+            bool withoutGameObjectActivation)
+        {
             InitialSize = initialSize;
             MaxSize = maxSize;
             ExpandType = expandType;
             WithoutGameObjectActivation = withoutGameObjectActivation;
             _instanceGetter = instanceGetter;
+            _resultContractType = resultContractType;
             _resultConcreteType = resultConcreteType;
             
             _factory = new Factory<TResult>();
-            _factory.Construct(_instanceGetter, _resultConcreteType);
+            _factory.Construct(_instanceGetter, _resultContractType, _resultConcreteType);
 
             var initialCapacity = MaxSize == -1 ? InitialSize : Mathf.Min(InitialSize, MaxSize);
 

@@ -26,12 +26,12 @@ namespace Uniject.Bindings.Pools
         private object CreatePool()
         {
             var pool = new TPool();
-            pool.Initialize(InstanceGetter, ResultConcreteType, InitialSize, MaxSize, ExpandType,
+            pool.Initialize(InstanceGetter, ResultContractType, ResultConcreteType, InitialSize, MaxSize, ExpandType,
                 WithoutGameObjectActivation);
             return pool;
         }
 
-        public override object GetInstance()
+        protected internal override object GetInstance(InjectContext context)
         {
             if (Scope == Scope.Transient)
                 return CreatePool();

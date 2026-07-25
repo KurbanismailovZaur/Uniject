@@ -7,7 +7,10 @@ namespace Uniject.InstanceGetters
     {
         public InstanceGetterFromConstructor(Container container) : base(container) { }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             return _container.Instantiate(concreteType);
         }

@@ -18,16 +18,16 @@ namespace Uniject.Bindings
             InstanceGetter = new InstanceGetterFromConstructor(container);
         }
 
-        protected virtual object CreateAndConfigureInstance()
+        protected virtual object CreateAndConfigureInstance(InjectContext injectContext)
         {
             IsNonLazyCreated = true;
 
             var (context, parentTransform) = Container.GetInfoAboutNearestParentForGameObjects();
             var createOptions = new CreateOptions(ObjectName, UnderTransform, parentTransform, context);
-            return InstanceGetter.GetInstance(ConcreteType, createOptions);
+            return InstanceGetter.GetInstance(ConcreteType, createOptions, injectContext);
         }
 
-        public override object GetInstance()
+        protected internal override object GetInstance(InjectContext context)
         {
             if (Scope == Scope.Transient)
             {
@@ -38,16 +38,16 @@ namespace Uniject.Bindings
                     return cachedInstance;
                 }
 
-                return CreateAndConfigureInstance();
+                return CreateAndConfigureInstance(context);
             }
 
-            return CachedInstance ??= CreateAndConfigureInstance();
+            return CachedInstance ??= CreateAndConfigureInstance(context);
         }
 
         internal void PrepareNonLazyInstance()
         {
             if (!IsNonLazyCreated)
-                CachedInstance ??= CreateAndConfigureInstance();
+                CachedInstance ??= CreateAndConfigureInstance(InjectContext.CreateRoot(ContractType));
         }
     }
 }

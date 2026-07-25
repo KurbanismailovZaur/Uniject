@@ -15,6 +15,9 @@ namespace Uniject.InstanceGetters.Factories
             _factory.InitializeInternal();
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions) => _factory.Create();
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context) => _factory.Create();
     }
 }

@@ -24,6 +24,12 @@ namespace Uniject.Bindings.Factories
             return To<TResult>().FromMethod(method);
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromMethod(
+            Func<Container, InjectContext, TResult> method)
+        {
+            return To<TResult>().FromMethod(method);
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOn(GameObject gameObject)
         {
             return To<TResult>().FromNewComponentOn(gameObject);

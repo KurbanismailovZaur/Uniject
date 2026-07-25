@@ -48,7 +48,18 @@ namespace Uniject.Tests
             var container = new Container();
 
             Assert.That(
-                () => container.BindFactory<Product, ProductFactory>().FromMethod(null),
+                () => container.BindFactory<Product, ProductFactory>().FromMethod((Func<Container, Product>)null),
+                Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
+        public void BindFactory_FromMethod_WhenContextAwareMethodIsNull_ThrowsArgumentNullException()
+        {
+            var container = new Container();
+
+            Assert.That(
+                () => container.BindFactory<Product, ProductFactory>()
+                    .FromMethod((Func<Container, InjectContext, Product>)null),
                 Throws.TypeOf<ArgumentNullException>());
         }
 

@@ -44,7 +44,10 @@ namespace Uniject.InstanceGetters
                     $"component assignable to type {concreteType}.", nameof(prefab));
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             var component = _container.Instantiate(_prefab);
             SetGameObjectNameAndParent(component, createOptions);

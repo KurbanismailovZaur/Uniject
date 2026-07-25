@@ -11,9 +11,12 @@ namespace Uniject.InstanceGetters
                 throw new ArgumentException($"Contract type and concrete type for {nameof(InstanceGetterFromResolve)} must be different types.");
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
-            return _container.Resolve(concreteType);
+            return ResolveWithContext(concreteType, context);
         }
     }
 }

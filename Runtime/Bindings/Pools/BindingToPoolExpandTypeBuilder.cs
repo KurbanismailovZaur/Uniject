@@ -43,6 +43,12 @@ namespace Uniject.Bindings.Pools
             return To<TResult>().FromMethod(method);
         }
 
+        public BindingToPoolAsBuilder<TResult, TResult, TPool> FromMethod(
+            Func<Container, InjectContext, TResult> method)
+        {
+            return To<TResult>().FromMethod(method);
+        }
+
         public BindingToPoolAsBuilder<TResult, TResult, TPool> FromNewComponentOn(GameObject gameObject)
         {
             return To<TResult>().FromNewComponentOn(gameObject);

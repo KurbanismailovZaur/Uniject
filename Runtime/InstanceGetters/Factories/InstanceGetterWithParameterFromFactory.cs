@@ -14,6 +14,9 @@ namespace Uniject.InstanceGetters.Factories
             _factory.InitializeInternal();
         }
 
-        public override object GetInstance(Type concreteType, TParam origin) => _factory.Create(origin);
+        public override object GetInstance(
+            Type concreteType,
+            TParam origin,
+            InjectContext context) => _factory.Create(origin);
     }
 }

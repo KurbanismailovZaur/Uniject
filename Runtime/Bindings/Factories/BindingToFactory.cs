@@ -19,11 +19,11 @@ namespace Uniject.Bindings.Factories
         private object CreateFactory()
         {
             var factory = new TFactory();
-            factory.Construct(InstanceGetter, ResultConcreteType);
+            factory.Construct(InstanceGetter, ResultContractType, ResultConcreteType);
             return factory;
         }
 
-        public override object GetInstance()
+        protected internal override object GetInstance(InjectContext context)
         {
             if (Scope == Scope.Transient)
                 return CreateFactory();

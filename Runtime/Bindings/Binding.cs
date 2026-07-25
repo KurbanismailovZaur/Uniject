@@ -20,6 +20,8 @@ namespace Uniject.Bindings
             Scope = Scope.Transient;
         }
 
-        public abstract object GetInstance();
+        public object GetInstance() => GetInstance(InjectContext.CreateRoot(ContractType));
+
+        protected internal abstract object GetInstance(InjectContext context);
     }
 }

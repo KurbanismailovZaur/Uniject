@@ -29,6 +29,12 @@ namespace Uniject.Bindings.Pools
             return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
         }
 
+        public BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> FromMethod(
+            Func<Container, InjectContext, TResultConcrete> method)
+        {
+            return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
+        }
+
         public BindingToPoolAsBuilder<TResult, TResultConcrete, TPool> FromNewComponentOn(GameObject gameObject)
         {
             return From(new InstanceGetterFromNewComponentOn(_container, gameObject, _binding.ResultConcreteType));

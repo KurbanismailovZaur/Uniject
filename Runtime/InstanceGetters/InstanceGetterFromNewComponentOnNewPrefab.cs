@@ -32,7 +32,10 @@ namespace Uniject.InstanceGetters
             _prefab = prefab.gameObject;
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             var cloned = _container.Instantiate(_prefab);
             var component = _container.AddComponent(cloned, concreteType);

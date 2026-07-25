@@ -21,7 +21,10 @@ namespace Uniject.InstanceGetters.Factories
                     nameof(concreteType));
         }
 
-        public override object GetInstance(Type concreteType, TParam prefab)
+        public override object GetInstance(
+            Type concreteType,
+            TParam prefab,
+            InjectContext context)
         {
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab),

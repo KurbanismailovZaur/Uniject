@@ -13,7 +13,10 @@ namespace Uniject.InstanceGetters
                 throw new ArgumentException($"Type {concreteType} for {nameof(InstanceGetterFromNewComponentOnNewGameObject)} must be a non-abstract Component.");
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             var gameObject = new GameObject(concreteType.Name);
             var component = _container.AddComponent(gameObject, concreteType);

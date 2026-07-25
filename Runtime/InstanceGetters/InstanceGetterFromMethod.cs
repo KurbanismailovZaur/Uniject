@@ -5,9 +5,20 @@ namespace Uniject.InstanceGetters
 {
     public class InstanceGetterFromMethod<TResult> : InstanceGetter
     {
-        private readonly Func<Container, TResult> _method;
+        private readonly Func<Container, InjectContext, TResult> _method;
 
         public InstanceGetterFromMethod(Container container, Func<Container, TResult> method) : base(container)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method),
+                    $"Method for {nameof(InstanceGetterFromMethod<TResult>)} can not be null.");
+
+            _method = (currentContainer, _) => method(currentContainer);
+        }
+
+        public InstanceGetterFromMethod(
+            Container container,
+            Func<Container, InjectContext, TResult> method) : base(container)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method),
@@ -16,9 +27,12 @@ namespace Uniject.InstanceGetters
             _method = method;
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
-            var instance = _method(_container);
+            var instance = _method(_container, context);
 
             if (instance is null)
                 throw new InvalidOperationException(

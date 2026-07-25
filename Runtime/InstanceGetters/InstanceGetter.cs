@@ -10,7 +10,10 @@ namespace Uniject.InstanceGetters
     {
         public InstanceGetter(Container container) : base(container) { }
 
-        public abstract object GetInstance(Type concreteType, CreateOptions createOptions);
+        public abstract object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context);
 
         protected void SetGameObjectNameAndParent(Component component, CreateOptions createOptions)
         {

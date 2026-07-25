@@ -28,6 +28,12 @@ namespace Uniject.Bindings.Factories
             return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromMethod(
+            Func<Container, InjectContext, TResultConcrete> method)
+        {
+            return From(new InstanceGetterFromMethod<TResultConcrete>(_container, method));
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromNewComponentOn(GameObject gameObject)
         {
             return From(new InstanceGetterFromNewComponentOn(_container, gameObject, _binding.ResultConcreteType));

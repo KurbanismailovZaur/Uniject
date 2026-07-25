@@ -23,7 +23,10 @@ namespace Uniject.InstanceGetters
             _gameObject = gameObject;
         }
 
-        public override object GetInstance(Type concreteType, CreateOptions createOptions)
+        public override object GetInstance(
+            Type concreteType,
+            CreateOptions createOptions,
+            InjectContext context)
         {
             return _container.AddComponent(_gameObject, concreteType);
         }

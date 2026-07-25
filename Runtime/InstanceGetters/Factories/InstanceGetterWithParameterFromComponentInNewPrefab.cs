@@ -17,7 +17,10 @@ namespace Uniject.InstanceGetters.Factories
                     "must be a Component or an interface.", nameof(concreteType));
         }
 
-        public override object GetInstance(Type concreteType, TParam prefab)
+        public override object GetInstance(
+            Type concreteType,
+            TParam prefab,
+            InjectContext context)
         {
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab),

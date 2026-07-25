@@ -6,6 +6,9 @@ namespace Uniject.InstanceGetters.Factories
     {
         public InstanceGetterWithParameter(Container container): base(container) { }
 
-        public abstract object GetInstance(Type concreteType, TParam origin);
+        public abstract object GetInstance(
+            Type concreteType,
+            TParam origin,
+            InjectContext context);
     }
 }
