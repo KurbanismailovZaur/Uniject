@@ -33,6 +33,13 @@ namespace Uniject.Bindings
             return new (_container, _binding);
         }
 
+        public BindingToTypeAsBuilder FromNewComponentOnConsumer()
+        {
+            _binding.InstanceGetter =
+                new InstanceGetterFromNewComponentOnConsumer(_container, _binding.ConcreteType);
+            return new (_container, _binding);
+        }
+
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab)
         {
             _binding.InstanceGetter = new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ConcreteType);
