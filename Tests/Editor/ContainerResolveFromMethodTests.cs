@@ -12,10 +12,10 @@ namespace Uniject.Tests
             var container = new Container();
             var callsCount = 0;
             var receivedContainer = default(Container);
-            container.Bind<Class>().FromMethod(currentContainer =>
+            container.Bind<Class>().FromMethod(context =>
             {
                 callsCount++;
-                receivedContainer = currentContainer;
+                receivedContainer = context.Container;
                 return new Class();
             }).AsTransient();
 
@@ -48,17 +48,7 @@ namespace Uniject.Tests
             var container = new Container();
 
             Assert.That(
-                () => container.Bind<Class>().FromMethod((Func<Container, Class>)null),
-                Throws.TypeOf<ArgumentNullException>());
-        }
-
-        [Test]
-        public void Bind_FromMethod_WhenContextAwareMethodIsNull_ThrowsArgumentNullException()
-        {
-            var container = new Container();
-
-            Assert.That(
-                () => container.Bind<Class>().FromMethod((Func<Container, InjectContext, Class>)null),
+                () => container.Bind<Class>().FromMethod((Func<InjectContext, Class>)null),
                 Throws.TypeOf<ArgumentNullException>());
         }
 

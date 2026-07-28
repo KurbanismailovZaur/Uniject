@@ -49,7 +49,7 @@ namespace Uniject.InstanceGetters
             CreateOptions createOptions,
             InjectContext context)
         {
-            var component = _container.Instantiate(_prefab);
+            var component = Container.Instantiate(_prefab);
             SetGameObjectNameAndParent(component, createOptions);
 
             return component;

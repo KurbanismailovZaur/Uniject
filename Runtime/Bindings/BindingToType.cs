@@ -47,7 +47,7 @@ namespace Uniject.Bindings
         internal void PrepareNonLazyInstance()
         {
             if (!IsNonLazyCreated)
-                CachedInstance ??= CreateAndConfigureInstance(InjectContext.CreateRoot(ContractType));
+                CachedInstance ??= CreateAndConfigureInstance(InjectContext.CreateRoot(Container, ContractType));
         }
     }
 }

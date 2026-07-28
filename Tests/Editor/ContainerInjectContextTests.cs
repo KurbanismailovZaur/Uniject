@@ -127,8 +127,8 @@ namespace Uniject.Tests
             Assert.That(context.ParameterInfo, Is.Null);
         }
 
-        private static void AssertLegacyRegularFromMethod(
-            Action<Container, Func<Container, Service>> configure)
+        private static void AssertRegularFromMethodWithoutInspectingContext(
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var container = new Container();
             configure(container, _ => new Service());
@@ -137,11 +137,11 @@ namespace Uniject.Tests
         }
 
         private static void AssertContextualRegularFromMethod(
-            Action<Container, Func<Container, InjectContext, Service>> configure)
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var receivedContext = default(InjectContext);
             var container = new Container();
-            configure(container, (_, context) =>
+            configure(container, context =>
             {
                 receivedContext = context;
                 return new Service();
@@ -151,8 +151,8 @@ namespace Uniject.Tests
             AssertRootContext(receivedContext, typeof(IService));
         }
 
-        private static void AssertLegacyFactoryFromMethod(
-            Action<Container, Func<Container, Service>> configure)
+        private static void AssertFactoryFromMethodWithoutInspectingContext(
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var container = new Container();
             configure(container, _ => new Service());
@@ -161,11 +161,11 @@ namespace Uniject.Tests
         }
 
         private static void AssertContextualFactoryFromMethod(
-            Action<Container, Func<Container, InjectContext, Service>> configure)
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var receivedContext = default(InjectContext);
             var container = new Container();
-            configure(container, (_, context) =>
+            configure(container, context =>
             {
                 receivedContext = context;
                 return new Service();
@@ -175,11 +175,11 @@ namespace Uniject.Tests
             AssertRootContext(receivedContext, typeof(IService));
         }
 
-        private static void AssertLegacyParameterizedFactoryFromMethod(
-            Action<Container, Func<Container, string, Service>> configure)
+        private static void AssertParameterizedFactoryFromMethodWithoutInspectingContext(
+            Action<Container, Func<string, InjectContext, Service>> configure)
         {
             var container = new Container();
-            configure(container, (currentContainer, origin) => new Service());
+            configure(container, (_, __) => new Service());
 
             Assert.That(
                 container.Resolve<ParameterizedServiceFactory>().Create("origin"),
@@ -187,11 +187,11 @@ namespace Uniject.Tests
         }
 
         private static void AssertContextualParameterizedFactoryFromMethod(
-            Action<Container, Func<Container, string, InjectContext, Service>> configure)
+            Action<Container, Func<string, InjectContext, Service>> configure)
         {
             var receivedContext = default(InjectContext);
             var container = new Container();
-            configure(container, (currentContainer, origin, context) =>
+            configure(container, (_, context) =>
             {
                 receivedContext = context;
                 return new Service();
@@ -203,8 +203,8 @@ namespace Uniject.Tests
             AssertRootContext(receivedContext, typeof(IService));
         }
 
-        private static void AssertLegacyPoolFromMethod(
-            Action<Container, Func<Container, Service>> configure)
+        private static void AssertPoolFromMethodWithoutInspectingContext(
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var container = new Container();
             configure(container, _ => new Service());
@@ -213,11 +213,11 @@ namespace Uniject.Tests
         }
 
         private static void AssertContextualPoolFromMethod(
-            Action<Container, Func<Container, InjectContext, Service>> configure)
+            Action<Container, Func<InjectContext, Service>> configure)
         {
             var receivedContext = default(InjectContext);
             var container = new Container();
-            configure(container, (_, context) =>
+            configure(container, context =>
             {
                 receivedContext = context;
                 return new Service();
@@ -233,7 +233,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<IService>().To<Service>().FromMethod((_, context) =>
+            container.Bind<IService>().To<Service>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -251,7 +251,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<IService>().To<Service>().FromMethod((_, context) =>
+            container.Bind<IService>().To<Service>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -273,7 +273,7 @@ namespace Uniject.Tests
             var binding = new BindingToType(container, typeof(IService))
             {
                 ConcreteType = typeof(Service),
-                InstanceGetter = new InstanceGetterFromMethod<Service>(container, (_, context) =>
+                InstanceGetter = new InstanceGetterFromMethod<Service>(container, context =>
                 {
                     receivedContext = context;
                     return expected;
@@ -292,7 +292,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -316,7 +316,7 @@ namespace Uniject.Tests
         {
             var receivedContexts = new List<InjectContext>();
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContexts.Add(context);
                 return new Service();
@@ -343,7 +343,7 @@ namespace Uniject.Tests
             var receivedContext = default(InjectContext);
             var consumer = new DerivedMethodConsumer();
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -367,7 +367,7 @@ namespace Uniject.Tests
             var receivedContexts = new List<InjectContext>();
             var consumer = new MultiParameterMethodConsumer();
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContexts.Add(context);
                 return new Service();
@@ -393,7 +393,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -412,7 +412,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var parent = new Container();
-            parent.Bind<IService>().FromMethod((_, context) =>
+            parent.Bind<IService>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -433,7 +433,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<Service>().FromMethod((_, context) =>
+            container.Bind<Service>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
@@ -455,7 +455,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContexts = new List<InjectContext>();
             var subcontainer = new Container();
-            subcontainer.Bind<Service>().FromMethod((_, context) =>
+            subcontainer.Bind<Service>().FromMethod(context =>
             {
                 receivedContexts.Add(context);
                 return expected;
@@ -488,7 +488,7 @@ namespace Uniject.Tests
                 .FromSubcontainerResolve()
                 .ByMethod(subcontainer =>
                 {
-                    subcontainer.Bind<Service>().FromMethod((_, context) =>
+                    subcontainer.Bind<Service>().FromMethod(context =>
                     {
                         receivedContexts.Add(context);
                         return new Service();
@@ -515,7 +515,7 @@ namespace Uniject.Tests
             var receivedContexts = new List<InjectContext>();
             var callsCount = 0;
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 callsCount++;
 
@@ -549,7 +549,7 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContexts = new List<InjectContext>();
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContexts.Add(context);
                 return expected;
@@ -569,7 +569,7 @@ namespace Uniject.Tests
         {
             var receivedContexts = new List<InjectContext>();
             var container = new Container();
-            container.Bind<IService>().FromMethod((_, context) =>
+            container.Bind<IService>().FromMethod(context =>
             {
                 receivedContexts.Add(context);
                 return new Service();
@@ -593,7 +593,7 @@ namespace Uniject.Tests
             var container = new Container();
             container.BindFactory<IService, ServiceFactory>()
                 .To<Service>()
-                .FromMethod((_, context) =>
+                .FromMethod(context =>
                 {
                     receivedContext = context;
                     return new Service();
@@ -616,7 +616,7 @@ namespace Uniject.Tests
             var container = new Container();
             container.BindFactory<string, IService, ParameterizedServiceFactory>()
                 .To<Service>()
-                .FromMethod((_, origin, context) =>
+                .FromMethod((origin, context) =>
                 {
                     receivedOrigin = origin;
                     receivedContext = context;
@@ -642,7 +642,7 @@ namespace Uniject.Tests
                 .WithMaxSize(2)
                 .ExpandByOne()
                 .To<Service>()
-                .FromMethod((_, context) =>
+                .FromMethod(context =>
                 {
                     receivedContexts.Add(context);
                     return new Service();
@@ -665,7 +665,7 @@ namespace Uniject.Tests
         {
             var receivedContext = default(InjectContext);
             var container = new Container();
-            var getter = new InstanceGetterFromMethod<Service>(container, (_, context) =>
+            var getter = new InstanceGetterFromMethod<Service>(container, context =>
             {
                 receivedContext = context;
                 return new Service();
@@ -686,56 +686,56 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void LegacyFromMethod_RemainsAvailableOnEveryFluentSurface()
+        public void FromMethod_CanIgnoreContextOnEveryFluentSurface()
         {
-            AssertLegacyRegularFromMethod((container, method) =>
+            AssertRegularFromMethodWithoutInspectingContext((container, method) =>
                 container.Bind<IService>().To<Service>().FromMethod(method).AsTransient());
-            AssertLegacyRegularFromMethod((container, method) =>
+            AssertRegularFromMethodWithoutInspectingContext((container, method) =>
                 container.Bind<IService>().FromMethod(method).AsTransient());
-            AssertLegacyRegularFromMethod((container, method) =>
+            AssertRegularFromMethodWithoutInspectingContext((container, method) =>
                 container.Bind(typeof(IService)).FromMethod<Service>(method).AsTransient());
 
-            AssertLegacyFactoryFromMethod((container, method) =>
+            AssertFactoryFromMethodWithoutInspectingContext((container, method) =>
                 container.BindFactory<IService, ServiceFactory>().FromMethod(method).AsCached());
-            AssertLegacyFactoryFromMethod((container, method) =>
+            AssertFactoryFromMethodWithoutInspectingContext((container, method) =>
                 container.BindFactory<IService, ServiceFactory>()
                     .To<Service>()
                     .FromMethod(method)
                     .AsCached());
 
-            AssertLegacyParameterizedFactoryFromMethod((container, method) =>
+            AssertParameterizedFactoryFromMethodWithoutInspectingContext((container, method) =>
                 container.BindFactory<string, IService, ParameterizedServiceFactory>()
                     .FromMethod(method)
                     .AsCached());
-            AssertLegacyParameterizedFactoryFromMethod((container, method) =>
+            AssertParameterizedFactoryFromMethodWithoutInspectingContext((container, method) =>
                 container.BindFactory<string, IService, ParameterizedServiceFactory>()
                     .To<Service>()
                     .FromMethod(method)
                     .AsCached());
 
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>().FromMethod(method).AsCached());
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>()
                     .WithInitialSize(0)
                     .FromMethod(method)
                     .AsCached());
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>()
                     .WithMaxSize(2)
                     .FromMethod(method)
                     .AsCached());
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>()
                     .ExpandByOne()
                     .FromMethod(method)
                     .AsCached());
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>()
                     .WithoutGameObjectActivation()
                     .FromMethod(method)
                     .AsCached());
-            AssertLegacyPoolFromMethod((container, method) =>
+            AssertPoolFromMethodWithoutInspectingContext((container, method) =>
                 container.BindPool<IService, ServicePool>()
                     .To<Service>()
                     .FromMethod(method)
@@ -805,13 +805,13 @@ namespace Uniject.Tests
             var expected = new Service();
             var receivedContext = default(InjectContext);
             var container = new Container();
-            container.Bind<Service>().FromMethod((_, context) =>
+            container.Bind<Service>().FromMethod(context =>
             {
                 receivedContext = context;
                 return expected;
             }).AsTransient();
             var forwardingGetter = new ForwardingGetter(container);
-            container.Bind<IService>().To<Service>().FromMethod((_, context) =>
+            container.Bind<IService>().To<Service>().FromMethod(context =>
             {
                 return (Service)forwardingGetter.GetInstance(
                     typeof(Service), CreateOptions.Default, context);

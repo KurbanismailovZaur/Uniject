@@ -13,10 +13,10 @@ namespace Uniject.Tests
             var callsCount = 0;
             var receivedContainer = default(Container);
             var receivedParameter = default(Class);
-            container.BindFactory<Class, Product, ClassProductFactory>().FromMethod((currentContainer, parameter) =>
+            container.BindFactory<Class, Product, ClassProductFactory>().FromMethod((parameter, context) =>
             {
                 callsCount++;
-                receivedContainer = currentContainer;
+                receivedContainer = context.Container;
                 receivedParameter = parameter;
                 return new Product();
             }).AsCached();
@@ -55,18 +55,7 @@ namespace Uniject.Tests
 
             Assert.That(
                 () => container.BindFactory<Class, Product, ClassProductFactory>()
-                    .FromMethod((Func<Container, Class, Product>)null),
-                Throws.TypeOf<ArgumentNullException>());
-        }
-
-        [Test]
-        public void BindFactoryWithParameter_FromMethod_WhenContextAwareMethodIsNull_ThrowsArgumentNullException()
-        {
-            var container = new Container();
-
-            Assert.That(
-                () => container.BindFactory<Class, Product, ClassProductFactory>()
-                    .FromMethod((Func<Container, Class, InjectContext, Product>)null),
+                    .FromMethod((Func<Class, InjectContext, Product>)null),
                 Throws.TypeOf<ArgumentNullException>());
         }
 

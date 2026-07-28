@@ -28,7 +28,7 @@ namespace Uniject.InstanceGetters
             CreateOptions createOptions,
             InjectContext context)
         {
-            return _container.AddComponent(_gameObject, concreteType);
+            return Container.AddComponent(_gameObject, concreteType);
         }
     }
 }

@@ -59,10 +59,10 @@ namespace Uniject.Tests
                 .WithInitialSize(2)
                 .WithMaxSize(3)
                 .ExpandByOne()
-                .FromMethod(currentContainer =>
+                .FromMethod(context =>
                 {
                     callsCount++;
-                    receivedContainer = currentContainer;
+                    receivedContainer = context.Container;
                     return new Product();
                 })
                 .AsCached();

@@ -37,8 +37,8 @@ namespace Uniject.InstanceGetters.Factories
                 _ => throw new ArgumentException("Prefab must be GameObject or Component.", nameof(prefab))
             };
 
-            var cloned = _container.Instantiate(prefabGameObject);
-            return _container.AddComponent(cloned, concreteType);       
+            var cloned = Container.Instantiate(prefabGameObject);
+            return Container.AddComponent(cloned, concreteType);       
         }
     }
 }

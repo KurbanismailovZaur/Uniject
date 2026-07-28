@@ -4,13 +4,13 @@ namespace Uniject.InstanceGetters
 {
     public abstract class InstanceGetterBase
     {
-        protected readonly Container _container;
+        internal Container Container { get; private set; }
 
-        public InstanceGetterBase(Container container) => _container = container;
+        public InstanceGetterBase(Container container) => Container = container;
 
         protected object ResolveWithContext(Type contractType, InjectContext context)
         {
-            return _container.Resolve(contractType, context);
+            return Container.Resolve(contractType, context);
         }
     }
 }

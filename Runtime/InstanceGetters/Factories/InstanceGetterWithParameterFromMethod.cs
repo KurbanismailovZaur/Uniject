@@ -4,22 +4,11 @@ namespace Uniject.InstanceGetters.Factories
 {
     public class InstanceGetterWithParameterFromMethod<TParam, TResult> : InstanceGetterWithParameter<TParam>
     {
-        private readonly Func<Container, TParam, InjectContext, TResult> _method;
+        private readonly Func<TParam, InjectContext, TResult> _method;
 
         public InstanceGetterWithParameterFromMethod(
             Container container,
-            Func<Container, TParam, TResult> method) : base(container)
-        {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method),
-                    $"Method for {nameof(InstanceGetterWithParameterFromMethod<TParam, TResult>)} can not be null.");
-
-            _method = (currentContainer, origin, _) => method(currentContainer, origin);
-        }
-
-        public InstanceGetterWithParameterFromMethod(
-            Container container,
-            Func<Container, TParam, InjectContext, TResult> method) : base(container)
+            Func<TParam, InjectContext, TResult> method) : base(container)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method),
@@ -33,7 +22,7 @@ namespace Uniject.InstanceGetters.Factories
             TParam origin,
             InjectContext context)
         {
-            var instance = _method(_container, origin, context);
+            var instance = _method(origin, context);
 
             if (instance is null)
                 throw new InvalidOperationException(

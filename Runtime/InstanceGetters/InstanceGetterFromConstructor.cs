@@ -12,7 +12,7 @@ namespace Uniject.InstanceGetters
             CreateOptions createOptions,
             InjectContext context)
         {
-            return _container.Instantiate(concreteType);
+            return Container.Instantiate(concreteType);
         }
     }
 }

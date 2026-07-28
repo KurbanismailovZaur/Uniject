@@ -37,8 +37,8 @@ namespace Uniject.InstanceGetters
             CreateOptions createOptions,
             InjectContext context)
         {
-            var cloned = _container.Instantiate(_prefab);
-            var component = _container.AddComponent(cloned, concreteType);
+            var cloned = Container.Instantiate(_prefab);
+            var component = Container.AddComponent(cloned, concreteType);
 
             SetGameObjectNameAndParent(component, createOptions);
             return component;

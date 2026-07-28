@@ -37,7 +37,7 @@ namespace Uniject.InstanceGetters.Factories
                 throw new ArgumentException($"Prefab for {nameof(InstanceGetterFromComponentInNewPrefab)} must have a " + 
                     $"component assignable to type {concreteType}.", nameof(prefab));
 
-            return _container.Instantiate(prefabComponent);
+            return Container.Instantiate(prefabComponent);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Uniject.InstanceGetters
             InjectContext context)
         {
             var gameObject = new GameObject(concreteType.Name);
-            var component = _container.AddComponent(gameObject, concreteType);
+            var component = Container.AddComponent(gameObject, concreteType);
 
             SetGameObjectNameAndParent(component, createOptions);
             return component;

@@ -38,13 +38,7 @@ namespace Uniject.Bindings.Pools
         }
 
         public BindingToPoolAsBuilder<TResult, TResult, TPool> FromMethod(
-            Func<Container, TResult> method)
-        {
-            return To<TResult>().FromMethod(method);
-        }
-
-        public BindingToPoolAsBuilder<TResult, TResult, TPool> FromMethod(
-            Func<Container, InjectContext, TResult> method)
+            Func<InjectContext, TResult> method)
         {
             return To<TResult>().FromMethod(method);
         }

@@ -15,13 +15,7 @@ namespace Uniject.Bindings
             return new (_container, _binding);
         }
 
-        public BindingToTypeAsBuilder FromMethod<TResult>(Func<Container, TResult> method)
-        {
-            _binding.InstanceGetter = new InstanceGetterFromMethod<TResult>(_container, method);
-            return new (_container, _binding);
-        }
-
-        public BindingToTypeAsBuilder FromMethod<TResult>(Func<Container, InjectContext, TResult> method)
+        public BindingToTypeAsBuilder FromMethod<TResult>(Func<InjectContext, TResult> method)
         {
             _binding.InstanceGetter = new InstanceGetterFromMethod<TResult>(_container, method);
             return new (_container, _binding);

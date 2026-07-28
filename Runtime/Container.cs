@@ -138,7 +138,7 @@ namespace Uniject
 
         public T Resolve<T>() => (T)Resolve(typeof(T));
 
-        public object Resolve(Type contractType) => Resolve(contractType, InjectContext.CreateRoot(contractType));
+        public object Resolve(Type contractType) => Resolve(contractType, InjectContext.CreateRoot(this, contractType));
 
         internal object Resolve(Type contractType, InjectContext context)
         {
@@ -156,7 +156,7 @@ namespace Uniject
                     throw new NoBindingFoundException($"No binding found for type {contractType}. " +
                         $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
 
-                return binding.GetInstance(context);
+                return binding.GetInstance(context.WithContainer(binding.Container));
             }
             finally
             {
@@ -256,7 +256,7 @@ namespace Uniject
 
             foreach (var parameter in methodInjectionData.parametersInfo)
             {
-                var context = InjectContext.CreateForMethodParameter(parameter, instance);
+                var context = InjectContext.CreateForMethodParameter(this, parameter, instance);
                 var parameterInstance = Resolve(parameter.ParameterType, context);
                 parametersInstances[parameter.Position] = parameterInstance;
             }
@@ -358,7 +358,7 @@ namespace Uniject
 
             foreach (var parameter in constructorInjectionData.parametersInfo)
             {
-                var context = InjectContext.CreateForConstructorParameter(parameter, concreteType);
+                var context = InjectContext.CreateForConstructorParameter(this, parameter, concreteType);
                 var parameterInstance = Resolve(parameter.ParameterType, context);
                 parametersInstances[parameter.Position] = parameterInstance;
             }

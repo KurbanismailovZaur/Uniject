@@ -19,13 +19,7 @@ namespace Uniject.Bindings.Factories
         }
 
         public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromMethod(
-            Func<Container, TResult> method)
-        {
-            return To<TResult>().FromMethod(method);
-        }
-
-        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromMethod(
-            Func<Container, InjectContext, TResult> method)
+            Func<InjectContext, TResult> method)
         {
             return To<TResult>().FromMethod(method);
         }

@@ -11,7 +11,7 @@ namespace Uniject.InstanceGetters.Factories
         public InstanceGetterFromFactory(Container container) : base(container)
         {
             _factory = new TFactory();
-            _factory.Construct(_container);
+            _factory.Construct(Container);
             _factory.InitializeInternal();
         }
 
