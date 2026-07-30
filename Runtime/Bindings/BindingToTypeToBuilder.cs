@@ -54,6 +54,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromComponentOnConsumer();
         }
 
+        public BindingToTypeAsBuilder FromComponentInParents()
+        {
+            return To(_binding.ContractType).FromComponentInParents();
+        }
+
         public BindingToTypeAsBuilder FromComponentInHierarchy()
         {
             return To(_binding.ContractType).FromComponentInHierarchy();
@@ -128,6 +133,8 @@ namespace Uniject.Bindings
         public BindingToTypeAsBuilder FromNewComponentOnConsumer() => To<TContract>().FromNewComponentOnConsumer();
 
         public BindingToTypeAsBuilder FromComponentOnConsumer() => To<TContract>().FromComponentOnConsumer();
+
+        public BindingToTypeAsBuilder FromComponentInParents() => To<TContract>().FromComponentInParents();
 
         public BindingToTypeAsBuilder FromComponentInHierarchy() => To<TContract>().FromComponentInHierarchy();
 
