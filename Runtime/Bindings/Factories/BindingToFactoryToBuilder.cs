@@ -29,6 +29,11 @@ namespace Uniject.Bindings.Factories
             return To<TResult>().FromNewComponentOn(gameObject);
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromNewComponentOnRoot()
+        {
+            return To<TResult>().FromNewComponentOnRoot();
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInHierarchy()
         {
             return To<TResult>().FromComponentInHierarchy();

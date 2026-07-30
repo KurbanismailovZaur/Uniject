@@ -33,6 +33,12 @@ namespace Uniject.Bindings.Factories
             return From(new InstanceGetterFromNewComponentOn(_container, gameObject, _binding.ResultConcreteType));
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromNewComponentOnRoot()
+        {
+            return From(
+                new InstanceGetterFromNewComponentOnRoot(_container, _binding.ResultConcreteType));
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromComponentInHierarchy()
         {
             return From(new InstanceGetterFromComponentInHierarchy(_container, _binding.ResultConcreteType));

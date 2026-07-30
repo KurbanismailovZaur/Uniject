@@ -44,6 +44,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromNewComponentOn(gameObject);
         }
 
+        public BindingToTypeAsBuilder FromNewComponentOnRoot()
+        {
+            return To(_binding.ContractType).FromNewComponentOnRoot();
+        }
+
         public BindingToTypeAsBuilder FromNewComponentOnConsumer()
         {
             return To(_binding.ContractType).FromNewComponentOnConsumer();
@@ -134,6 +139,8 @@ namespace Uniject.Bindings
         public BindingToTypeAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
 
         public BindingToTypeAsBuilder FromNewComponentOn(GameObject gameObject) => To<TContract>().FromNewComponentOn(gameObject);
+
+        public BindingToTypeAsBuilder FromNewComponentOnRoot() => To<TContract>().FromNewComponentOnRoot();
 
         public BindingToTypeAsBuilder FromNewComponentOnConsumer() => To<TContract>().FromNewComponentOnConsumer();
 

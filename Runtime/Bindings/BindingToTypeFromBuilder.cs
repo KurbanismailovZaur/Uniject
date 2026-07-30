@@ -33,6 +33,13 @@ namespace Uniject.Bindings
             return new (_container, _binding);
         }
 
+        public BindingToTypeAsBuilder FromNewComponentOnRoot()
+        {
+            _binding.InstanceGetter =
+                new InstanceGetterFromNewComponentOnRoot(_container, _binding.ConcreteType);
+            return new (_container, _binding);
+        }
+
         public BindingToTypeAsBuilder FromNewComponentOnConsumer()
         {
             _binding.InstanceGetter =
