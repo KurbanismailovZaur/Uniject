@@ -29,6 +29,11 @@ namespace Uniject.Bindings.Factories
             return To<TResult>().FromNewComponentOn(gameObject);
         }
 
+        public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInHierarchy()
+        {
+            return To<TResult>().FromComponentInHierarchy();
+        }
+
         public BindingToFactoryAsBuilder<TResult, TResult, TFactory> FromComponentInNewPrefab(GameObject prefab)
         {
             return To<TResult>().FromComponentInNewPrefab(prefab);

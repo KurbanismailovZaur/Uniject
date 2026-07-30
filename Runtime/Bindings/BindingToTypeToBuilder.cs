@@ -54,6 +54,11 @@ namespace Uniject.Bindings
             return To(_binding.ContractType).FromComponentOnConsumer();
         }
 
+        public BindingToTypeAsBuilder FromComponentInHierarchy()
+        {
+            return To(_binding.ContractType).FromComponentInHierarchy();
+        }
+
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab)
         {
             return To(_binding.ContractType).FromComponentInNewPrefab(prefab);
@@ -123,6 +128,8 @@ namespace Uniject.Bindings
         public BindingToTypeAsBuilder FromNewComponentOnConsumer() => To<TContract>().FromNewComponentOnConsumer();
 
         public BindingToTypeAsBuilder FromComponentOnConsumer() => To<TContract>().FromComponentOnConsumer();
+
+        public BindingToTypeAsBuilder FromComponentInHierarchy() => To<TContract>().FromComponentInHierarchy();
 
         public BindingToTypeWithGameObjectNameBuilder FromComponentInNewPrefab(GameObject prefab) => To<TContract>().FromComponentInNewPrefab(prefab);
         

@@ -40,6 +40,47 @@ namespace Uniject
 
         public void SetParentContainer(Container parentContainer) => _parentContainer = parentContainer;
 
+        internal IReadOnlyList<Container> GetSelfAndParents()
+        {
+            var visitedContainers = new HashSet<Container>();
+            var containers = new List<Container>();
+            var currentContainer = this;
+
+            while (currentContainer != null)
+            {
+                if (!visitedContainers.Add(currentContainer))
+                    throw new InvalidOperationException("A cycle was detected in the container hierarchy.");
+
+                containers.Add(currentContainer);
+                currentContainer = currentContainer._parentContainer;
+            }
+
+            return containers;
+        }
+
+        internal bool IsStrictDescendantOf(Container ancestor)
+        {
+            if (ancestor == null)
+                throw new ArgumentNullException(nameof(ancestor));
+
+            var visitedContainers = new HashSet<Container>();
+            var currentContainer = _parentContainer;
+            var isDescendant = false;
+
+            while (currentContainer != null)
+            {
+                if (!visitedContainers.Add(currentContainer))
+                    throw new InvalidOperationException("A cycle was detected in the container hierarchy.");
+
+                if (ReferenceEquals(currentContainer, ancestor))
+                    isDescendant = true;
+
+                currentContainer = currentContainer._parentContainer;
+            }
+
+            return isDescendant;
+        }
+
         public BindingToBuilder<TContract> Bind<TContract>() => new(this, CreateBinding(typeof(TContract)));
 
         public BindingToTypeToBuilder Bind(Type contractType) => new(this, CreateBinding(contractType));
