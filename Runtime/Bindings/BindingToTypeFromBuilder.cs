@@ -54,6 +54,13 @@ namespace Uniject.Bindings
             return new (_container, _binding);
         }
 
+        public BindingToTypeAsBuilder FromComponentInChildren()
+        {
+            _binding.InstanceGetter =
+                new InstanceGetterFromComponentInChildren(_container, _binding.ConcreteType);
+            return new (_container, _binding);
+        }
+
         public BindingToTypeAsBuilder FromComponentInHierarchy()
         {
             _binding.InstanceGetter =
