@@ -1,14 +1,18 @@
+using System;
 using System.Collections.Generic;
 using Uniject.Components;
 using Uniject.Installers;
 using Uniject.Lifecycle;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Uniject.Contexts
 {
     public abstract class Context : MonoBehaviour
     {
+        [SerializeField] protected bool _useSiblingInstallers = true;
         [SerializeField] protected List<MonoInstaller> _installers = new();
+        [SerializeField] protected bool _injectInAllContextGameObjects = true;
         [SerializeField] protected List<MonoBehaviour> _injectTargets = new();
         [SerializeField] protected List<GameObjectContext> _gameObjectContexts = new();
         [SerializeField] protected Transform ParentTransformForGameObjects;
@@ -37,15 +41,39 @@ namespace Uniject.Contexts
 
             IsInstalled = true;
 
-            foreach (var installer in _installers)
-                installer.Install(Container);
+            var installers = _useSiblingInstallers ? (IList<MonoInstaller>)GetComponents<MonoInstaller>() : _installers;
+            
+            foreach (var installer in installers)
+                installer.Install(Container);               
 
-            foreach (var target in _injectTargets)
+            if (_injectInAllContextGameObjects)
             {
-                if (target is InjectTargets injectTargets)
-                    Container.AddToInjectionQueue(injectTargets.Targets);
-                else
+                var injectTargets = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
+                var monoBehaviours = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
+                var roots = gameObject.scene.GetRootGameObjects();
+
+                foreach (var root in roots)
+                {
+                    root.GetComponentsInChildren(includeInactive: true, monoBehaviours);
+                    injectTargets.AddRange(monoBehaviours);
+                }
+
+                StaticCollections.collectionPool.DespawnList(monoBehaviours);
+
+                foreach (var target in injectTargets)
                     Container.AddToInjectionQueue(target);
+
+                StaticCollections.collectionPool.DespawnList(injectTargets);
+            }
+            else
+            {
+                foreach (var target in _injectTargets)
+                {
+                    if (target is InjectTargets injectTargetsComponent)
+                        Container.AddToInjectionQueue(injectTargetsComponent.Targets);
+                    else
+                        Container.AddToInjectionQueue(target);
+                }
             }
 
             foreach (var context in _gameObjectContexts)
