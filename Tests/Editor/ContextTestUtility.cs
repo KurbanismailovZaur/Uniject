@@ -17,11 +17,18 @@ namespace Uniject.Tests
             IEnumerable<MonoInstaller> installers = null,
             IEnumerable<MonoBehaviour> injectTargets = null,
             IEnumerable<GameObjectContext> gameObjectContexts = null,
-            Transform parentTransformForGameObjects = null)
+            Transform parentTransformForGameObjects = null,
+            bool useSiblingInstallers = false,
+            bool injectInAllContextGameObjects = false)
         {
+            SetField(context, "_useSiblingInstallers", useSiblingInstallers);
             SetField(context, "_installers", new List<MonoInstaller>(installers ?? Array.Empty<MonoInstaller>()));
+            SetField(context, "_injectInAllContextGameObjects", injectInAllContextGameObjects);
             SetField(context, "_injectTargets", new List<MonoBehaviour>(injectTargets ?? Array.Empty<MonoBehaviour>()));
-            SetField(context, "_gameObjectContexts", new List<GameObjectContext>(gameObjectContexts ?? Array.Empty<GameObjectContext>()));
+            SetField(
+                context,
+                "_gameObjectContexts",
+                new List<GameObjectContext>(gameObjectContexts ?? Array.Empty<GameObjectContext>()));
             SetField(context, "ParentTransformForGameObjects", parentTransformForGameObjects);
             EditorUtility.SetDirty(context);
         }
