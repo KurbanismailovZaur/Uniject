@@ -202,6 +202,237 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Run_WhenSceneAutoInjectionFindsGameObjectContext_PrunesItsGameObjectAndHierarchy()
+        {
+            var contextScene = EditorSceneManager.NewPreviewScene();
+            var contextObject = new GameObject("SceneContext");
+            var sceneTargetObject = new GameObject("SceneTarget");
+            var nestedContextObject = new GameObject("NestedGameObjectContext");
+            var nestedTargetObject = new GameObject("NestedTarget");
+
+            try
+            {
+                SceneManager.MoveGameObjectToScene(contextObject, contextScene);
+                SceneManager.MoveGameObjectToScene(sceneTargetObject, contextScene);
+                SceneManager.MoveGameObjectToScene(nestedContextObject, contextScene);
+                SceneManager.MoveGameObjectToScene(nestedTargetObject, contextScene);
+                nestedContextObject.transform.SetParent(contextObject.transform);
+                nestedTargetObject.transform.SetParent(nestedContextObject.transform);
+
+                var dependency = new ContextOptionsTestDependency();
+                var context = contextObject.AddComponent<SceneContext>();
+                var installer = contextObject.AddComponent<ContextOptionsTestInstaller>();
+                var sceneTarget = sceneTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var nestedContext = nestedContextObject.AddComponent<GameObjectContext>();
+                var nestedContextTarget = nestedContextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var nestedTarget = nestedTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                installer.InstallAction = container => container.BindInstance(dependency);
+                ContextTestUtility.Configure(
+                    context,
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+
+                context.Run();
+
+                AssertInjectedOnce(sceneTarget, dependency);
+                AssertNotInjected(nestedContextTarget);
+                AssertNotInjected(nestedTarget);
+                Assert.That(nestedContext.IsInitialized, Is.False);
+            }
+            finally
+            {
+                DestroyGameObjects(
+                    contextObject,
+                    sceneTargetObject,
+                    nestedContextObject,
+                    nestedTargetObject);
+
+                if (contextScene.IsValid() && contextScene.isLoaded)
+                    EditorSceneManager.ClosePreviewScene(contextScene);
+            }
+        }
+
+        [Test]
+        public void Run_WhenGameObjectContextUsesAutoInjection_InjectsOnlyItsRootAndOrdinaryDescendants()
+        {
+            var parentObject = new GameObject("Parent");
+            var contextObject = new GameObject("GameObjectContext");
+            var childObject = new GameObject("Child");
+            var inactiveObject = new GameObject("InactiveChild");
+            var siblingObject = new GameObject("Sibling");
+
+            try
+            {
+                contextObject.transform.SetParent(parentObject.transform);
+                childObject.transform.SetParent(contextObject.transform);
+                inactiveObject.transform.SetParent(childObject.transform);
+                siblingObject.transform.SetParent(parentObject.transform);
+                inactiveObject.SetActive(false);
+
+                var dependency = new ContextOptionsTestDependency();
+                var context = contextObject.AddComponent<GameObjectContext>();
+                var installer = contextObject.AddComponent<ContextOptionsTestInstaller>();
+                var rootTarget = contextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var childTarget = childObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var inactiveTarget = inactiveObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var parentTarget = parentObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var siblingTarget = siblingObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var injectTargets = contextObject.AddComponent<InjectTargets>();
+                SetInjectTargets(injectTargets, siblingTarget);
+                installer.InstallAction = container => container.BindInstance(dependency);
+                ContextTestUtility.Configure(
+                    context,
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+
+                context.Run();
+
+                AssertInjectedOnce(rootTarget, dependency);
+                AssertInjectedOnce(childTarget, dependency);
+                AssertInjectedOnce(inactiveTarget, dependency);
+                AssertNotInjected(parentTarget);
+                AssertNotInjected(siblingTarget);
+            }
+            finally
+            {
+                DestroyGameObjects(parentObject, contextObject, childObject, inactiveObject, siblingObject);
+            }
+        }
+
+        [Test]
+        public void Run_WhenGameObjectContextFindsNestedContexts_PrunesDirectAndDeepContextHierarchies()
+        {
+            var contextObject = new GameObject("GameObjectContext");
+            var directContextObject = new GameObject("DirectContext");
+            var directTargetObject = new GameObject("DirectContextTarget");
+            var ordinaryBranchObject = new GameObject("OrdinaryBranch");
+            var deepContextObject = new GameObject("DeepContext");
+            var deepTargetObject = new GameObject("DeepContextTarget");
+
+            try
+            {
+                directContextObject.transform.SetParent(contextObject.transform);
+                directTargetObject.transform.SetParent(directContextObject.transform);
+                ordinaryBranchObject.transform.SetParent(contextObject.transform);
+                deepContextObject.transform.SetParent(ordinaryBranchObject.transform);
+                deepTargetObject.transform.SetParent(deepContextObject.transform);
+
+                var dependency = new ContextOptionsTestDependency();
+                var context = contextObject.AddComponent<GameObjectContext>();
+                var installer = contextObject.AddComponent<ContextOptionsTestInstaller>();
+                var rootTarget = contextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var directContext = directContextObject.AddComponent<GameObjectContext>();
+                var directContextTarget = directContextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var directTarget = directTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var ordinaryTarget = ordinaryBranchObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var deepContext = deepContextObject.AddComponent<GameObjectContext>();
+                var deepContextTarget = deepContextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var deepTarget = deepTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                installer.InstallAction = container => container.BindInstance(dependency);
+                ContextTestUtility.Configure(
+                    context,
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+
+                context.Run();
+
+                AssertInjectedOnce(rootTarget, dependency);
+                AssertInjectedOnce(ordinaryTarget, dependency);
+                AssertNotInjected(directContextTarget);
+                AssertNotInjected(directTarget);
+                AssertNotInjected(deepContextTarget);
+                AssertNotInjected(deepTarget);
+                Assert.That(directContext.IsInitialized, Is.False);
+                Assert.That(deepContext.IsInitialized, Is.False);
+            }
+            finally
+            {
+                DestroyGameObjects(
+                    contextObject,
+                    directContextObject,
+                    directTargetObject,
+                    ordinaryBranchObject,
+                    deepContextObject,
+                    deepTargetObject);
+            }
+        }
+
+        [Test]
+        public void Run_WithNestedAutoInjectionContexts_InjectsEachTargetOnceUsingItsOwnerContainer()
+        {
+            var contextScene = EditorSceneManager.NewPreviewScene();
+            var sceneContextObject = new GameObject("SceneContext");
+            var sceneTargetObject = new GameObject("SceneTarget");
+            var childContextObject = new GameObject("ChildContext");
+            var childTargetObject = new GameObject("ChildTarget");
+            var grandchildContextObject = new GameObject("GrandchildContext");
+            var grandchildTargetObject = new GameObject("GrandchildTarget");
+
+            try
+            {
+                sceneTargetObject.transform.SetParent(sceneContextObject.transform);
+                childContextObject.transform.SetParent(sceneContextObject.transform);
+                childTargetObject.transform.SetParent(childContextObject.transform);
+                grandchildContextObject.transform.SetParent(childContextObject.transform);
+                grandchildTargetObject.transform.SetParent(grandchildContextObject.transform);
+                SceneManager.MoveGameObjectToScene(sceneContextObject, contextScene);
+
+                var sceneDependency = new ContextOptionsTestDependency();
+                var childDependency = new ContextOptionsTestDependency();
+                var grandchildDependency = new ContextOptionsTestDependency();
+                var sceneContext = sceneContextObject.AddComponent<SceneContext>();
+                var childContext = childContextObject.AddComponent<GameObjectContext>();
+                var grandchildContext = grandchildContextObject.AddComponent<GameObjectContext>();
+                var sceneInstaller = sceneContextObject.AddComponent<ContextOptionsTestInstaller>();
+                var childInstaller = childContextObject.AddComponent<ContextOptionsTestInstaller>();
+                var grandchildInstaller = grandchildContextObject.AddComponent<ContextOptionsTestInstaller>();
+                var sceneTarget = sceneTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var childContextTarget = childContextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var childTarget = childTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var grandchildContextTarget = grandchildContextObject.AddComponent<ContextOptionsTestInjectTarget>();
+                var grandchildTarget = grandchildTargetObject.AddComponent<ContextOptionsTestInjectTarget>();
+                sceneInstaller.InstallAction = container => container.BindInstance(sceneDependency);
+                childInstaller.InstallAction = container => container.BindInstance(childDependency);
+                grandchildInstaller.InstallAction = container => container.BindInstance(grandchildDependency);
+                ContextTestUtility.Configure(
+                    grandchildContext,
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+                ContextTestUtility.Configure(
+                    childContext,
+                    gameObjectContexts: new[] { grandchildContext },
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+                ContextTestUtility.Configure(
+                    sceneContext,
+                    gameObjectContexts: new[] { childContext },
+                    useSiblingInstallers: true,
+                    injectInAllContextGameObjects: true);
+
+                sceneContext.Run();
+
+                AssertInjectedOnce(sceneTarget, sceneDependency);
+                AssertInjectedOnce(childContextTarget, childDependency);
+                AssertInjectedOnce(childTarget, childDependency);
+                AssertInjectedOnce(grandchildContextTarget, grandchildDependency);
+                AssertInjectedOnce(grandchildTarget, grandchildDependency);
+            }
+            finally
+            {
+                DestroyGameObjects(
+                    sceneContextObject,
+                    sceneTargetObject,
+                    childContextObject,
+                    childTargetObject,
+                    grandchildContextObject,
+                    grandchildTargetObject);
+
+                if (contextScene.IsValid() && contextScene.isLoaded)
+                    EditorSceneManager.ClosePreviewScene(contextScene);
+            }
+        }
+
+        [Test]
         public void Run_WhenInjectInAllContextGameObjectsIsDisabled_InjectsOnlyConfiguredTargets()
         {
             var contextObject = new GameObject("Context");
@@ -273,6 +504,12 @@ namespace Uniject.Tests
         {
             Assert.That(target.Dependency, Is.SameAs(dependency));
             Assert.That(target.InjectCallsCount, Is.EqualTo(1));
+        }
+
+        private static void AssertNotInjected(ContextOptionsTestInjectTarget target)
+        {
+            Assert.That(target.Dependency, Is.Null);
+            Assert.That(target.InjectCallsCount, Is.Zero);
         }
 
         private static void DestroyGameObjects(params GameObject[] gameObjects)

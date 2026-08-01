@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using Uniject.Components;
 using Uniject.Installers;
-using Uniject.Lifecycle;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Uniject.Contexts
 {
@@ -21,6 +19,8 @@ namespace Uniject.Contexts
         public bool IsInitialized { get; protected set; }
         public bool IsInstalled { get; protected set; }
         public bool IsBuilded { get; protected set; }
+
+        protected abstract void InjectInAllContextGameObjects();
 
         public virtual void Initialize(Container parentContainer = null)
         {
@@ -47,24 +47,7 @@ namespace Uniject.Contexts
                 installer.Install(Container);               
 
             if (_injectInAllContextGameObjects)
-            {
-                var injectTargets = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
-                var monoBehaviours = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
-                var roots = gameObject.scene.GetRootGameObjects();
-
-                foreach (var root in roots)
-                {
-                    root.GetComponentsInChildren(includeInactive: true, monoBehaviours);
-                    injectTargets.AddRange(monoBehaviours);
-                }
-
-                StaticCollections.collectionPool.DespawnList(monoBehaviours);
-
-                foreach (var target in injectTargets)
-                    Container.AddToInjectionQueue(target);
-
-                StaticCollections.collectionPool.DespawnList(injectTargets);
-            }
+                InjectInAllContextGameObjects();
             else
             {
                 foreach (var target in _injectTargets)
@@ -78,6 +61,55 @@ namespace Uniject.Contexts
 
             foreach (var context in _gameObjectContexts)
                 context.Install();
+        }
+
+        protected void InjectMonoBehavioursInHierarchies(
+            IReadOnlyList<GameObject> rootGameObjects,
+            Transform allowedGameObjectContextRoot = null)
+        {
+            if (rootGameObjects == null)
+                throw new ArgumentNullException(nameof(rootGameObjects));
+
+            var injectTargets = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
+            var monoBehaviours = StaticCollections.collectionPool.SpawnList<MonoBehaviour>();
+            var pendingTransforms = StaticCollections.collectionPool.SpawnStack<Transform>();
+
+            foreach (var rootGameObject in rootGameObjects)
+            {
+                if (rootGameObject == null)
+                    continue;
+
+                pendingTransforms.Push(rootGameObject.transform);
+
+                while (pendingTransforms.Count > 0)
+                {
+                    var currentTransform = pendingTransforms.Pop();
+
+                    if (currentTransform == null)
+                        continue;
+
+                    if (currentTransform != allowedGameObjectContextRoot &&
+                        currentTransform.TryGetComponent<GameObjectContext>(out _))
+                    {
+                        continue;
+                    }
+
+                    monoBehaviours.Clear();
+                    currentTransform.GetComponents(monoBehaviours);
+                    injectTargets.AddRange(monoBehaviours);
+
+                    for (var i = currentTransform.childCount - 1; i >= 0; i--)
+                        pendingTransforms.Push(currentTransform.GetChild(i));
+                }
+            }
+
+            StaticCollections.collectionPool.DespawnStack(pendingTransforms);
+            StaticCollections.collectionPool.DespawnList(monoBehaviours);
+
+            foreach (var target in injectTargets)
+                Container.AddToInjectionQueue(target);
+
+            StaticCollections.collectionPool.DespawnList(injectTargets);
         }
 
         public virtual void Build()

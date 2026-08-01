@@ -37,6 +37,9 @@ namespace Uniject.Tests
 
     public sealed class ComponentInHierarchyUnsupportedContext : Context
     {
+        protected override void InjectInAllContextGameObjects()
+        {
+        }
     }
 
     public class ContainerResolveFromComponentInHierarchyTests

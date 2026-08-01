@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Uniject.Components;
-using Uniject.Installers;
-using Uniject.Lifecycle;
 using UnityEngine;
 
 namespace Uniject.Contexts
@@ -9,5 +5,20 @@ namespace Uniject.Contexts
     public class SceneContext : Context
     {
         protected void Start() => Run();
+
+        protected override void InjectInAllContextGameObjects()
+        {
+            var rootGameObjects = StaticCollections.collectionPool.SpawnList<GameObject>();
+
+            try
+            {
+                gameObject.scene.GetRootGameObjects(rootGameObjects);
+                InjectMonoBehavioursInHierarchies(rootGameObjects);
+            }
+            finally
+            {
+                StaticCollections.collectionPool.DespawnList(rootGameObjects);
+            }
+        }
     }
 }

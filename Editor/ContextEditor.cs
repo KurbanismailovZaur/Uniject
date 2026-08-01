@@ -1,5 +1,6 @@
 using Uniject.Contexts;
 using UnityEditor;
+using UnityEngine;
 
 namespace Uniject.Editor
 {
@@ -25,8 +26,8 @@ namespace Uniject.Editor
         {
             serializedObject.Update();
 
-            var hideInstallers = IsEnabledForEverySelectedObject(_useSiblingInstallers);
-            var hideInjectTargets =
+            var disableInstallers = IsEnabledForEverySelectedObject(_useSiblingInstallers);
+            var disableInjectTargets =
                 IsEnabledForEverySelectedObject(_injectInAllContextGameObjects);
 
             var property = serializedObject.GetIterator();
@@ -38,13 +39,16 @@ namespace Uniject.Editor
 
                 if (property.propertyPath == "_installers")
                 {
-                    DrawInstallersRow(hideInstallers);
+                    DrawCollectionFoldout(_useSiblingInstallers, _installers, disableInstallers);
                     continue;
                 }
 
                 if (property.propertyPath == "_injectTargets")
                 {
-                    DrawInjectTargetsRow(hideInjectTargets);
+                    DrawCollectionFoldout(
+                        _injectInAllContextGameObjects,
+                        _injectTargets,
+                        disableInjectTargets);
                     continue;
                 }
 
@@ -61,25 +65,46 @@ namespace Uniject.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawInstallersRow(bool hideInstallers)
+        private static void DrawCollectionFoldout(
+            SerializedProperty toggleProperty,
+            SerializedProperty collectionProperty,
+            bool disableCollection)
         {
-            using (new EditorGUILayout.HorizontalScope())
+            var headerRect = EditorGUILayout.GetControlRect();
+            var toggleWidth = EditorGUIUtility.singleLineHeight;
+            var toggleRect = new Rect(
+                headerRect.xMax - toggleWidth,
+                headerRect.y,
+                toggleWidth,
+                headerRect.height);
+            var foldoutRect = headerRect;
+            foldoutRect.xMax = toggleRect.xMin - EditorGUIUtility.standardVerticalSpacing;
+
+            toggleProperty.isExpanded = EditorGUI.Foldout(
+                foldoutRect,
+                toggleProperty.isExpanded,
+                toggleProperty.displayName,
+                true);
+            EditorGUI.PropertyField(toggleRect, toggleProperty, GUIContent.none);
+
+            if (!toggleProperty.isExpanded)
+                return;
+
+            using (new EditorGUI.DisabledScope(disableCollection))
             {
-                EditorGUILayout.PropertyField(_useSiblingInstallers);
+                EditorGUI.indentLevel++;
 
-                if (!hideInstallers)
-                    EditorGUILayout.PropertyField(_installers, true);
-            }
-        }
+                try
+                {
+                    EditorGUILayout.PropertyField(collectionProperty.FindPropertyRelative("Array.size"));
 
-        private void DrawInjectTargetsRow(bool hideInjectTargets)
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.PropertyField(_injectInAllContextGameObjects);
-
-                if (!hideInjectTargets)
-                    EditorGUILayout.PropertyField(_injectTargets, true);
+                    for (var index = 0; index < collectionProperty.arraySize; index++)
+                        EditorGUILayout.PropertyField(collectionProperty.GetArrayElementAtIndex(index), true);
+                }
+                finally
+                {
+                    EditorGUI.indentLevel--;
+                }
             }
         }
 

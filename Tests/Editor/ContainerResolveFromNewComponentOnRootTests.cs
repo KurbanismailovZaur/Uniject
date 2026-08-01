@@ -47,6 +47,9 @@ namespace Uniject.Tests
 
     public sealed class NewComponentOnRootTestUnsupportedContext : Context
     {
+        protected override void InjectInAllContextGameObjects()
+        {
+        }
     }
 
     public class ContainerResolveFromNewComponentOnRootTests
