@@ -12,6 +12,7 @@ namespace Uniject.Bindings
 
         private InstanceGetterFromSubContainerResolve SetSubcontainerGetter(SubcontainerGetter subcontainerGetter)
         {
+            _binding.EnsureCanConfigure();
             var instanceGetter = (InstanceGetterFromSubContainerResolve)_binding.InstanceGetter;
             instanceGetter.SubcontainerGetter = subcontainerGetter;
             return instanceGetter;

@@ -7,6 +7,8 @@ namespace Uniject.InstanceGetters
     {
         private readonly object _instance;
 
+        internal object Instance => _instance;
+
         public InstanceGetterFromInstance(Container container, object instance, Type concreteType) : base(container)
         {
             if (instance == null)

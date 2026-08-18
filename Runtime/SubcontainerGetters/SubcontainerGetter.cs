@@ -7,6 +7,8 @@ namespace Uniject.SubcontainerGetters
     public abstract class SubcontainerGetter
     {
         protected readonly Container _container;
+
+        internal virtual bool IsOwnedByParent => false;
         
         public string ContextGameObjectName { get; set; }
         

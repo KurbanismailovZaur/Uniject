@@ -6,18 +6,18 @@ namespace Uniject.Bindings
 
         public BindingToTypeNonLazyBuilder AsTransient()
         {
-            _binding.Scope = Scope.Transient;
+            _binding.ConfigureScope(Scope.Transient);
             return new BindingToTypeNonLazyBuilder(_container, _binding);
         }
 
-        public BindingToTypeNonLazyBuilder AsCached()
+        public BindingToTypeCachedBuilder AsCached()
         {
-            _binding.Scope = Scope.Cached;
-            return new BindingToTypeNonLazyBuilder(_container, _binding);
+            _binding.ConfigureScope(Scope.Cached);
+            return new BindingToTypeCachedBuilder(_container, _binding);
         }
 
         public BindingToTypeAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
         
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

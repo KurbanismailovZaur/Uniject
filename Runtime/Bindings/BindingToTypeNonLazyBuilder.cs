@@ -6,7 +6,7 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsEntryPointBuilder NonLazy()
         {
-            _binding.IsNonLazy = true;
+            _binding.ConfigureNonLazy();
             return new BindingToTypeAsEntryPointBuilder(_container, _binding);
         }
     }

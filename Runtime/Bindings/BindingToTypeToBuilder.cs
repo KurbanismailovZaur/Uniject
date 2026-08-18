@@ -16,7 +16,7 @@ namespace Uniject.Bindings
             if (!_binding.ContractType.IsAssignableFrom(concreteType))
                 throw new ArgumentException($"Type {concreteType} is not assignable to {_binding.ContractType}.", nameof(concreteType));
 
-            _binding.ConcreteType = concreteType;
+            _binding.ConfigureConcreteType(concreteType);
             return new BindingToTypeFromBuilder(_container, _binding);
         }
 
@@ -107,11 +107,11 @@ namespace Uniject.Bindings
 
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
-        public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();
+        public BindingToTypeCachedBuilder AsCached() => FromConstructor().AsCached();
         
         public BindingToTypeAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
 
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 
     public class BindingToBuilder<TContract> : BindingToTypeBuilder
@@ -126,7 +126,7 @@ namespace Uniject.Bindings
             if (!_binding.ContractType.IsAssignableFrom(concreteType))
                 throw new ArgumentException($"Type {concreteType} is not assignable to {_binding.ContractType}.", nameof(concreteType));
 
-            _binding.ConcreteType = concreteType;
+            _binding.ConfigureConcreteType(concreteType);
             return new BindingToTypeFromBuilder(_container, _binding);
         }
 
@@ -139,9 +139,9 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsBuilder FromResolveGetter<TResolve>(Func<TResolve, TContract> getter)
         {
-            _binding.ConcreteType = typeof(TContract);
-            _binding.InstanceGetter =
-                new InstanceGetterFromResolveGetter<TResolve, TContract>(_container, getter);
+            _binding.ConfigureConcreteType(typeof(TContract));
+            _binding.ConfigureInstanceGetter(
+                new InstanceGetterFromResolveGetter<TResolve, TContract>(_container, getter));
             return new BindingToTypeAsBuilder(_container, _binding);
         }
 
@@ -178,10 +178,10 @@ namespace Uniject.Bindings
 
         public BindingToTypeNonLazyBuilder AsTransient() => FromConstructor().AsTransient();
 
-        public BindingToTypeNonLazyBuilder AsCached() => FromConstructor().AsCached();
+        public BindingToTypeCachedBuilder AsCached() => FromConstructor().AsCached();
         
         public BindingToTypeAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
 
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

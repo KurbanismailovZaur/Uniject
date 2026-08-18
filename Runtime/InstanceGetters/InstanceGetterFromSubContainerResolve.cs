@@ -24,16 +24,76 @@ namespace Uniject.InstanceGetters
             if (Scope == Scope.Transient)
             {
                 var container = SubcontainerGetter.GetContainer();
-                container.Build();
-                return container.Resolve(concreteType, context);
+                return BuildAndResolve(container, concreteType, context, false);
             }
 
             if (CachedContainer != null)
                 return CachedContainer.Resolve(concreteType, context);
 
-            CachedContainer = SubcontainerGetter.GetContainer();
-            CachedContainer.Build();
-            return CachedContainer.Resolve(concreteType, context);
+            var cachedContainer = SubcontainerGetter.GetContainer();
+            return BuildAndResolve(cachedContainer, concreteType, context, true);
+        }
+
+        private object BuildAndResolve(
+            Container container,
+            Type concreteType,
+            InjectContext context,
+            bool cacheContainer)
+        {
+            var isOwnedByParent = SubcontainerGetter.IsOwnedByParent;
+            var isRegistered = false;
+
+            try
+            {
+                if (isOwnedByParent)
+                {
+                    Container.RegisterOwnedChildContainer(container);
+                    isRegistered = true;
+                }
+
+                container.Build();
+                var instance = container.Resolve(concreteType, context);
+
+                if (cacheContainer)
+                    CachedContainer = container;
+
+                return instance;
+            }
+            catch (Exception resolveException)
+            {
+                if (isOwnedByParent)
+                {
+                    Exception cleanupException = null;
+
+                    if (isRegistered)
+                    {
+                        try
+                        {
+                            Container.UnregisterOwnedChildContainer(container);
+                        }
+                        catch (Exception unregisterException)
+                        {
+                            cleanupException = unregisterException;
+                        }
+                    }
+
+                    try
+                    {
+                        container.Dispose();
+                    }
+                    catch (Exception disposeException)
+                    {
+                        cleanupException = cleanupException == null
+                            ? disposeException
+                            : new AggregateException(cleanupException, disposeException);
+                    }
+
+                    if (cleanupException != null)
+                        throw new AggregateException(resolveException, cleanupException).Flatten();
+                }
+
+                throw;
+            }
         }
     }
 }

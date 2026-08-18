@@ -18,6 +18,7 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerAsBuilder UnderTransform(Transform parent)
         {
+            _binding.EnsureCanConfigure();
             _instanceGetter.SubcontainerGetter.ContextUnderTransform = parent;
             return new BindingToSubcontainerAsBuilder(_container, _binding, _instanceGetter);
         }
@@ -28,6 +29,6 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsEntryPointBuilder NonLazy()=> AsCached().NonLazy();
 
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

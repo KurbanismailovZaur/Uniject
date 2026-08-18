@@ -8,7 +8,7 @@ namespace Uniject.Bindings
 
         public BindingToTypeUnderTransformBuilder WithGameObjectName(string name)
         {
-            _binding.ObjectName = name;
+            _binding.ConfigureObjectName(name);
             return new BindingToTypeUnderTransformBuilder(_container, _binding);
         }
 
@@ -16,10 +16,10 @@ namespace Uniject.Bindings
 
         public BindingToTypeNonLazyBuilder AsTransient() => WithGameObjectName(null).UnderTransform(null).AsTransient();
 
-        public BindingToTypeNonLazyBuilder AsCached() => WithGameObjectName(null).UnderTransform(null).AsCached();
+        public BindingToTypeCachedBuilder AsCached() => WithGameObjectName(null).UnderTransform(null).AsCached();
         
         public BindingToTypeAsEntryPointBuilder NonLazy() => AsTransient().NonLazy();
 
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

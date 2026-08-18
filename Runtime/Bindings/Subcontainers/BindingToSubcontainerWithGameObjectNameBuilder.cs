@@ -18,6 +18,7 @@ namespace Uniject.Bindings
 
         public BindingToSubcontainerUnderTransformBuilder WithGameObjectName(string name)
         {
+            _binding.EnsureCanConfigure();
             _instanceGetter.SubcontainerGetter.ContextGameObjectName = name;
             return new BindingToSubcontainerUnderTransformBuilder(_container, _binding, _instanceGetter);
         }
@@ -30,6 +31,6 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsEntryPointBuilder NonLazy()=> AsCached().NonLazy();
 
-        public void AsEntryPoint() => NonLazy().AsEntryPoint();
+        public BindingToTypeCachedEntryPointBuilder AsEntryPoint() => NonLazy().AsEntryPoint();
     }
 }

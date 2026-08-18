@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Uniject.Bindings;
 using Uniject.Bindings.Factories;
 using Uniject.Bindings.Pools;
@@ -13,16 +14,51 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public class Container : IObjectBuilder
+    public class Container : IObjectBuilder, IDisposable
     {
+        private enum DisposalState
+        {
+            Alive,
+            Disposing,
+            Disposed
+        }
+
+        private sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+        {
+            public static ReferenceEqualityComparer<T> Instance { get; } = new();
+
+            public bool Equals(T x, T y) => ReferenceEquals(x, y);
+
+            public int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
+        }
+
         private Container _parentContainer;
+        private Container _ownerContainer;
+        private Transform _parentTransformForGameObjects;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
         private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
+        private readonly Stack<IDisposable> _disposables = new();
+        private readonly HashSet<IDisposable> _disposablesSet =
+            new(ReferenceEqualityComparer<IDisposable>.Instance);
+        private readonly HashSet<IDisposable> _disposedDisposableHistory =
+            new(ReferenceEqualityComparer<IDisposable>.Instance);
+        private readonly List<Container> _ownedChildContainers = new();
+        private readonly HashSet<Container> _ownedChildContainersSet =
+            new(ReferenceEqualityComparer<Container>.Instance);
+        private DisposalState _disposalState;
 
-        public Transform ParentTransformForGameObjects { get; set; }
+        public Transform ParentTransformForGameObjects
+        {
+            get => _parentTransformForGameObjects;
+            set
+            {
+                ThrowIfDisposed();
+                _parentTransformForGameObjects = value;
+            }
+        }
         public Context Context { get; private set; }
 
         public bool IsBuilded { get; private set; }
@@ -37,10 +73,86 @@ namespace Uniject
             Bind<IObjectBuilder>().FromInstance(this).AsCached();
         }
 
-        public void SetParentContainer(Container parentContainer) => _parentContainer = parentContainer;
+        public void SetParentContainer(Container parentContainer)
+        {
+            ThrowIfDisposed();
+            _parentContainer = parentContainer;
+        }
+
+        internal void RegisterDisposable(object instance, Type contractType)
+        {
+            ThrowIfDisposed();
+
+            if (contractType == null)
+                throw new ArgumentNullException(nameof(contractType));
+
+            if (instance is not IDisposable disposable)
+                throw new InvalidOperationException(
+                    $"Instance {(instance == null ? "null" : $"of type {instance.GetType()}")} " +
+                    $"registered for contract {contractType} " +
+                    $"must implement {typeof(IDisposable)}.");
+
+            if (ReferenceEquals(disposable, this))
+                throw new InvalidOperationException(
+                    $"Container can not register itself for disposal for contract {contractType}.");
+
+            if (_disposablesSet.Add(disposable))
+                _disposables.Push(disposable);
+        }
+
+        internal void RegisterOwnedChildContainer(Container childContainer)
+        {
+            ThrowIfDisposed();
+
+            if (childContainer == null)
+                throw new ArgumentNullException(nameof(childContainer));
+
+            if (ReferenceEquals(childContainer, this))
+                throw new ArgumentException("Container can not own itself.", nameof(childContainer));
+
+            if (childContainer._ownerContainer != null &&
+                !ReferenceEquals(childContainer._ownerContainer, this))
+            {
+                throw new InvalidOperationException("Container is already owned by another container.");
+            }
+
+            if (_ownedChildContainersSet.Add(childContainer))
+            {
+                _ownedChildContainers.Add(childContainer);
+                childContainer._ownerContainer = this;
+            }
+        }
+
+        internal void UnregisterOwnedChildContainer(Container childContainer)
+        {
+            if (childContainer == null)
+                throw new ArgumentNullException(nameof(childContainer));
+
+            if (!_ownedChildContainersSet.Remove(childContainer))
+                return;
+
+            for (var i = _ownedChildContainers.Count - 1; i >= 0; i--)
+            {
+                if (!ReferenceEquals(_ownedChildContainers[i], childContainer))
+                    continue;
+
+                _ownedChildContainers.RemoveAt(i);
+                childContainer._ownerContainer = null;
+                childContainer._disposedDisposableHistory.Clear();
+                break;
+            }
+        }
+
+        internal void ThrowIfDisposed()
+        {
+            if (_disposalState != DisposalState.Alive)
+                throw new ObjectDisposedException(nameof(Container));
+        }
 
         internal IReadOnlyList<Container> GetSelfAndParents()
         {
+            ThrowIfDisposed();
+
             var visitedContainers = new HashSet<Container>();
             var containers = new List<Container>();
             var currentContainer = this;
@@ -59,6 +171,8 @@ namespace Uniject
 
         internal bool IsStrictDescendantOf(Container ancestor)
         {
+            ThrowIfDisposed();
+
             if (ancestor == null)
                 throw new ArgumentNullException(nameof(ancestor));
 
@@ -86,6 +200,8 @@ namespace Uniject
 
         private BindingToType CreateBinding(Type contractType)
         {
+            ThrowIfDisposed();
+
             if (contractType == null)
                 throw new ArgumentNullException(nameof(contractType));
 
@@ -98,8 +214,10 @@ namespace Uniject
             return binding;
         }
 
-        public BindingToTypeAsEntryPointBuilder BindInstance<T>(T instance)
+        public BindingToTypeCachedNonLazyBuilder BindInstance<T>(T instance)
         {
+            ThrowIfDisposed();
+
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
 
@@ -108,6 +226,8 @@ namespace Uniject
 
         public void BindInstances(params object[] instances)
         {
+            ThrowIfDisposed();
+
             if (instances == null)
                 throw new ArgumentNullException(nameof(instances));
 
@@ -129,6 +249,8 @@ namespace Uniject
         private BindingToFactory<TResult, TFactory> CreateBindingToFactory<TResult, TFactory>(Type resultType, Type factoryType)
             where TFactory : Factory<TResult>, new()
         {
+            ThrowIfDisposed();
+
             if (_bindings.ContainsKey(factoryType))
                 throw new InvalidOperationException($"Type {factoryType} is already bound.");
 
@@ -147,6 +269,8 @@ namespace Uniject
         private BindingToFactoryWithParameter<TParam, TResult, TFactory> CreateBindingToFactoryWithParameter<TParam, TResult, TFactory>(Type paramType, Type resultType, Type factoryType)
             where TFactory : Factory<TParam, TResult>, new()
         {
+            ThrowIfDisposed();
+
             if (_bindings.ContainsKey(factoryType))
                 throw new InvalidOperationException($"Type {factoryType} is already bound.");
 
@@ -167,6 +291,8 @@ namespace Uniject
             where TResult : class
             where TPool : Pool<TResult>, new()
         {
+            ThrowIfDisposed();
+
             if (_bindings.ContainsKey(poolType))
                 throw new InvalidOperationException($"Type {poolType} is already bound.");
 
@@ -178,10 +304,16 @@ namespace Uniject
 
         public T Resolve<T>() => (T)Resolve(typeof(T));
 
-        public object Resolve(Type contractType) => Resolve(contractType, InjectContext.CreateRoot(this, contractType));
+        public object Resolve(Type contractType)
+        {
+            ThrowIfDisposed();
+            return Resolve(contractType, InjectContext.CreateRoot(this, contractType));
+        }
 
         internal object Resolve(Type contractType, InjectContext context)
         {
+            ThrowIfDisposed();
+
             if (contractType == null)
                 throw new ArgumentNullException(nameof(contractType));
 
@@ -196,6 +328,7 @@ namespace Uniject
                     throw new NoBindingFoundException($"No binding found for type {contractType}. " +
                         $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
 
+                binding.Container.ThrowIfDisposed();
                 return binding.GetInstance(context.WithContainer(binding.Container));
             }
             finally
@@ -217,6 +350,8 @@ namespace Uniject
 
         public object TryResolve(Type contractType)
         {
+            ThrowIfDisposed();
+
             try
             {
                 return Resolve(contractType);
@@ -239,16 +374,24 @@ namespace Uniject
         private Binding FindBinding(Type contractType)
         {
             var currentContainer = this;
-            var binding = default(Binding);
 
-            while (!currentContainer?._bindings.TryGetValue(contractType, out binding) ?? false)
+            while (currentContainer != null)
+            {
+                currentContainer.ThrowIfDisposed();
+
+                if (currentContainer._bindings.TryGetValue(contractType, out var binding))
+                    return binding;
+
                 currentContainer = currentContainer._parentContainer;
+            }
 
-            return binding;
+            return null;
         }
 
         internal void ResolveNonLazyBindings()
         {
+            ThrowIfDisposed();
+
             foreach (var bindingType in _bindingsTypes)
             {
                 var bindingBase = _bindings[bindingType];
@@ -271,6 +414,8 @@ namespace Uniject
 
         internal void RunEntryPoints()
         {
+            ThrowIfDisposed();
+
             foreach (var bindingType in _bindingsTypes)
             {
                 var bindingBase = _bindings[bindingType];
@@ -284,6 +429,8 @@ namespace Uniject
 
         public void Inject(object instance)
         {
+            ThrowIfDisposed();
+
             var methodInjectionData = ReflectionCache.GetMethodInjectionData(instance.GetType());
 
             if (!methodInjectionData.hasInjectMethod)
@@ -303,12 +450,16 @@ namespace Uniject
 
         public void Inject(IEnumerable<object> instances)
         {
+            ThrowIfDisposed();
+
             foreach (var instance in instances)
                 Inject(instance);
         }
 
         public void AddToInjectionQueue(object instance)
         {
+            ThrowIfDisposed();
+
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance), "Instance can not be null.");
 
@@ -318,6 +469,8 @@ namespace Uniject
 
         public void AddToInjectionQueue(params object[] instances)
         {
+            ThrowIfDisposed();
+
             if (instances == null)
                 throw new ArgumentNullException(nameof(instances), "Instances array can not be null.");
 
@@ -327,12 +480,16 @@ namespace Uniject
 
         internal void InjectQueuedInstances()
         {
+            ThrowIfDisposed();
+
             while (_injectQueue.Count > 0)
                 Inject(_injectQueue.PopFirst());
         }
 
         public Context GetNearestContext()
         {
+            ThrowIfDisposed();
+
             var container = this;
             while (container != null)
             {
@@ -347,6 +504,8 @@ namespace Uniject
 
         public (Context context, Transform parentTransform) GetInfoAboutNearestParentForGameObjects()
         {
+            ThrowIfDisposed();
+
             var container = this;
             var parentTransform = default(Transform);
 
@@ -374,6 +533,8 @@ namespace Uniject
 
         public void Build()
         {
+            ThrowIfDisposed();
+
             if (IsBuilded)
                 return;
 
@@ -390,6 +551,8 @@ namespace Uniject
 
         public object Instantiate(Type concreteType)
         {
+            ThrowIfDisposed();
+
             var constructorInjectionData = ReflectionCache.GetConstructorInjectionData(concreteType);
             var parametersInstances = new object[constructorInjectionData.parametersInfo.Length];
 
@@ -405,6 +568,8 @@ namespace Uniject
 
         public GameObject Instantiate(GameObject prefab)
         {
+            ThrowIfDisposed();
+
             var cloned = UnityEngine.Object.Instantiate(prefab);
 
             if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
@@ -420,6 +585,8 @@ namespace Uniject
 
         public Component Instantiate(Component prefab)
         {
+            ThrowIfDisposed();
+
             var cloned = UnityEngine.Object.Instantiate(prefab);
 
             if (cloned.TryGetComponent<InjectTargets>(out var injectionTargets))
@@ -435,6 +602,8 @@ namespace Uniject
 
         public Component AddComponent(GameObject gameObject, Type componentType)
         {
+            ThrowIfDisposed();
+
             var component = gameObject.AddComponent(componentType);
             Inject(component);
             return component;
@@ -447,9 +616,102 @@ namespace Uniject
 
         public Component AddComponent(Component component, Type componentType)
         {
+            ThrowIfDisposed();
+
             component = component.gameObject.AddComponent(componentType);
             Inject(component);
             return component;
+        }
+
+        public void Dispose()
+        {
+            Dispose(new HashSet<IDisposable>(ReferenceEqualityComparer<IDisposable>.Instance));
+        }
+
+        private void Dispose(HashSet<IDisposable> disposedDisposables)
+        {
+            if (_disposalState != DisposalState.Alive)
+            {
+                disposedDisposables.UnionWith(_disposedDisposableHistory);
+                return;
+            }
+
+            _disposalState = DisposalState.Disposing;
+            var exceptions = new List<Exception>();
+
+            try
+            {
+                var ownedChildContainers = _ownedChildContainers.ToArray();
+                _ownedChildContainers.Clear();
+                _ownedChildContainersSet.Clear();
+
+                for (var i = ownedChildContainers.Length - 1; i >= 0; i--)
+                {
+                    try
+                    {
+                        ownedChildContainers[i].Dispose(disposedDisposables);
+                    }
+                    catch (Exception exception)
+                    {
+                        AddFlattenedException(exceptions, exception);
+                    }
+                    finally
+                    {
+                        ownedChildContainers[i]._ownerContainer = null;
+                        ownedChildContainers[i]._disposedDisposableHistory.Clear();
+                    }
+                }
+
+                while (_disposables.TryPop(out var disposable))
+                {
+                    _disposablesSet.Remove(disposable);
+
+                    if (!disposedDisposables.Add(disposable))
+                        continue;
+
+                    if (_ownerContainer != null)
+                        _disposedDisposableHistory.Add(disposable);
+
+                    try
+                    {
+                        disposable.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        AddFlattenedException(exceptions, exception);
+                    }
+                }
+            }
+            finally
+            {
+                if (_ownerContainer != null)
+                    _disposedDisposableHistory.UnionWith(disposedDisposables);
+
+                _ownedChildContainers.Clear();
+                _ownedChildContainersSet.Clear();
+                _disposables.Clear();
+                _disposablesSet.Clear();
+                _injectQueue.Clear();
+                _bindings.Clear();
+                _bindingsTypes.Clear();
+                _disposalState = DisposalState.Disposed;
+            }
+
+            if (exceptions.Count > 0)
+                throw new AggregateException(exceptions);
+        }
+
+        private static void AddFlattenedException(List<Exception> exceptions, Exception exception)
+        {
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (var innerException in aggregateException.InnerExceptions)
+                    AddFlattenedException(exceptions, innerException);
+
+                return;
+            }
+
+            exceptions.Add(exception);
         }
     }
 }

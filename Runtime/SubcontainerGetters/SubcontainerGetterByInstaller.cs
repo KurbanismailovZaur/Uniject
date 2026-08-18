@@ -9,6 +9,8 @@ namespace Uniject.SubcontainerGetters
     {
         private readonly IInstaller _installer;
 
+        internal override bool IsOwnedByParent => true;
+
         public SubcontainerGetterByInstaller(Container container, IInstaller installer) : base(container)
         {
             _installer = installer;
@@ -17,8 +19,25 @@ namespace Uniject.SubcontainerGetters
         public override Container GetContainer()
         {
             var container = new Container(_container);
-            _installer.Install(container);
-            return container;
+
+            try
+            {
+                _installer.Install(container);
+                return container;
+            }
+            catch (Exception installException)
+            {
+                try
+                {
+                    container.Dispose();
+                }
+                catch (Exception disposeException)
+                {
+                    throw new AggregateException(installException, disposeException).Flatten();
+                }
+
+                throw;
+            }
         }
     }
 }
