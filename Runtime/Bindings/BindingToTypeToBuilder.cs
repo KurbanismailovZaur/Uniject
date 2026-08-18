@@ -1,4 +1,5 @@
 using System;
+using Uniject.InstanceGetters;
 using UnityEngine;
 
 namespace Uniject.Bindings
@@ -135,6 +136,14 @@ namespace Uniject.Bindings
 
         public BindingToTypeAsBuilder FromMethod(Func<InjectContext, TContract> method) =>
             To<TContract>().FromMethod(method);
+
+        public BindingToTypeAsBuilder FromResolveGetter<TResolve>(Func<TResolve, TContract> getter)
+        {
+            _binding.ConcreteType = typeof(TContract);
+            _binding.InstanceGetter =
+                new InstanceGetterFromResolveGetter<TResolve, TContract>(_container, getter);
+            return new BindingToTypeAsBuilder(_container, _binding);
+        }
 
         public BindingToTypeAsBuilder FromInstance(TContract instance) => To<TContract>().FromInstance(instance);
 

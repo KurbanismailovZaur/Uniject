@@ -450,6 +450,33 @@ namespace Uniject.Tests
         }
 
         [Test]
+        public void Inject_FromResolveGetter_ForwardsOriginalContextToSourceResolve()
+        {
+            var expected = new Service();
+            var receivedContext = default(InjectContext);
+            var container = new Container();
+            container.Bind<Service>().FromMethod(context =>
+            {
+                receivedContext = context;
+                return expected;
+            }).AsTransient();
+            container.Bind<IService>().FromResolveGetter<Service>(service => service).AsTransient();
+            var consumer = new MethodConsumer();
+
+            container.Inject(consumer);
+
+            Assert.That(consumer.Service, Is.SameAs(expected));
+            Assert.That(receivedContext.ContractType, Is.EqualTo(typeof(IService)));
+            Assert.That(receivedContext.ConsumerType, Is.EqualTo(typeof(MethodConsumer)));
+            Assert.That(receivedContext.ConsumerInstance, Is.SameAs(consumer));
+            Assert.That(receivedContext.ParameterInfo, Is.Not.Null);
+            Assert.That(receivedContext.ParameterInfo.ParameterType, Is.EqualTo(typeof(IService)));
+            Assert.That(receivedContext.ParameterInfo.Position, Is.EqualTo(0));
+            Assert.That(receivedContext.ParameterInfo.Member.DeclaringType,
+                Is.EqualTo(typeof(MethodConsumer)));
+        }
+
+        [Test]
         public void Inject_FromCachedSubcontainer_ForwardsEachOriginalContext()
         {
             var expected = new Service();

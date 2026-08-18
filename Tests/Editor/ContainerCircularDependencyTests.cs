@@ -25,6 +25,20 @@ namespace Uniject.Tests
             public FromResolveCircularDependency(IFromResolveCircularDependency dependency) { }
         }
 
+        private interface IFromResolveGetterCircularDependency
+        {
+        }
+
+        private class FromResolveGetterCircularSource
+        {
+            public IFromResolveGetterCircularDependency Dependency { get; }
+
+            public FromResolveGetterCircularSource(IFromResolveGetterCircularDependency dependency)
+            {
+                Dependency = dependency;
+            }
+        }
+
         private static void AssertCircularDependency(TestDelegate action)
         {
             Assert.That(action, Throws.Exception.With.Message.Contains("Circular dependency detected"));
@@ -62,6 +76,17 @@ namespace Uniject.Tests
             container.Bind<FromResolveCircularDependency>();
 
             AssertCircularDependency(() => container.Resolve<IFromResolveCircularDependency>());
+        }
+
+        [Test]
+        public void Resolve_FromResolveGetter_WhenSourceDependsOnContract_ThrowsException()
+        {
+            var container = new Container();
+            container.Bind<FromResolveGetterCircularSource>();
+            container.Bind<IFromResolveGetterCircularDependency>()
+                .FromResolveGetter<FromResolveGetterCircularSource>(source => source.Dependency);
+
+            AssertCircularDependency(() => container.Resolve<IFromResolveGetterCircularDependency>());
         }
 
         [Test]
