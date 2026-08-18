@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Uniject
 {
-    public class Container : IObjectBuilder, IDisposable
+    public class Container : IObjectBuilder
     {
         private Container _parentContainer;
 
@@ -21,7 +21,6 @@ namespace Uniject
         private readonly List<Type> _bindingsTypes = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
-        private Stack<IDisposable> _disposables = new();
 
         public Transform ParentTransformForGameObjects { get; set; }
         public Context Context { get; private set; }
@@ -279,9 +278,6 @@ namespace Uniject
                 if (bindingBase is not BindingToType binding || !binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
 
-                if (binding.CachedInstance is not Component && binding.CachedInstance is IDisposable disposable)
-                    _disposables.Push(disposable);
-
                 ((IEntryPoint)binding.CachedInstance).Run();
             }
         }
@@ -454,12 +450,6 @@ namespace Uniject
             component = component.gameObject.AddComponent(componentType);
             Inject(component);
             return component;
-        }
-
-        public void Dispose()
-        {
-            while (_disposables.TryPop(out var disposable))
-                disposable.Dispose();
         }
     }
 }

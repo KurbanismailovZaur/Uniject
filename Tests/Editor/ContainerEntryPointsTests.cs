@@ -36,35 +36,11 @@ namespace Uniject.Tests
             public void Run() => EntryPointOrder.Items.Add("Second");
         }
 
-        private class DisposableEntryPoint : IEntryPoint, IDisposable
+        private class DisposableEntryPoint : IEntryPoint
         {
             public int RunsCount { get; private set; }
-            public int DisposesCount { get; private set; }
 
             public void Run() => RunsCount++;
-
-            public void Dispose() => DisposesCount++;
-        }
-
-        private static class DisposableEntryPointOrder
-        {
-            public static readonly List<string> Items = new();
-
-            public static void Clear() => Items.Clear();
-        }
-
-        private class FirstDisposableEntryPoint : IEntryPoint, IDisposable
-        {
-            public void Run() { }
-
-            public void Dispose() => DisposableEntryPointOrder.Items.Add("First");
-        }
-
-        private class SecondDisposableEntryPoint : IEntryPoint, IDisposable
-        {
-            public void Run() { }
-
-            public void Dispose() => DisposableEntryPointOrder.Items.Add("Second");
         }
 
         private static void ResolveNonLazyBindings(Container container)
@@ -165,73 +141,6 @@ namespace Uniject.Tests
         }
 
         [Test]
-        public void Dispose_WhenEntryPointIsDisposable_DisposesEntryPoint()
-        {
-            var container = new Container();
-            container.Bind<DisposableEntryPoint>().AsEntryPoint();
-
-            ResolveNonLazyBindings(container);
-            var entryPoint = container.Resolve<DisposableEntryPoint>();
-
-            RunEntryPoints(container);
-            container.Dispose();
-
-            Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Dispose_WhenNoDisposableEntryPoints_DoesNotThrow()
-        {
-            var container = new Container();
-
-            Assert.That(() => container.Dispose(), Throws.Nothing);
-        }
-
-        [Test]
-        public void Dispose_WhenDisposableBindingIsNotEntryPoint_DoesNotDisposeIt()
-        {
-            var container = new Container();
-            container.Bind<DisposableEntryPoint>().AsCached();
-
-            var entryPoint = container.Resolve<DisposableEntryPoint>();
-
-            container.Dispose();
-
-            Assert.That(entryPoint.DisposesCount, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void Dispose_WhenEntryPointIsBoundFromInstance_DisposesIt()
-        {
-            var entryPoint = new DisposableEntryPoint();
-
-            var container = new Container();
-            container.Bind<DisposableEntryPoint>().FromInstance(entryPoint).AsEntryPoint();
-
-            ResolveNonLazyBindings(container);
-            RunEntryPoints(container);
-            container.Dispose();
-
-            Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Dispose_WhenSeveralDisposableEntryPointsExist_DisposesInReverseRegistrationOrder()
-        {
-            DisposableEntryPointOrder.Clear();
-
-            var container = new Container();
-            container.Bind<FirstDisposableEntryPoint>().AsEntryPoint();
-            container.Bind<SecondDisposableEntryPoint>().AsEntryPoint();
-
-            ResolveNonLazyBindings(container);
-            RunEntryPoints(container);
-            container.Dispose();
-
-            Assert.That(DisposableEntryPointOrder.Items, Is.EqualTo(new[] { "Second", "First" }));
-        }
-
-        [Test]
         public void CallEntryPoints_WhenBindInstanceIsMarkedAsEntryPoint_CallsRun()
         {
             var entryPoint = new DisposableEntryPoint();
@@ -243,21 +152,6 @@ namespace Uniject.Tests
             RunEntryPoints(container);
 
             Assert.That(entryPoint.RunsCount, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Dispose_WhenBindInstanceIsMarkedAsEntryPoint_DisposesIt()
-        {
-            var entryPoint = new DisposableEntryPoint();
-
-            var container = new Container();
-            container.BindInstance(entryPoint).AsEntryPoint();
-
-            ResolveNonLazyBindings(container);
-            RunEntryPoints(container);
-            container.Dispose();
-
-            Assert.That(entryPoint.DisposesCount, Is.EqualTo(1));
         }
     }
 }

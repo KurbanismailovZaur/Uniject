@@ -131,11 +131,5 @@ namespace Uniject.Contexts
             Install();
             Build();
         }
-
-        protected virtual void OnDestroy()
-        {
-            if (IsBuilded)
-                Container.Dispose();
-        }
     }
 }
