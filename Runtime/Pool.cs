@@ -190,13 +190,17 @@ namespace Uniject
         {
             foreach (var instance in _spawnedInstancesSet)
             {
-                if (instance is UnityEngine.Object unityObject)
+                if (instance is Component component)
+                    UnityEngine.Object.Destroy(component.gameObject);
+                else if (instance is UnityEngine.Object unityObject)
                     UnityEngine.Object.Destroy(unityObject);
             }
 
             foreach (var instance in _despawnedInstances)
             {
-                if (instance is UnityEngine.Object unityObject)
+                if (instance is Component component)
+                    UnityEngine.Object.Destroy(component.gameObject);
+                else if (instance is UnityEngine.Object unityObject)
                     UnityEngine.Object.Destroy(unityObject);
             }
 
