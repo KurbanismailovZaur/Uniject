@@ -1,6 +1,6 @@
 {
-    "name": "Uniject.Runtime.Tests",
-    "rootNamespace": "Uniject.Tests",
+    "name": "Uniject.Performance.Tests",
+    "rootNamespace": "Uniject.Tests.Performance",
     "references": [
         "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2",
         "GUID:c0dd0d10738d4ad4a9de57c559d0ca1b"
@@ -10,11 +10,11 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false,
     "optionalUnityReferences": [
-    "TestAssemblies"
+        "TestAssemblies"
     ]
 }

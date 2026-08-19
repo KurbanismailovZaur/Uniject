@@ -47,6 +47,7 @@ namespace Uniject.Tests
             var parentDependency = new ParentDependency();
             var parentContainer = new Container();
             parentContainer.BindInstance(parentDependency);
+            parentContainer.Bind<SceneLoader>().AsCached();
             var sceneContainer = default(Container);
 
             try
@@ -72,6 +73,7 @@ namespace Uniject.Tests
             var parentDependency = new ParentDependency();
             var parentContainer = new Container();
             parentContainer.BindInstance(parentDependency);
+            parentContainer.Bind<SceneLoader>().AsCached();
             var sceneContainer = default(Container);
 
             try

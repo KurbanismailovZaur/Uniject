@@ -15,7 +15,8 @@ namespace Uniject
         public async Awaitable LoadSceneAdditiveAsync(int sceneBuildIndex, LocalPhysicsMode localPhysicsMode = LocalPhysicsMode.None,
             Action<Container> installMethod = null)
         {
-            string sceneName = SceneUtility.GetScenePathByBuildIndex(sceneBuildIndex);
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(sceneBuildIndex);
+            string sceneName = Path.GetFileNameWithoutExtension(scenePath);
             await LoadSceneAdditiveAsync(sceneName, localPhysicsMode, installMethod);
         }
 
