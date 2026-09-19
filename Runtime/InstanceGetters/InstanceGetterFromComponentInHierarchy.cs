@@ -118,52 +118,103 @@ namespace Uniject.InstanceGetters
                 $"{context.GetType()}. Only GameObjectContext and SceneContext are supported.");
         }
 
-        private static Component FindFromRoot(
-            Transform root,
-            Type concreteType,
-            Container contextContainer,
-            HashSet<Transform> visitedTransforms)
+        private static Component FindFromRoot(Transform root, Type concreteType, Container contextContainer, HashSet<Transform> visitedTransforms)
         {
-            if (root == null ||
-                visitedTransforms.Contains(root) ||
-                IsInsideLogicalDescendantContext(root, contextContainer))
+            if (root == null || visitedTransforms.Contains(root))
                 return null;
 
-            var pendingTransforms = new Stack<Transform>();
-            pendingTransforms.Push(root);
+            var pool = StaticCollections.collectionPool;
+            var contexts = pool.SpawnList<Context>();
+            Stack<Transform> pendingTransforms = null;
 
-            while (pendingTransforms.Count > 0)
+            try
             {
-                var currentTransform = pendingTransforms.Pop();
+                if (IsInsideLogicalDescendantContext(root, contextContainer, contexts))
+                    return null;
 
-                if (currentTransform == null || !visitedTransforms.Add(currentTransform))
-                    continue;
+                if (visitedTransforms.Count == 0)
+                {
+                    // Частый случай: компонент находится прямо на корне.
+                    if (root.TryGetComponent(concreteType, out var rootComponent))
+                        return rootComponent;
 
-                if (HasLogicalDescendantContext(currentTransform.gameObject, contextContainer))
-                    continue;
+                    // Проверяем структуру одним native-обходом.
+                    root.GetComponentsInChildren<Context>(true, contexts);
 
-                var component = currentTransform.gameObject.GetComponent(concreteType);
+                    var hasNestedContext = false;
 
-                if (component != null)
-                    return component;
+                    foreach (var foundContext in contexts)
+                    {
+                        if (foundContext != null && foundContext.transform != root)
+                        {
+                            hasNestedContext = true;
+                            break;
+                        }
+                    }
 
-                for (var i = currentTransform.childCount - 1; i >= 0; i--)
-                    pendingTransforms.Push(currentTransform.GetChild(i));
+                    if (!hasNestedContext)
+                    {
+                        var candidate = root.GetComponentInChildren(concreteType, true);
+
+                        // Сохраняем выбор компонента на найденном GameObject
+                        // через тот же локальный API, который использует текущий DFS.
+                        if (candidate != null &&
+                            candidate.gameObject.TryGetComponent(
+                                concreteType, out var resolvedComponent))
+                        {
+                            return resolvedComponent;
+                        }
+                    }
+                }
+
+                // Далее существующий DFS.
+
+                pendingTransforms = pool.SpawnStack<Transform>();
+                pendingTransforms.Push(root);
+
+                while (pendingTransforms.Count > 0)
+                {
+                    var currentTransform = pendingTransforms.Pop();
+
+                    if (currentTransform == null || !visitedTransforms.Add(currentTransform))
+                        continue;
+
+                    var gameObject = currentTransform.gameObject;
+
+                    if (HasLogicalDescendantContext(gameObject, contextContainer, contexts))
+                        continue;
+
+                    if (gameObject.TryGetComponent(concreteType, out var component))
+                        return component;
+
+                    for (var i = currentTransform.childCount - 1; i >= 0; i--)
+                        pendingTransforms.Push(currentTransform.GetChild(i));
+                }
+
+                return null;
             }
+            finally
+            {
+                if (pendingTransforms != null)
+                    pool.DespawnStack(pendingTransforms);
 
-            return null;
+                pool.DespawnList(contexts);
+            }
         }
 
-        private static bool IsInsideLogicalDescendantContext(
-            Transform transform,
-            Container contextContainer)
+        private static bool IsInsideLogicalDescendantContext(Transform transform, Container contextContainer, List<Context> contexts)
         {
             var currentTransform = transform;
 
             while (currentTransform != null)
             {
-                if (HasLogicalDescendantContext(currentTransform.gameObject, contextContainer))
+                if (HasLogicalDescendantContext(
+                        currentTransform.gameObject,
+                        contextContainer,
+                        contexts))
+                {
                     return true;
+                }
 
                 currentTransform = currentTransform.parent;
             }
@@ -171,11 +222,11 @@ namespace Uniject.InstanceGetters
             return false;
         }
 
-        private static bool HasLogicalDescendantContext(
-            GameObject gameObject,
-            Container contextContainer)
+        private static bool HasLogicalDescendantContext(GameObject gameObject, Container contextContainer, List<Context> contexts)
         {
-            foreach (var context in gameObject.GetComponents<Context>())
+            gameObject.GetComponents(contexts);
+
+            foreach (var context in contexts)
             {
                 if (context == null || context.Container == null)
                     continue;

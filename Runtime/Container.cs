@@ -312,6 +312,11 @@ namespace Uniject
 
         internal object Resolve(Type contractType, InjectContext context)
         {
+            return ResolveCore(contractType, context, throwIfMissing: true);
+        }
+
+        private object ResolveCore(Type contractType, InjectContext context, bool throwIfMissing)
+        {
             ThrowIfDisposed();
 
             if (contractType == null)
@@ -325,8 +330,14 @@ namespace Uniject
                 var binding = FindBinding(contractType);
 
                 if (binding == null)
-                    throw new NoBindingFoundException($"No binding found for type {contractType}. " +
+                {
+                    if (!throwIfMissing)
+                        return null;
+
+                    throw new NoBindingFoundException(
+                        $"No binding found for type {contractType}. " +
                         $"Dependencies stack: {string.Join(" ← ", _resolvingTypes)}.");
+                }
 
                 binding.Container.ThrowIfDisposed();
                 return binding.GetInstance(context.WithContainer(binding.Container));
@@ -354,7 +365,10 @@ namespace Uniject
 
             try
             {
-                return Resolve(contractType);
+                return ResolveCore(
+                    contractType,
+                    InjectContext.CreateRoot(this, contractType),
+                    throwIfMissing: false);
             }
             catch (NoBindingFoundException)
             {
