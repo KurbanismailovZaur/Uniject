@@ -25,17 +25,10 @@ namespace Uniject.InstanceGetters
                     $"{nameof(InstanceGetterFromComponentInParents)} can only be used during method injection " +
                     "into a live MonoBehaviour.");
 
-            var currentTransform = consumer.transform;
+            var component = consumer.GetComponentInParent(concreteType, includeInactive: true);
 
-            while (currentTransform != null)
-            {
-                var component = currentTransform.gameObject.GetComponent(concreteType);
-
-                if (component != null)
-                    return component;
-
-                currentTransform = currentTransform.parent;
-            }
+            if (component != null)
+                return component;
 
             throw new InvalidOperationException(
                 $"{nameof(InstanceGetterFromComponentInParents)} could not find a component assignable to type " +
