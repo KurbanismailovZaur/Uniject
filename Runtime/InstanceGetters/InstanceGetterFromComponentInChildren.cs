@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Uniject.Bindings;
 using Uniject.Reflection;
 using UnityEngine;
@@ -16,34 +15,19 @@ namespace Uniject.InstanceGetters
                     "must be a Component or an interface.");
         }
 
-        public override object GetInstance(
-            Type concreteType,
-            CreateOptions createOptions,
-            InjectContext context)
+        public override object GetInstance(Type concreteType, CreateOptions createOptions, InjectContext context)
         {
             if (context.ConsumerInstance is not MonoBehaviour consumer || consumer == null)
                 throw new InvalidOperationException(
                     $"{nameof(InstanceGetterFromComponentInChildren)} can only be used during method injection " +
                     "into a live MonoBehaviour.");
 
-            var pendingTransforms = new Stack<Transform>();
-            pendingTransforms.Push(consumer.transform);
+            var component = consumer.GetComponentInChildren(
+                concreteType,
+                includeInactive: true);
 
-            while (pendingTransforms.Count > 0)
-            {
-                var currentTransform = pendingTransforms.Pop();
-
-                if (currentTransform == null)
-                    continue;
-
-                var component = currentTransform.gameObject.GetComponent(concreteType);
-
-                if (component != null)
-                    return component;
-
-                for (var i = currentTransform.childCount - 1; i >= 0; i--)
-                    pendingTransforms.Push(currentTransform.GetChild(i));
-            }
+            if (component != null)
+                return component;
 
             throw new InvalidOperationException(
                 $"{nameof(InstanceGetterFromComponentInChildren)} could not find a component assignable to type " +
