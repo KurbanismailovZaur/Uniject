@@ -31,11 +31,6 @@ namespace Uniject
                 Capacity = capacity;
             }
 
-            public bool Matches(CollectionKind kind, Type firstType, Type secondType)
-            {
-                return Kind == kind && FirstType == firstType && SecondType == secondType;
-            }
-
             public bool Equals(BucketKey other)
             {
                 return Kind == other.Kind && FirstType == other.FirstType && SecondType == other.SecondType &&
@@ -60,6 +55,9 @@ namespace Uniject
         private readonly Dictionary<object, BucketKey> _spawnedCollections =
             new(ObjectReferenceComparer.Instance);
 
+        private BucketKey _lastBucketKey;
+        private Stack<object> _lastBucket;
+
         private bool _isDisposed;
 
         public List<T> SpawnList<T>(int capacity = 0)
@@ -76,7 +74,7 @@ namespace Uniject
 
         public void DespawnList<T>(List<T> collection)
         {
-            var key = ValidateDespawn(collection, CollectionKind.List, typeof(T), null, nameof(collection));
+            var key = ValidateAndUntrackDespawn(collection, nameof(collection));
             collection.Clear();
             TrackDespawned(collection, key);
         }
@@ -95,7 +93,7 @@ namespace Uniject
 
         public void DespawnArray<T>(T[] array)
         {
-            var key = ValidateDespawn(array, CollectionKind.Array, typeof(T), null, nameof(array));
+            var key = ValidateAndUntrackDespawn(array, nameof(array));
             Array.Clear(array, 0, array.Length);
             TrackDespawned(array, key);
         }
@@ -114,7 +112,7 @@ namespace Uniject
 
         public void DespawnHashSet<T>(HashSet<T> collection)
         {
-            var key = ValidateDespawn(collection, CollectionKind.HashSet, typeof(T), null, nameof(collection));
+            var key = ValidateAndUntrackDespawn(collection, nameof(collection));
             collection.Clear();
             TrackDespawned(collection, key);
         }
@@ -135,8 +133,7 @@ namespace Uniject
 
         public void DespawnDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection)
         {
-            var key = ValidateDespawn(collection, CollectionKind.Dictionary, typeof(TKey), typeof(TValue),
-                nameof(collection));
+            var key = ValidateAndUntrackDespawn(collection, nameof(collection));
             collection.Clear();
             TrackDespawned(collection, key);
         }
@@ -155,7 +152,7 @@ namespace Uniject
 
         public void DespawnQueue<T>(Queue<T> collection)
         {
-            var key = ValidateDespawn(collection, CollectionKind.Queue, typeof(T), null, nameof(collection));
+            var key = ValidateAndUntrackDespawn(collection, nameof(collection));
             collection.Clear();
             TrackDespawned(collection, key);
         }
@@ -174,7 +171,7 @@ namespace Uniject
 
         public void DespawnStack<T>(Stack<T> collection)
         {
-            var key = ValidateDespawn(collection, CollectionKind.Stack, typeof(T), null, nameof(collection));
+            var key = ValidateAndUntrackDespawn(collection, nameof(collection));
             collection.Clear();
             TrackDespawned(collection, key);
         }
@@ -182,7 +179,10 @@ namespace Uniject
         public void Clear()
         {
             ThrowIfDisposed();
+
             _despawnedCollections.Clear();
+            _lastBucket = null;
+            _lastBucketKey = default;
         }
 
         public void Dispose()
@@ -192,12 +192,38 @@ namespace Uniject
 
             _despawnedCollections.Clear();
             _spawnedCollections.Clear();
+
+            _lastBucket = null;
+            _lastBucketKey = default;
+
             _isDisposed = true;
+        }
+
+        private Stack<object> GetDespawnedBucket(BucketKey key, bool createIfMissing)
+        {
+            if (_lastBucket != null && _lastBucketKey.Equals(key))
+                return _lastBucket;
+
+            if (!_despawnedCollections.TryGetValue(key, out var collections))
+            {
+                if (!createIfMissing)
+                    return null;
+
+                collections = new Stack<object>();
+                _despawnedCollections.Add(key, collections);
+            }
+
+            _lastBucketKey = key;
+            _lastBucket = collections;
+
+            return collections;
         }
 
         private object TakeDespawned(BucketKey key)
         {
-            if (!_despawnedCollections.TryGetValue(key, out var collections) || collections.Count == 0)
+            var collections = GetDespawnedBucket(key, createIfMissing: false);
+
+            if (collections == null || collections.Count == 0)
                 return null;
 
             return collections.Pop();
@@ -209,16 +235,21 @@ namespace Uniject
                 throw new InvalidOperationException("Collection is already spawned.");
         }
 
-        private BucketKey ValidateDespawn(object collection, CollectionKind kind, Type firstType, Type secondType,
+        private BucketKey ValidateAndUntrackDespawn<TCollection>(TCollection collection,
             string parameterName)
+            where TCollection : class
         {
             ThrowIfDisposed();
 
             if (collection == null)
                 throw new ArgumentNullException(parameterName);
 
-            if (!_spawnedCollections.TryGetValue(collection, out var key) ||
-                !key.Matches(kind, firstType, secondType))
+            if (collection.GetType() != typeof(TCollection))
+            {
+                throw new InvalidOperationException("Collection is not spawned by this pool or has an incompatible type.");
+            }
+
+            if (!_spawnedCollections.Remove(collection, out var key))
             {
                 throw new InvalidOperationException("Collection is not spawned by this pool or has an incompatible type.");
             }
@@ -228,14 +259,7 @@ namespace Uniject
 
         private void TrackDespawned(object collection, BucketKey key)
         {
-            _spawnedCollections.Remove(collection);
-
-            if (!_despawnedCollections.TryGetValue(key, out var collections))
-            {
-                collections = new Stack<object>();
-                _despawnedCollections.Add(key, collections);
-            }
-
+            var collections = GetDespawnedBucket(key, createIfMissing: true);
             collections.Push(collection);
         }
 
