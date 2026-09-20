@@ -37,7 +37,7 @@ namespace Uniject
         private Transform _parentTransformForGameObjects;
 
         private readonly Dictionary<Type, Binding> _bindings = new();
-        private readonly List<Type> _bindingsTypes = new();
+        private readonly List<Binding> _bindingsInOrder = new();
         private readonly OrderedSet<Type> _resolvingTypes = new();
         private readonly OrderedSet<object> _injectQueue = new();
         private readonly Stack<IDisposable> _disposables = new();
@@ -210,7 +210,7 @@ namespace Uniject
 
             var binding = new BindingToType(this, contractType);
             _bindings[contractType] = binding;
-            _bindingsTypes.Add(contractType);
+            _bindingsInOrder.Add(binding);
             return binding;
         }
 
@@ -256,7 +256,7 @@ namespace Uniject
 
             var binding = new BindingToFactory<TResult, TFactory>(this, resultType, factoryType);
             _bindings[factoryType] = binding;
-            _bindingsTypes.Add(factoryType);
+            _bindingsInOrder.Add(binding);
             return binding;
         }
 
@@ -276,7 +276,7 @@ namespace Uniject
 
             var binding = new BindingToFactoryWithParameter<TParam, TResult, TFactory>(this, paramType, resultType, factoryType);
             _bindings[factoryType] = binding;
-            _bindingsTypes.Add(factoryType);
+            _bindingsInOrder.Add(binding);
             return binding;
         }
 
@@ -298,7 +298,7 @@ namespace Uniject
 
             var binding = new BindingToPool<TResult, TPool>(this, resultType, poolType);
             _bindings[poolType] = binding;
-            _bindingsTypes.Add(poolType);
+            _bindingsInOrder.Add(binding);
             return binding;
         }
 
@@ -406,10 +406,8 @@ namespace Uniject
         {
             ThrowIfDisposed();
 
-            foreach (var bindingType in _bindingsTypes)
+            foreach (var bindingBase in _bindingsInOrder)
             {
-                var bindingBase = _bindings[bindingType];
-
                 if (bindingBase is not BindingToType binding || !binding.IsNonLazy)
                     continue;
 
@@ -430,10 +428,8 @@ namespace Uniject
         {
             ThrowIfDisposed();
 
-            foreach (var bindingType in _bindingsTypes)
+            foreach (var bindingBase in _bindingsInOrder)
             {
-                var bindingBase = _bindings[bindingType];
-
                 if (bindingBase is not BindingToType binding || !binding.IsNonLazy || !binding.IsEntryPoint)
                     continue;
 
@@ -707,7 +703,7 @@ namespace Uniject
                 _disposablesSet.Clear();
                 _injectQueue.Clear();
                 _bindings.Clear();
-                _bindingsTypes.Clear();
+                _bindingsInOrder.Clear();
                 _disposalState = DisposalState.Disposed;
             }
 
