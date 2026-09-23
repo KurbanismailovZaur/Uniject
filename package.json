@@ -1,5 +1,6 @@
 {
   "author": "Codomaster",
+  "license": "MIT",
   "name": "com.codomaster.uniject",
   "version": "1.0.0",
   "displayName": "Uniject",
