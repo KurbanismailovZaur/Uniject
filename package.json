@@ -2,14 +2,14 @@
   "author": "Codomaster",
   "license": "MIT",
   "name": "com.codomaster.uniject",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "Uniject",
   "description": "Uniject is a dependency injection framework for Unity inspired by Zenject. It allows you to easily manage dependencies and improve the modularity of your code.",
   "category": "Tools",
   "documentationUrl": "",
   "changelogUrl": "",
   "unity": "6000.0",
-  "unityRelease": "44f1",
+  "unityRelease": "0f1",
   "dependencies": {
     "com.unity.test-framework": "1.6.0",
     "com.unity.test-framework.performance": "3.2.0"
