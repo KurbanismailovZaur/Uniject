@@ -2,6 +2,12 @@
 
 All notable changes to Uniject are documented in this file.
 
+## [1.0.3] - 2026-10-03
+
+### Removed
+
+- Removed `FromComponentInHierarchy()` from factory bindings, including bindings configured through `To<T>()`.
+
 ## [1.0.2] - 2026-09-24
 
 
