@@ -151,39 +151,6 @@ namespace Uniject.Tests.Performance.CPU
             Object.DestroyImmediate(root);
         }
 
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
-        [Performance]
-        public void Create_FromComponentInHierarchy_TargetLast(int objectCount)
-        {
-            var root = new GameObject("Context");
-            var context = root.AddComponent<GameObjectContext>();
-            context.Initialize();
-            var target = root;
-
-            for (var i = 1; i < objectCount; i++)
-            {
-                target = new GameObject("Child");
-                target.transform.SetParent(root.transform);
-            }
-
-            target.AddComponent<PlainComponent>();
-            var container = context.Container;
-            container.BindFactory<PlainComponent, Factory<PlainComponent>>()
-                .FromComponentInHierarchy()
-                .AsCached();
-            var factory = container.Resolve<Factory<PlainComponent>>();
-            factory.Create();
-
-            Measure.Method(() => factory.Create())
-                .SampleGroup(new SampleGroup("Create", SampleUnit.Nanosecond))
-                .Run();
-
-            Object.DestroyImmediate(root);
-        }
-
         [TestCase(false)]
         [TestCase(true)]
         [Performance]

@@ -39,11 +39,6 @@ namespace Uniject.Bindings.Factories
                 new InstanceGetterFromNewComponentOnRoot(_container, _binding.ResultConcreteType));
         }
 
-        public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromComponentInHierarchy()
-        {
-            return From(new InstanceGetterFromComponentInHierarchy(_container, _binding.ResultConcreteType));
-        }
-
         public BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> FromComponentInNewPrefab(GameObject prefab)
         {
             return From(new InstanceGetterFromComponentInNewPrefab(_container, prefab, _binding.ResultConcreteType));
