@@ -2,6 +2,14 @@
 
 All notable changes to Uniject are documented in this file.
 
+## [1.1.0] - 2026-10-04
+
+### Added
+
+- Added a standalone `SignalBus` for synchronous, type-specific signals with `Subscribe<T>`, `Unsubscribe<T>`, and `Fire<T>` overloads, supporting classes, structs, and container-managed disposal through `DisposeWithContainer()`.
+- Added editor tests for signal delivery, subscription changes, disposal, and container integration.
+- Added CPU performance and managed allocation tests for signal dispatch and subscription cycles with 0, 1, 10, and 100 subscribers.
+
 ## [1.0.3] - 2026-10-03
 
 ### Removed
