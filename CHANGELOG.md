@@ -11,6 +11,10 @@ All notable changes to Uniject are documented in this file.
 - Added editor tests for signal delivery, subscription changes, disposal, and container integration.
 - Added CPU performance and managed allocation tests for signal dispatch and subscription cycles with 0, 1, 10, and 100 subscribers.
 
+### Changed
+
+- Renamed `IProvider<T>.HasData` to `HasObject` and `IProvider<T>.Data` to `Object`. This is a breaking API change; update provider implementations and usages to the new property names.
+
 ## [1.0.3] - 2026-10-03
 
 ### Removed

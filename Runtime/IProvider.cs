@@ -2,8 +2,8 @@ namespace Uniject
 {
     public interface IProvider<T>
     {
-        bool HasData { get; }
+        bool HasObject { get; }
 
-        T Data { get; }
+        T Object { get; }
     }
 }
