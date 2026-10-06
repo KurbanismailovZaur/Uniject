@@ -1,0 +1,16 @@
+{
+    "name": "Uniject.Samples.QuickStart",
+    "rootNamespace": "Uniject.Samples.QuickStart",
+    "references": [
+        "GUID:c63ba1b8c6bbdb040a18c5450dff4ae2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
