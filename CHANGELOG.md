@@ -2,6 +2,12 @@
 
 All notable changes to Uniject are documented in this file.
 
+## [1.1.1] - 2026-10-06
+
+### Changed
+
+- Remove unused usings.
+
 ## [1.1.0] - 2026-10-04
 
 ### Added
