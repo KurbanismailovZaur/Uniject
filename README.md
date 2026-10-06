@@ -2,6 +2,11 @@
 
 Uniject is a dependency injection framework for Unity, inspired by Zenject. Build modular game systems with explicit dependencies, flexible object creation, and control over object lifetimes.
 
+## Documentation
+
+[Read the full Uniject documentation step by step in notion](https://app.notion.com/p/mashabela/Uniject-37ab35befbee80188725c8957681e308) for installation instructions, tutorials, and examples.
+
+
 ## Features
 
 - **Constructor and method injection:** Keep dependencies explicit in C# classes and inject services into MonoBehaviours.
@@ -194,7 +199,3 @@ signals.Subscribe(onDefeated);
 signals.Fire<EnemyDefeated>();
 signals.Unsubscribe(onDefeated);
 ```
-
-## Documentation
-
-[Read the Uniject documentation](https://app.notion.com/p/mashabela/Uniject-37ab35befbee80188725c8957681e308) for installation instructions, tutorials, and examples.
