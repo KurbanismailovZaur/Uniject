@@ -30,7 +30,10 @@ public sealed class GameInstaller : MonoInstaller
 {
     public override void Install(Container container)
     {
+        // Reuse one ScoreService instance for all consumers of this binding.
         container.Bind<ScoreService>().AsCached();
+
+        // Let Uniject create GameStartup and call Run during scene startup.
         container.Bind<GameStartup>().AsEntryPoint();
     }
 }
@@ -45,6 +48,7 @@ public sealed class GameStartup : IEntryPoint
 {
     private readonly ScoreService _score;
 
+    // Uniject resolves constructor parameters from the container.
     public GameStartup(ScoreService score) => _score = score;
 
     public void Run()
@@ -67,9 +71,11 @@ public sealed class ScoreButton : MonoBehaviour
 {
     private ScoreService _score;
 
+    // SceneContext calls this method and supplies the shared ScoreService.
     [Inject]
     public void Construct(ScoreService score) => _score = score;
 
+    // Connect this method to a Unity UI Button's On Click event.
     public void AddPoint() => _score.Add(1);
 }
 ```
@@ -81,9 +87,11 @@ Expose an `Inventory` facade while keeping its state in a child container:
 ```csharp
 public sealed class InventoryState
 {
+    // Each child container will hold its own inventory data.
     public System.Collections.Generic.List<string> Items { get; } = new();
 }
 
+// The parent container exposes this facade to the rest of the game.
 public sealed class Inventory
 {
     private readonly InventoryState _state;
@@ -99,13 +107,14 @@ Choose one of these alternative bindings inside `GameInstaller.Install`.
 
 ```csharp
 container.Bind<Inventory>()
-    .FromSubcontainerResolve()
+    .FromSubcontainerResolve() // Resolve Inventory from a child container.
     .ByMethod(child =>
     {
+        // Keep one state and one facade in this child container.
         child.Bind<InventoryState>().AsCached();
         child.Bind<Inventory>().AsCached();
     })
-    .AsCached();
+    .AsCached(); // Reuse the child container across resolves.
 ```
 
 Consumers inject `Inventory` as usual. Its `InventoryState` binding is only available inside the child container. Dependencies missing from the child can still be resolved from its parent.
@@ -117,6 +126,7 @@ public sealed class InventoryInstaller : Uniject.Installers.IInstaller
 {
     public void Install(Uniject.Container container)
     {
+        // ByInstaller passes the child container here.
         container.Bind<InventoryState>().AsCached();
         container.Bind<Inventory>().AsCached();
     }
@@ -126,20 +136,23 @@ public sealed class InventoryInstaller : Uniject.Installers.IInstaller
 ```csharp
 container.Bind<Inventory>()
     .FromSubcontainerResolve()
-    .ByInstaller<InventoryInstaller>()
-    .AsCached();
+    .ByInstaller<InventoryInstaller>() // Configure the child with this installer.
+    .AsCached(); // Keep one configured child for this binding.
 ```
 
 **Use an existing container:**
 
 ```csharp
+// Prepare a container and register its inventory services.
 var inventoryContainer = new Container();
 new InventoryInstaller().Install(inventoryContainer);
 
 container.Bind<Inventory>()
     .FromSubcontainerResolve()
-    .ByInstance(inventoryContainer)
+    .ByInstance(inventoryContainer) // Use this child and assign its parent.
     .AsCached();
+
+// The caller still owns inventoryContainer and must dispose it when finished.
 ```
 
 Uniject builds the child before resolving `Inventory`. `ByInstance` also assigns the binding's container as its parent. Keep the existing container alive while it is in use and dispose it when its owner shuts down; unlike children created by `ByMethod` or `ByInstaller`, it is not owned by the parent.
@@ -153,7 +166,10 @@ Define a factory and a pool for your game type:
 ```csharp
 public sealed class Enemy
 {
+    // Inject the factory to create a new Enemy on demand.
     public sealed class Factory : Uniject.Factory<Enemy> { }
+
+    // Inject the pool to borrow and return reusable Enemy instances.
     public sealed class Pool : Uniject.Pool<Enemy> { }
 }
 ```
@@ -161,9 +177,11 @@ public sealed class Enemy
 Register them inside `GameInstaller.Install`:
 
 ```csharp
+// Cache the factory itself; each Create call still constructs a new Enemy.
 container.BindFactory<Enemy, Enemy.Factory>()
     .FromConstructor().AsCached();
 
+// Reuse one pool and preallocate 16 enemies when it is initialized.
 container.BindPool<Enemy, Enemy.Pool>()
     .WithInitialSize(16).FromConstructor().AsCached();
 ```
@@ -172,8 +190,8 @@ Inject `Enemy.Factory` or `Enemy.Pool` into a consumer as `factory` or `pool`, t
 
 ```csharp
 Enemy created = factory.Create(); // A new object on each call.
-Enemy reused = pool.Spawn();
-pool.Despawn(reused); // Return it when finished.
+Enemy reused = pool.Spawn(); // Borrow an object; the pool creates one if empty.
+pool.Despawn(reused); // Return it for reuse and stop using this reference.
 ```
 
 ### Connect systems with signals
@@ -181,21 +199,24 @@ pool.Despawn(reused); // Return it when finished.
 Register the signal bus inside `GameInstaller.Install`. The container will dispose it along with its subscriptions:
 
 ```csharp
+// Share one bus and clear its subscriptions when the container is disposed.
 container.Bind<SignalBus>().AsCached().DisposeWithContainer();
 ```
 
 Define a signal, then inject `SignalBus` into senders and listeners:
 
 ```csharp
+// A payload-free notification identified by its C# type.
 public readonly struct EnemyDefeated { }
 ```
 
 With an injected `SignalBus signals`, subscribe and publish without referencing the other system directly. Unsubscribe when a listener stops listening:
 
 ```csharp
+// Keep the delegate so the same listener can be removed later.
 System.Action<EnemyDefeated> onDefeated = _ => Debug.Log("Enemy defeated!");
 
-signals.Subscribe(onDefeated);
-signals.Fire<EnemyDefeated>();
-signals.Unsubscribe(onDefeated);
+signals.Subscribe(onDefeated); // Listen for EnemyDefeated signals.
+signals.Fire<EnemyDefeated>(); // Notify listeners; this prints "Enemy defeated!".
+signals.Unsubscribe(onDefeated); // Stop listening when this consumer is done.
 ```
