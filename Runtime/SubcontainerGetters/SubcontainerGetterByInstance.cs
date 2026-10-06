@@ -1,7 +1,3 @@
-using System;
-using Uniject.InstanceGetters;
-using UnityEngine;
-
 namespace Uniject.SubcontainerGetters
 {
     public class SubcontainerGetterByInstance : SubcontainerGetter

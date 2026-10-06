@@ -1,7 +1,5 @@
 using System;
-using Uniject.InstanceGetters;
 using Uniject.InstanceGetters.Factories;
-using UnityEngine;
 
 namespace Uniject.Bindings.Factories
 {

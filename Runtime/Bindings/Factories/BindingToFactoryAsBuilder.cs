@@ -1,5 +1,3 @@
-using Uniject.Bindings;
-
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactoryAsBuilder<TResult, TResultConcrete, TFactory> : BindingToFactoryBuilder<TResult, TFactory> 

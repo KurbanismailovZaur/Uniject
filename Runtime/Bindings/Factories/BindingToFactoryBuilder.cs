@@ -1,6 +1,3 @@
-using System;
-using Uniject.Bindings;
-
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactoryBuilder<TResult, TFactory> where TFactory : Factory<TResult>, new()

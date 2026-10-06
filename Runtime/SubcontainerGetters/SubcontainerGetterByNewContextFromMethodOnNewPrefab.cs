@@ -1,7 +1,5 @@
 using System;
 using Uniject.Contexts;
-using Uniject.Installers;
-using Uniject.InstanceGetters;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

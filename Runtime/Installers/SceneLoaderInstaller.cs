@@ -1,6 +1,3 @@
-using Uniject.Lifecycle;
-using UnityEngine;
-
 namespace Uniject.Installers
 {
     public class SceneLoaderInstaller : MonoInstaller

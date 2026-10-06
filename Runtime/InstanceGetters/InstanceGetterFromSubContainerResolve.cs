@@ -1,7 +1,6 @@
 using System;
 using Uniject.Bindings;
 using Uniject.SubcontainerGetters;
-using UnityEngine;
 
 namespace Uniject.InstanceGetters
 {

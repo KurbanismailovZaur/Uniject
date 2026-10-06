@@ -1,5 +1,4 @@
 using Uniject.Lifecycle;
-using UnityEngine;
 
 namespace Uniject.Installers
 {

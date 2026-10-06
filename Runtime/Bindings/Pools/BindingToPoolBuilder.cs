@@ -1,6 +1,3 @@
-using System;
-using Uniject.Bindings;
-
 namespace Uniject.Bindings.Pools
 {
     public class BindingToPoolBuilder<TResult, TPool> 

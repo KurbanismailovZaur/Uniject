@@ -1,7 +1,3 @@
-using System;
-using Uniject.Bindings;
-using UnityEngine;
-
 namespace Uniject.Bindings.Factories
 {
     public class BindingToFactoryWithParameterBuilder<TParam, TResult, TFactory> 

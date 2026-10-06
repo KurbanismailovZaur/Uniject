@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Uniject.Bindings.Pools;
 using Uniject.InstanceGetters;
-using Uniject.InstanceGetters.Factories;
 using UnityEngine;
 
 namespace Uniject
