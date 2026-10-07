@@ -106,10 +106,15 @@ namespace Uniject.Contexts
             StaticCollections.collectionPool.DespawnStack(pendingTransforms);
             StaticCollections.collectionPool.DespawnList(monoBehaviours);
 
-            foreach (var target in injectTargets)
-                Container.AddToInjectionQueue(target);
-
-            StaticCollections.collectionPool.DespawnList(injectTargets);
+            try
+            {
+                foreach (var target in injectTargets)
+                    Container.AddToInjectionQueue(target);
+            }
+            finally
+            {
+                StaticCollections.collectionPool.DespawnList(injectTargets);
+            }
         }
 
         public virtual void Build()

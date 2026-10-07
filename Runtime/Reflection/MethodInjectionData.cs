@@ -1,15 +1,18 @@
 using System.Reflection;
 
-public readonly struct MethodInjectionData
+namespace Uniject.Reflection
 {
-    public readonly MethodInfo methodInfo;
-    public readonly ParameterInfo[] parametersInfo;
-    public readonly bool hasInjectMethod;
-
-    public MethodInjectionData(MethodInfo methodInfo, ParameterInfo[] parametersInfo, bool hasInjectMethod)
+    public readonly struct MethodInjectionData
     {
-        this.methodInfo = methodInfo;
-        this.parametersInfo = parametersInfo;
-        this.hasInjectMethod = hasInjectMethod;
+        public readonly MethodInfo methodInfo;
+        public readonly ParameterInfo[] parametersInfo;
+        public readonly bool hasInjectMethod;
+
+        public MethodInjectionData(MethodInfo methodInfo, ParameterInfo[] parametersInfo, bool hasInjectMethod)
+        {
+            this.methodInfo = methodInfo;
+            this.parametersInfo = parametersInfo;
+            this.hasInjectMethod = hasInjectMethod;
+        }
     }
 }
