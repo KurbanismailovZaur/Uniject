@@ -2,6 +2,19 @@
 
 All notable changes to Uniject are documented in this file.
 
+## [1.1.3] - 2026-10-06
+
+### Changed
+
+- Now StaticCollectionPool disposed when starts game, it is needed because Unity 6.6 static fields must be cleaned between sessions.
+- Now Context finally return list to CollectionPool, it is also needed for Unity 6.6 to correctly work with static fields. 
+
+## [1.1.2] - 2026-10-06
+
+### Added
+
+- PDF doc and sample.
+
 ## [1.1.1] - 2026-10-06
 
 ### Changed
