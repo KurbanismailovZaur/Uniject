@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Documentation~/Images/Uniject%20Styled%20Logo.png" alt="Uniject logo" width="500">
+</p>
+
 # Uniject
 
 Uniject is a dependency injection framework for Unity, inspired by Zenject. Build modular game systems with explicit dependencies, flexible object creation, and control over object lifetimes.
